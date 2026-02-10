@@ -1,0 +1,3 @@
+// Taskbar module placeholder
+
+export {};

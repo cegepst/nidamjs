@@ -1,0 +1,3 @@
+// Icons module placeholder
+
+export {};
