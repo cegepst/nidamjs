@@ -1,3 +1,0 @@
-// Core module placeholder
-
-export {};

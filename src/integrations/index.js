@@ -1,3 +1,0 @@
-// Integrations module placeholder
-
-export {};
