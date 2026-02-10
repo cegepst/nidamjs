@@ -18,13 +18,12 @@ NidamJS is a framework-agnostic JavaScript library designed to inject desktop-li
 ```text
 nidamjs/
 ├── src/
-│   ├── windows/
-│   ├── taskbar/
-│   ├── icons/
-│   ├── core/
-│   └── integrations/
+│   ├── components/
+│   ├── utils/
+│   ├── index.js
 ├── tests/
 ├── docs/
+├── examples/
 └── package.json
 
 ```
