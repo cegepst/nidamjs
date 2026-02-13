@@ -52,4 +52,35 @@ describe("WindowManager", () => {
     expect(container.querySelector(".window")).toBe(win);
     expect(initializeContent).toHaveBeenCalledTimes(1);
   });
+
+  test("captures current size before maximize for robust restore", () => {
+    document.body.innerHTML = `<div id="target"></div>`;
+    const container = document.querySelector("#target");
+    const delegator = createDelegatorStub();
+
+    const manager = new WindowManager(container, delegator, {
+      initializeContent: vi.fn(),
+      fetchWindowContent: vi.fn(),
+    });
+
+    const win = document.createElement("div");
+    win.className = "window";
+    win.innerHTML = `<button data-maximize><i class="fa-expand"></i></button>`;
+
+    Object.defineProperty(win, "offsetWidth", {
+      value: 640,
+      configurable: true,
+    });
+    Object.defineProperty(win, "offsetHeight", {
+      value: 315,
+      configurable: true,
+    });
+
+    manager.toggleMaximize(win);
+
+    expect(JSON.parse(win.dataset.prevState)).toMatchObject({
+      width: "640px",
+      height: "315px",
+    });
+  });
 });

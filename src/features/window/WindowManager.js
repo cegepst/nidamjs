@@ -1,4 +1,9 @@
 import BaseManager from "../../core/BaseManager.js";
+import {
+  applyWindowState,
+  readWindowState,
+  saveWindowState,
+} from "../../utils/windowState.js";
 
 /**
  * WindowManager handles multi-window interface including:
@@ -168,10 +173,7 @@ export default class WindowManager extends BaseManager {
   toggleMaximize(winElement) {
     winElement.classList.add("window-toggling");
     if (!winElement.classList.contains("maximized")) {
-      winElement.dataset.prevState = JSON.stringify({
-        width: `${winElement.offsetWidth}px`,
-        height: `${winElement.offsetHeight}px`,
-      });
+      saveWindowState(winElement, "prevState", { includePosition: false });
     }
     const isMaximized = winElement.classList.toggle("maximized");
 
@@ -690,28 +692,22 @@ export default class WindowManager extends BaseManager {
   _restoreWindowInternal(winElement, xRatio) {
     // Determine target dimensions
     let width, height;
+    const savedState = readWindowState(winElement);
 
     if (xRatio === null) {
       // Tiled Restore
-      const state = winElement.dataset.prevState
-        ? JSON.parse(winElement.dataset.prevState)
-        : null;
-      if (state) {
-        width = state.width;
-        height = state.height;
+      if (savedState) {
+        width = savedState.width;
+        height = savedState.height;
       }
     } else {
       // Maximized Restore
-      const state = winElement.dataset.prevState
-        ? JSON.parse(winElement.dataset.prevState)
-        : null;
-      width = state?.width || winElement.style.width;
-      height = state?.height || winElement.style.height;
-
-      if (!width || width === "100%") width = this._config.defaultWidth + "px";
-      if (!height || height === "100%")
-        height = this._config.defaultHeight + "px";
+      width = savedState?.width || winElement.style.width;
+      height = savedState?.height || winElement.style.height;
     }
+    if (!width || width === "100%") width = this._config.defaultWidth + "px";
+    if (!height || height === "100%")
+      height = this._config.defaultHeight + "px";
 
     // Apply
     winElement.classList.remove("maximized", "tiled");
@@ -720,10 +716,7 @@ export default class WindowManager extends BaseManager {
     // Add restoration class for width/height transition only (no top/left transition)
     winElement.classList.add("window-toggling", "dragging-restore");
 
-    Object.assign(winElement.style, {
-      width: width,
-      height: height,
-    });
+    applyWindowState(winElement, { width, height });
 
     // Cleanup
     setTimeout(() => {
@@ -759,10 +752,7 @@ export default class WindowManager extends BaseManager {
   _snapWindow(winElement, type, vw, vh) {
     // Save current state before tiling for future restoration
     if (!winElement.classList.contains("tiled")) {
-      winElement.dataset.prevState = JSON.stringify({
-        width: winElement.style.width,
-        height: winElement.style.height,
-      });
+      saveWindowState(winElement, "prevState", { includePosition: false });
     }
 
     winElement.classList.add("window-toggling", "tiled");
