@@ -15,8 +15,8 @@ The main class used to initialize the desktop environment.
 
 **Parameters**
 
-| Name | Type | Description |
-| :--- | :--- | :--- |
+| Name     | Type     | Description                                                                             |
+| :------- | :------- | :-------------------------------------------------------------------------------------- |
 | `config` | `Object` | Configuration options for the environment. See [Configuration](guide/configuration.md). |
 
 **Returns**
@@ -26,10 +26,10 @@ The main class used to initialize the desktop environment.
 **Example**
 
 ```javascript
-import { Nidam } from 'nidamjs';
+import { Nidam } from "nidamjs";
 
 const desktop = new Nidam({
-    theme: 'dark'
+  theme: "dark",
 });
 ```
 
@@ -47,12 +47,12 @@ The `Desktop` instance allows you to control the environment programmatically.
 
 ### Properties
 
-| Property | Type | Description |
-| :--- | :--- | :--- |
-| `root` | `HTMLElement` | The DOM element containing the desktop. |
-| `windows` | `WindowsManager` | Interface for managing windows. |
-| `taskbar` | `TaskbarManager` | Interface for managing the taskbar. |
-| `icons` | `IconsManager` | Interface for managing desktop icons. |
+| Property  | Type             | Description                             |
+| :-------- | :--------------- | :-------------------------------------- |
+| `root`    | `HTMLElement`    | The DOM element containing the desktop. |
+| `windows` | `WindowsManager` | Interface for managing windows.         |
+| `taskbar` | `TaskbarManager` | Interface for managing the taskbar.     |
+| `icons`   | `IconsManager`   | Interface for managing desktop icons.   |
 
 ### Methods
 
@@ -82,11 +82,11 @@ Creates and displays a new window.
 **Parameters**
 
 - `options` (Object): Configuration for the window.
-    - `id` (string, optional): Unique ID.
-    - `title` (string): Title bar text.
-    - `content` (string|HTMLElement): Body content.
-    - `width` (number): Initial width.
-    - `height` (number): Initial height.
+  - `id` (string, optional): Unique ID.
+  - `title` (string): Title bar text.
+  - `content` (string|HTMLElement): Body content.
+  - `width` (number): Initial width.
+  - `height` (number): Initial height.
 
 **Returns**
 
@@ -115,13 +115,13 @@ Represents an individual window. Returned by `desktop.windows.create()`.
 
 ### Properties
 
-| Property | Type | Description |
-| :--- | :--- | :--- |
-| `id` | `string` | The unique identifier of the window. |
-| `element` | `HTMLElement` | The main DOM element of the window. |
-| `bodyElement` | `HTMLElement` | The content container element. |
-| `isMinimized` | `boolean` | Current minimization state. |
-| `isMaximized` | `boolean` | Current maximization state. |
+| Property      | Type          | Description                          |
+| :------------ | :------------ | :----------------------------------- |
+| `id`          | `string`      | The unique identifier of the window. |
+| `element`     | `HTMLElement` | The main DOM element of the window.  |
+| `bodyElement` | `HTMLElement` | The content container element.       |
+| `isMinimized` | `boolean`     | Current minimization state.          |
+| `isMaximized` | `boolean`     | Current maximization state.          |
 
 ### Methods
 
@@ -176,10 +176,10 @@ Hides the taskbar.
 Adds a custom item to the system tray area.
 
 - `item` (Object):
-    - `id` (string): Unique ID.
-    - `icon` (string): URL or HTML for the icon.
-    - `tooltip` (string): Hover text.
-    - `onClick` (function): Click handler.
+  - `id` (string): Unique ID.
+  - `icon` (string): URL or HTML for the icon.
+  - `tooltip` (string): Hover text.
+  - `onClick` (function): Click handler.
 
 ---
 
@@ -194,9 +194,9 @@ Accessible via `desktop.icons`.
 Adds a new icon to the desktop grid.
 
 - `iconConfig` (Object):
-    - `label` (string): Icon text.
-    - `icon` (string): Image URL.
-    - `action` (function): Double-click handler.
+  - `label` (string): Icon text.
+  - `icon` (string): Image URL.
+  - `action` (function): Double-click handler.
 
 #### `remove(id)`
 

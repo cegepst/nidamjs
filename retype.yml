@@ -15,4 +15,4 @@ footer:
   copyright: "&copy; Copyright {{ year }}. All rights reserved."
 
 exclude:
-   - "retype.md"
+  - "retype.md"

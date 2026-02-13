@@ -11,17 +11,23 @@ Get started with **NidamJS** by adding it to your project. You can install it vi
 Install NidamJS using `npm`, `yarn` or `bun`.
 
 +++ npm
+
 ```bash
 npm install nidamjs
 ```
+
 +++Bun
+
 ```bash
 bun add nidamjs
 ```
+
 +++ Yarn
+
 ```bash
 yarn add nidamjs
 ```
+
 +++
 
 ## CDN

@@ -8,7 +8,7 @@ Here is a guide to the most useful features available in Retype, along with refe
 
 Retype supports standard Markdown and GitHub Flavored Markdown (GFM).
 
-- **Bold**, *Italic*, `Code`
+- **Bold**, _Italic_, `Code`
 - Lists, Links, Images
 - Tables
 
@@ -71,7 +71,9 @@ Organize content into tabs.
 ```md
 +++ npm
 npm install nidamjs
-+++ bun
++++
+
+bun
 bun add nidamjs
 +++
 ```

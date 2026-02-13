@@ -58,7 +58,7 @@ open.
 
 ## Scripts (Bun)
 
-- `bun run check:imports`: verifies the public entrypoint can be imported.
+- `bun run imports`: verifies the public entrypoint can be imported.
 - `bun run test`: runs Vitest with coverage enabled.
 - `bun run test:watch`: watch mode with coverage enabled.
 - `bun run lint`: type-lints JS with TypeScript (`checkJs`).

@@ -51,8 +51,8 @@ Interaction in NidamJS is heavily event-driven. Components emit events that you 
 - `desktop:contextmenu`: Fired when right-clicking the desktop background.
 
 ```javascript
-desktop.on('window:open', (win) => {
-    console.log(`Opened window: ${win.title}`);
+desktop.on("window:open", (win) => {
+  console.log(`Opened window: ${win.title}`);
 });
 ```
 

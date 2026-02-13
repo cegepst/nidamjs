@@ -23,7 +23,7 @@ Get up and running in seconds.
 import { Nidam } from "nidamjs";
 
 const desktop = new Nidam({
-    theme: 'modern'
+  theme: "modern",
 });
 
 desktop.init();
@@ -31,12 +31,12 @@ desktop.init();
 
 ## Explore the Docs
 
-| Section | Description |
-| :--- | :--- |
-| [**Getting Started**](get-started/installation.md) | Installation and setup guide. |
-| [**Core Concepts**](guide/concepts.md) | Learn about the architecture and modules. |
-| [**Components**](components/window.md) | Detailed docs on Windows, Taskbar, and Icons. |
-| [**API Reference**](reference.md) | Technical API documentation. |
+| Section                                            | Description                                   |
+| :------------------------------------------------- | :-------------------------------------------- |
+| [**Getting Started**](get-started/installation.md) | Installation and setup guide.                 |
+| [**Core Concepts**](guide/concepts.md)             | Learn about the architecture and modules.     |
+| [**Components**](components/window.md)             | Detailed docs on Windows, Taskbar, and Icons. |
+| [**API Reference**](reference.md)                  | Technical API documentation.                  |
 
 ## License
 
