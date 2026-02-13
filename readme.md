@@ -34,9 +34,25 @@ const app = createNidamApp({
 app.initialize();
 ```
 
+## Documentation
+
+- Porting plan and Code Arena differences: [porting_plan.md](porting_plan.md)
+- Additional docs index: [docs/readme.md](docs/readme.md)
+- Example app guide: [examples/app/readme.md](examples/app/readme.md)
+
+## Naming Convention
+
+- All documentation filenames use lowercase.
+- Standard file name: `readme.md` (not `README.md`).
+
+## Files
+
+- Porting plan: [porting_plan.md](porting_plan.md)
+- Project root documentation: [readme.md](readme.md)
+
 ## Scripts (Bun)
 
-- `bun run imports`: verifies the public entrypoint can be imported.
+- `bun run check:imports`: verifies the public entrypoint can be imported.
 - `bun run test`: runs Vitest with coverage enabled.
 - `bun run test:watch`: watch mode with coverage enabled.
 - `bun run lint`: type-lints JS with TypeScript (`checkJs`).
@@ -73,14 +89,14 @@ The window engine expects these selectors/attributes in your modal HTML:
 ```text
 .
 ├── .gitignore
-├── README.md
+├── porting_plan.md
+├── readme.md
 ├── bun.lock
 ├── docs
-│   ├── PORTING_PLAN.md
-│   └── docs.md
+│   └── readme.md
 ├── examples
 │   └── app
-│       ├── README.md
+│       ├── readme.md
 │       ├── app.js
 │       ├── public
 │       │   ├── client.js
@@ -107,11 +123,10 @@ The window engine expects these selectors/attributes in your modal HTML:
 │   │       └── WindowRefresher.js
 │   ├── index.js
 │   └── utils
-│       ├── UTILS.MD
 │       ├── dom.js
 │       └── eventUtils.js
 ├── tests
-│   ├── TEST.MD
+│   ├── readme.md
 │   └── unit
 │       ├── content-initializer.test.js
 │       ├── window-manager.test.js
@@ -130,10 +145,10 @@ The window engine expects these selectors/attributes in your modal HTML:
 - `src/utils/`: shared utility helpers.
 - `examples/app/`: minimal Tailwind demo app with 2 live window routes.
 - `tests/unit/`: focused unit tests for core and window features.
-- `docs/PORTING_PLAN.md`: migration decisions and boundaries.
+- `docs/porting_plan.md`: migration decisions and boundaries.
 - `tsconfig.json`: type-lint config for JS (`checkJs`).
 - `vitest.config.js`: test runner config.
 
 ## Notes
 
-Detailed migration strategy and design rationale are documented in `docs/PORTING_PLAN.md`.
+Detailed migration strategy and design rationale are documented in [docs/porting_plan.md](porting_plan.md).

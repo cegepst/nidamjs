@@ -10,7 +10,7 @@
   "files": [
     "src",
     "docs",
-    "README.md"
+    "readme.md"
   ],
   "scripts": {
     "imports": "bun -e \"await import('./src/index.js')\"",

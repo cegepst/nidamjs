@@ -30,7 +30,7 @@ examples/app/
 │       ├── layout.js
 │       ├── windowShell.js
 │       └── windows.js
-└── README.md
+└── readme.md
 ```
 
 ## Notes
