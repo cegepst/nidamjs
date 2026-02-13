@@ -1,3 +1,7 @@
+---
+icon: rocket
+---
+
 # Example App
 
 ## Quick start

@@ -383,3 +383,6 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+#Zed IDE
+.zed
