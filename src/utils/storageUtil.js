@@ -1,8 +1,8 @@
 const storageUtil = {
   /**
    * Saves a value to localStorage. Automatically stringifies objects/arrays.
-   * @param {string} key 
-   * @param {*} value 
+   * @param {string} key
+   * @param {*} value
    */
   set(key, value) {
     try {
@@ -15,7 +15,7 @@ const storageUtil = {
 
   /**
    * Retrieves a value from localStorage. Automatically parses JSON.
-   * @param {string} key 
+   * @param {string} key
    * @param {*} defaultValue - Returned if the key doesn't exist or on error.
    * @returns {*}
    */
@@ -34,7 +34,7 @@ const storageUtil = {
 
   /**
    * Removes a specific item from localStorage.
-   * @param {string} key 
+   * @param {string} key
    */
   remove(key) {
     try {
@@ -51,13 +51,13 @@ const storageUtil = {
     try {
       localStorage.clear();
     } catch (error) {
-      console.error('Error clearing localStorage:', error);
+      console.error("Error clearing localStorage:", error);
     }
   },
 
   /**
    * Checks if a key exists in localStorage.
-   * @param {string} key 
+   * @param {string} key
    * @returns {boolean}
    */
   has(key) {
@@ -66,7 +66,7 @@ const storageUtil = {
     } catch (error) {
       return false;
     }
-  }
+  },
 };
 
 export default storageUtil;

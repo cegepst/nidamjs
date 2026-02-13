@@ -1,14 +1,17 @@
 import BaseManager from "../../core/BaseManager.js";
+import storageUtil from "../../utils/storageUtil.js";
 
 export default class DesktopIconManager extends BaseManager {
   _dragState = null;
   _storageKey = "desktop_grid_layout";
   _storageNamespace = "";
+  _storage = storageUtil;
 
   constructor(container, delegator, options = {}) {
     super(container, delegator);
     this._storageKey = options.storageKey || this._storageKey;
     this._storageNamespace = options.storageNamespace || "";
+    this._storage = options.storage || storageUtil;
     this._loadLayout();
   }
 
@@ -21,7 +24,7 @@ export default class DesktopIconManager extends BaseManager {
   _loadLayout() {
     try {
       const key = this._getStorageKey();
-      const savedLayout = JSON.parse(localStorage.getItem(key));
+      const savedLayout = this._storage.get(key, []);
 
       if (!savedLayout || !Array.isArray(savedLayout)) return;
 
@@ -254,6 +257,6 @@ export default class DesktopIconManager extends BaseManager {
     });
 
     const key = this._getStorageKey();
-    localStorage.setItem(key, JSON.stringify(layout));
+    this._storage.set(key, layout);
   }
 }
