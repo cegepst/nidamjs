@@ -171,20 +171,59 @@ export default class WindowManager extends BaseManager {
 
   // Toggle between maximized and normal state
   toggleMaximize(winElement) {
+    const wasMaximized = winElement.classList.contains("maximized");
+    const wasTiledAndSnapped =
+      winElement.classList.contains("tiled") &&
+      typeof winElement.dataset.snapType === "string" &&
+      winElement.dataset.snapType.length > 0;
     winElement.classList.add("window-toggling");
-    if (!winElement.classList.contains("maximized")) {
+    // Preserve original free-window geometry when maximizing from tiled state.
+    // Tiling already captured prevState, so re-capturing here would overwrite it.
+    if (!wasMaximized && !winElement.classList.contains("tiled")) {
       saveWindowState(winElement, "prevState", { includePosition: false });
     }
     const isMaximized = winElement.classList.toggle("maximized");
+    let shouldSaveRatiosAfterToggle = false;
 
-    const icon = winElement.querySelector("[data-maximize] i");
-    if (icon) {
-      icon.classList.toggle("fa-expand", !isMaximized);
-      icon.classList.toggle("fa-compress", isMaximized);
+    this._updateMaximizeIcon(winElement, isMaximized);
+
+    if (!isMaximized) {
+      if (wasTiledAndSnapped) {
+        const layout = this._getSnapLayout(
+          winElement.dataset.snapType,
+          window.innerWidth,
+          window.innerHeight - this._config.taskbarHeight,
+        );
+        Object.assign(winElement.style, layout);
+      } else {
+        const savedState = readWindowState(winElement);
+        applyWindowState(winElement, savedState);
+
+        const widthPx =
+          this._parseCssPixelValue(savedState?.width) ||
+          this._parseCssPixelValue(winElement.style.width) ||
+          winElement.offsetWidth;
+        const heightPx =
+          this._parseCssPixelValue(savedState?.height) ||
+          this._parseCssPixelValue(winElement.style.height) ||
+          winElement.offsetHeight;
+
+        this._repositionWindowFromRatios(
+          winElement,
+          window.innerWidth,
+          window.innerHeight,
+          {
+            widthPx,
+            heightPx,
+          },
+        );
+        shouldSaveRatiosAfterToggle = true;
+      }
     }
 
     setTimeout(() => {
       winElement.classList.remove("window-toggling");
+      if (shouldSaveRatiosAfterToggle) this._savePositionRatios(winElement);
     }, this._config.animationDurationMs);
   }
 
@@ -465,6 +504,35 @@ export default class WindowManager extends BaseManager {
 
     winElement.dataset.xRatio = String(centerX / window.innerWidth);
     winElement.dataset.yRatio = String(centerY / window.innerHeight);
+  }
+
+  _parseCssPixelValue(value) {
+    if (!value) return null;
+    const px = parseFloat(value);
+    return Number.isFinite(px) ? px : null;
+  }
+
+  _repositionWindowFromRatios(winElement, vw, vh, size = null) {
+    const xRatio = parseFloat(winElement.dataset.xRatio);
+    const yRatio = parseFloat(winElement.dataset.yRatio);
+
+    if (isNaN(xRatio) || isNaN(yRatio)) return false;
+
+    const width =
+      (size && Number.isFinite(size.widthPx) && size.widthPx > 0
+        ? size.widthPx
+        : null) || winElement.offsetWidth;
+    const height =
+      (size && Number.isFinite(size.heightPx) && size.heightPx > 0
+        ? size.heightPx
+        : null) || winElement.offsetHeight;
+
+    const centerX = xRatio * vw;
+    const centerY = yRatio * vh;
+
+    winElement.style.left = `${Math.round(centerX - width / 2)}px`;
+    winElement.style.top = `${Math.round(centerY - height / 2)}px`;
+    return true;
   }
 
   _handleFocusSelector(winElement, selector) {
@@ -819,20 +887,7 @@ export default class WindowManager extends BaseManager {
         const layout = this._getSnapLayout(type, vw, vhTiled);
         Object.assign(winElement.style, layout);
       } else if (!winElement.classList.contains("maximized")) {
-        // Handle normal window relative positioning (Center-based)
-        const xRatio = parseFloat(winElement.dataset.xRatio);
-        const yRatio = parseFloat(winElement.dataset.yRatio);
-
-        if (!isNaN(xRatio) && !isNaN(yRatio)) {
-          const width = winElement.offsetWidth;
-          const height = winElement.offsetHeight;
-
-          const centerX = xRatio * vw;
-          const centerY = yRatio * vhFull;
-
-          winElement.style.left = `${Math.round(centerX - width / 2)}px`;
-          winElement.style.top = `${Math.round(centerY - height / 2)}px`;
-        }
+        this._repositionWindowFromRatios(winElement, vw, vhFull);
       }
     });
   }
