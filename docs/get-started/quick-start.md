@@ -6,26 +6,8 @@ icon: rocket
 
 Get your first NidamJS desktop environment running in minutes.
 
-## Installation
-
-NidamJS is available via npm. You can install it using your preferred package manager.
-
-+++ npm
-```bash
-npm install nidamjs
-```
-+++ bun
-```bash
-bun add nidamjs
-```
-+++ yarn
-```bash
-yarn add nidamjs
-```
-+++
 
 ## Basic Usage
-
 ### 1. Add the container
 
 Create an HTML file and add a container element where the desktop environment will be rendered. Usually, this is the `<body>` tag, but you can restrict it to a specific `div`.
@@ -93,11 +75,3 @@ For quick prototyping without a build step, you can use the CDN version.
     const desktop = Nidam.createDesktop({ root: document.body });
 </script>
 ```
-
-## Next Steps
-
-Now that you have the basics running, explore the core concepts:
-
-- [Configuration](configuration.md)
-- [Window Management](../guide/window-management.md)
-- [Taskbar Customization](../components/taskbar.md)
