@@ -1,8 +1,6 @@
-Example App
-===========
+# Example App
 
-Quick start
------------
+## Quick start
 
 Prerequisites: `bun` installed and available on your PATH.
 
@@ -21,7 +19,7 @@ Listening on port 8080...
 
 Stop the server with `Ctrl-C`.
 
-Notes
------
+## Notes
+
 - If `bun` is not installed, follow the instructions at https://bun.sh
 - Run the commands from the project root or directly from the `examples/app` folder.

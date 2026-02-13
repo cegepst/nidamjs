@@ -59,9 +59,9 @@ nidamjs/
 ### 2. JavaScript Initialization
 
 ```javascript
-import { createWindow, createTaskbar } from 'nidamjs';
+import { createWindow, createTaskbar } from "nidamjs";
 
-const win = createWindow({ title: 'My App', icon: 'app.png' });
+const win = createWindow({ title: "My App", icon: "app.png" });
 createTaskbar({ windows: [win] });
 ```
 
