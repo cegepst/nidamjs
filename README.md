@@ -106,3 +106,17 @@ createTaskbar({ windows: [win] });
 - **Vanilla JS:** Direct API usage, inject into DOM.
 - **React/Vue/Angular/Svelte:** Use as a service or custom element; no framework-specific dependencies.
 - **Styling:** Provide default CSS, allow overrides.
+
+## Dev
+
+### Run the app exemple
+
+```bash
+bun examples/app/app.js
+```
+
+### Format the code
+
+```bash
+bun run prettier -w *
+```
