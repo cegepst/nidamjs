@@ -36,19 +36,26 @@ app.initialize();
 
 ## Scripts (Bun)
 
-- `bun run check:imports`: verifies the public entrypoint can be imported.
-- `bun run lint:types`: type-lints JS with TypeScript (`checkJs`).
-- `bun run test:unit`: runs unit tests with Vitest (`jsdom`).
-- `bun run test:watch`: watch mode for Vitest.
-- `bun run format:check`: checks formatting with Prettier.
-- `bun run format:write`: rewrites formatting with Prettier.
-- `bun run quality:verify`: full quality gate (imports + type lint + tests + formatting).
+- `bun run imports`: verifies the public entrypoint can be imported.
+- `bun run test`: runs Vitest with coverage enabled.
+- `bun run test:watch`: watch mode with coverage enabled.
+- `bun run lint`: type-lints JS with TypeScript (`checkJs`).
+- `bun run format`: rewrites formatting with Prettier.
+- `bun run quality`: aggregate quality command.
 
 ## Quality Stack
 
 - Test framework: `Vitest` + `jsdom`
+- Coverage: `@vitest/coverage-v8` (V8 provider)
 - Type linter: `TypeScript` in `checkJs` mode
 - Formatter: `Prettier`
+
+## Coverage Report
+
+- Run `bun run test`.
+- Terminal summary is printed after tests.
+- HTML report: `coverage/index.html`.
+- LCOV report: `coverage/lcov.info`.
 
 ## Runtime DOM Contract
 
