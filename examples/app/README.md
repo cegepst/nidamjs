@@ -1,25 +1,39 @@
-# Example App
+# Example App (Minimal Tailwind + NidamJS)
 
-## Quick start
+This demo keeps only the essentials: one page + two live window routes.
 
-Prerequisites: `bun` installed and available on your PATH.
-
-Start the server from the `examples/app` folder:
+## Run
 
 ```bash
-cd examples/app
-bun app.js
+bun examples/app/app.js
 ```
 
-You should see:
+Open `http://localhost:8080`.
 
-```
-Listening on port 8080...
-```
+## Routes
 
-Stop the server with `Ctrl-C`.
+- `GET /`: home page with two buttons
+- `GET /page-one`: first window content
+- `GET /page-two`: second window content
+
+## File structure
+
+```text
+examples/app/
+├── app.js
+├── public/
+│   ├── client.js
+│   └── styles.css
+├── server/
+│   ├── routes.js
+│   └── templates/
+│       ├── layout.js
+│       ├── windowShell.js
+│       └── windows.js
+└── README.md
+```
 
 ## Notes
 
-- If `bun` is not installed, follow the instructions at https://bun.sh
-- Run the commands from the project root or directly from the `examples/app` folder.
+- Server creation is directly in `app.js`.
+- The demo uses `/lib/index.js` from local source for direct library usage.

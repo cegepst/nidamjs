@@ -1,6 +1,4 @@
 import BaseManager from "../../core/BaseManager.js";
-import ContentInitializer from "../../core/ContentInitializer.js";
-import { showToast } from "../../utils/toast.js";
 
 /**
  * WindowManager handles multi-window interface including:
@@ -32,15 +30,39 @@ export default class WindowManager extends BaseManager {
   _windows = new Map();
   _zIndexCounter = this._config.zIndexBase;
   _getModules = null;
+  _notify = null;
+  _fetchWindowContent = null;
+  _initializeContent = null;
+  _resolveEndpoint = null;
   _lastOpenTimestamps = new Map();
   _pendingRequests = new Map();
 
   // Tiling & Snapping properties
   _snapIndicator = null;
 
-  constructor(container, delegator, getModules = null) {
+  constructor(container, delegator, options = {}) {
     super(container, delegator);
+    const {
+      getModules = null,
+      config = null,
+      notify = null,
+      fetchWindowContent = null,
+      initializeContent = null,
+      resolveEndpoint = null,
+    } = options || {};
+
     this._getModules = getModules;
+    this._notify = notify || this._defaultNotify.bind(this);
+    this._fetchWindowContent =
+      fetchWindowContent || this._defaultFetchWindowContent.bind(this);
+    this._initializeContent = initializeContent || (() => {});
+    this._resolveEndpoint = resolveEndpoint || this._defaultResolveEndpoint;
+
+    if (config && typeof config === "object") {
+      this._config = { ...this._config, ...config };
+    }
+    this._zIndexCounter = this._config.zIndexBase;
+
     this._initSnapIndicator();
   }
 
@@ -168,7 +190,7 @@ export default class WindowManager extends BaseManager {
       const msg =
         document.body.dataset.errorMaxWindows ||
         `Maximum of ${this._config.maxWindows} windows allowed.`;
-      showToast("error", msg.replace("%s", String(this._config.maxWindows)));
+      this._notify("error", msg.replace("%s", String(this._config.maxWindows)));
       return Promise.reject(new Error("Max windows reached"));
     }
 
@@ -198,12 +220,15 @@ export default class WindowManager extends BaseManager {
     // 5. Fetch and Create
     const openPromise = (async () => {
       try {
-        const response = await fetch(`/${endpoint}`, {
-          headers: { "X-Modal-Request": "1" },
-          cache: "no-cache",
+        const html = await this._fetchWindowContent(endpoint, {
+          force,
+          focusSelector,
+          activate,
+          manager: this,
         });
-
-        const html = await response.text();
+        if (typeof html !== "string") {
+          throw new TypeError("fetchWindowContent must return an HTML string");
+        }
 
         // Handle Refresh
         if (this._windows.has(endpoint) && force) {
@@ -233,7 +258,7 @@ export default class WindowManager extends BaseManager {
         console.error("Error opening window:", error);
         const msg =
           document.body.dataset.errorOpenFailed || "Failed to open window.";
-        showToast("error", msg);
+        this._notify("error", msg);
         throw error;
       } finally {
         this._pendingRequests.delete(endpoint);
@@ -284,7 +309,9 @@ export default class WindowManager extends BaseManager {
   _refreshWindowContent(winElement, html) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
-    const newContent = doc.querySelector(".window");
+    const newContent = /** @type {HTMLElement|null} */ (
+      doc.querySelector(".window")
+    );
 
     if (!newContent) return;
 
@@ -346,7 +373,9 @@ export default class WindowManager extends BaseManager {
   _createWindowElement(html, endpoint) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
-    const winElement = doc.querySelector(".window");
+    const winElement = /** @type {HTMLElement|null} */ (
+      doc.querySelector(".window")
+    );
 
     if (winElement) {
       winElement.dataset.endpoint = endpoint;
@@ -622,12 +651,7 @@ export default class WindowManager extends BaseManager {
 
     if (this._dragState.snap !== snap) {
       this._dragState.snap = snap;
-      this._updateSnapIndicator(
-        snap,
-        view.w,
-        view.h,
-        this._dragState.winElement,
-      );
+      this._updateSnapIndicator(snap, view.w, view.h);
     }
   }
 
@@ -889,8 +913,31 @@ export default class WindowManager extends BaseManager {
     return path.join(" > ");
   }
 
+  async _defaultFetchWindowContent(endpoint) {
+    const response = await fetch(this._resolveEndpoint(endpoint), {
+      headers: { "X-Modal-Request": "1" },
+      cache: "no-cache",
+    });
+
+    return response.text();
+  }
+
+  _defaultResolveEndpoint(endpoint) {
+    const normalized = String(endpoint || "").replace(/^\/+/, "");
+    return `/${normalized}`;
+  }
+
+  _defaultNotify(level, message) {
+    const logger = level === "error" ? console.error : console.log;
+    logger(`[nidamjs:${level}]`, message);
+  }
+
   _initializeModalContent(root) {
     const modules = this._getModules ? this._getModules() : null;
-    ContentInitializer.initialize(this._delegator, root, modules);
+    this._initializeContent(root, {
+      delegator: this._delegator,
+      modules: modules,
+      manager: this,
+    });
   }
 }

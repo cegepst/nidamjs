@@ -1,4 +1,5 @@
 import { DOMUtils } from "../utils/dom.js";
+/** @typedef {import("./EventDelegator.js").default} EventDelegator */
 
 export default class BaseManager {
   _root;

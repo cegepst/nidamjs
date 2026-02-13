@@ -1,12 +1,32 @@
 {
   "name": "nidamjs",
-  "version": "0.0.0",
-  "private": true,
-  "main": "src/index.js",
-  "dependencies": {
-    "express": "^5.2.1"
+  "version": "0.0.1",
+  "type": "module",
+  "private": false,
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src",
+    "docs",
+    "README.md"
+  ],
+  "scripts": {
+    "check:imports": "bun -e \"await import('./src/index.js')\"",
+    "test:unit": "vitest run",
+    "test:watch": "vitest",
+    "lint:types": "tsc --noEmit",
+    "format:check": "prettier -c .",
+    "format:write": "prettier -w .",
+    "quality:verify": "bun run check:imports && bun run lint:types && bun run test:unit && bun run format:check"
   },
   "devDependencies": {
-    "prettier": "^3.8.1"
+    "@types/node": "^24.3.0",
+    "express": "^5.2.1",
+    "jsdom": "^27.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
   }
 }

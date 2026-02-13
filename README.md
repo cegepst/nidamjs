@@ -1,122 +1,132 @@
 # NidamJS
 
-## Purpose
+NidamJS is a framework-agnostic JavaScript library for desktop-like window components in web applications.
 
-NidamJS is a framework-agnostic JavaScript library designed to inject desktop-like logic into web frontends. It enables windows, taskbar, icons, and related UI/UX features without requiring backend changes. The goal is to provide a reusable, modular system similar to htmx, but for desktop metaphors.
+## Official API
 
-## Key Features
+Use only the package root export:
 
-- **Windows:** Create, move, resize, minimize, maximize, and close windows in the frontend.
-- **Taskbar:** Manage open windows, show status, and allow quick switching.
-- **Icons:** Support for desktop and window icons, drag-and-drop, and context menus.
-- **Event Handling:** Listen for and emit desktop-like events (window focus, taskbar click, etc).
-- **Framework Agnostic:** Works with React, Vue, Angular, Svelte, or vanilla JS.
-- **Frontend Only:** No backend logic or requirements; injects into existing frontend.
+```js
+import { createNidamApp, WindowManager, WindowRefresher } from "nidamjs";
+```
 
-## Architecture Overview
+Internal paths (`src/*`) are implementation details and not public API.
+
+## Installation
+
+```bash
+bun install
+```
+
+## Quick Start
+
+```js
+import { createNidamApp } from "nidamjs";
+
+const app = createNidamApp({
+  modalContainer: "#target",
+  registry: [],
+  windowManager: {
+    notify: (level, message) => console.log(level, message),
+  },
+});
+
+app.initialize();
+```
+
+## Scripts (Bun)
+
+- `bun run check:imports`: verifies the public entrypoint can be imported.
+- `bun run lint:types`: type-lints JS with TypeScript (`checkJs`).
+- `bun run test:unit`: runs unit tests with Vitest (`jsdom`).
+- `bun run test:watch`: watch mode for Vitest.
+- `bun run format:check`: checks formatting with Prettier.
+- `bun run format:write`: rewrites formatting with Prettier.
+- `bun run quality:verify`: full quality gate (imports + type lint + tests + formatting).
+
+## Quality Stack
+
+- Test framework: `Vitest` + `jsdom`
+- Type linter: `TypeScript` in `checkJs` mode
+- Formatter: `Prettier`
+
+## Runtime DOM Contract
+
+The window engine expects these selectors/attributes in your modal HTML:
+
+- `.window`
+- `[data-modal]`
+- `[data-close]`
+- `[data-maximize]`
+- `[data-bar]`
+- `.window-content-scrollable` (optional but recommended)
+
+## Project Tree
 
 ```text
-nidamjs/
-├── src/
-│   ├── components/
-│   ├── utils/
+.
+├── .gitignore
+├── README.md
+├── bun.lock
+├── docs
+│   ├── PORTING_PLAN.md
+│   └── docs.md
+├── examples
+│   └── app
+│       ├── README.md
+│       ├── app.js
+│       ├── public
+│       │   ├── client.js
+│       │   └── styles.css
+│       └── server
+│           ├── routes.js
+│           └── templates
+│               ├── layout.js
+│               ├── windowShell.js
+│               └── windows.js
+├── package.json
+├── src
+│   ├── bootstrap
+│   │   └── NidamApp.js
+│   ├── core
+│   │   ├── BaseManager.js
+│   │   ├── ContentInitializer.js
+│   │   └── EventDelegator.js
+│   ├── features
+│   │   ├── desktop
+│   │   │   └── DesktopIconManager.js
+│   │   └── window
+│   │       ├── WindowManager.js
+│   │       └── WindowRefresher.js
 │   ├── index.js
-├── tests/
-├── docs/
-├── examples/
-└── package.json
-
+│   └── utils
+│       ├── UTILS.MD
+│       ├── dom.js
+│       └── eventUtils.js
+├── tests
+│   ├── TEST.MD
+│   └── unit
+│       ├── content-initializer.test.js
+│       ├── window-manager.test.js
+│       └── window-refresher.test.js
+├── tsconfig.json
+└── vitest.config.js
 ```
 
-## Modules
+## Tree Explanation
 
-- **Core:** Window/taskbar/icon state management, event bus, API surface.
-- **Windows:** UI components, window lifecycle, z-index, drag/resize logic.
-- **Taskbar:** Taskbar UI, window list, status indicators.
-- **Icons:** Icon rendering, desktop placement, context menu.
-- **Integrations:** Adapters for popular frameworks (optional).
+- `src/index.js`: single public entrypoint.
+- `src/bootstrap/`: app bootstrap composition (`NidamApp`).
+- `src/core/`: generic infrastructure primitives (base manager, event delegation, dynamic init).
+- `src/features/window/`: core window system (open/close/focus/drag/snap/refresh).
+- `src/features/desktop/`: desktop icon drag-and-drop behavior.
+- `src/utils/`: shared utility helpers.
+- `examples/app/`: minimal Tailwind demo app with 2 live window routes.
+- `tests/unit/`: focused unit tests for core and window features.
+- `docs/PORTING_PLAN.md`: migration decisions and boundaries.
+- `tsconfig.json`: type-lint config for JS (`checkJs`).
+- `vitest.config.js`: test runner config.
 
-## Example Usage
+## Notes
 
-### 1. HTML Setup
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Desktop Web App</title>
-  </head>
-  <body>
-    <button nd-open="/users">Open users page</button>
-
-    <script type="module" src="nidam.js"></script>
-  </body>
-</html>
-```
-
-### 2. JavaScript Initialization
-
-```javascript
-import { createWindow, createTaskbar } from "nidamjs";
-
-const win = createWindow({ title: "My App", icon: "app.png" });
-createTaskbar({ windows: [win] });
-```
-
-### 3. Configuration Object
-
-```json
-{
-  "zIndexBase": 40,
-  "cascadeOffset": 30,
-  "cooldownMs": 500,
-  "maxWindows": 10,
-  "snapGap": 8,
-  "taskbarHeight": 64,
-  "snapThreshold": 30,
-  "dragThreshold": 10,
-  "resizeDebounceMs": 6,
-  "animationDurationMs": 400,
-  "defaultWidth": 800,
-  "defaultHeight": 600,
-  "minMargin": 10,
-  "edgeDetectionRatio": 0.4,
-  "scrollRestoreTimeoutMs": 2000,
-  "windowDefaults": {
-    "title": "Untitled",
-    "icon": "default.png",
-    "resizable": true,
-    "minimizable": true,
-    "maximizable": true
-  },
-  "taskbar": {
-    "showClock": true,
-    "showNotifications": true
-  },
-  "icons": {
-    "supportedFormats": ["ico", "png", "svg"]
-  }
-}
-```
-
-## Integration Strategy
-
-- **Vanilla JS:** Direct API usage, inject into DOM.
-- **React/Vue/Angular/Svelte:** Use as a service or custom element; no framework-specific dependencies.
-- **Styling:** Provide default CSS, allow overrides.
-
-## Dev
-
-### Run the app exemple
-
-```bash
-bun examples/app/app.js
-```
-
-### Format the code
-
-```bash
-bun run prettier -w *
-```
+Detailed migration strategy and design rationale are documented in `docs/PORTING_PLAN.md`.
