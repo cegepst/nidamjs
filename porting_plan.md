@@ -141,7 +141,8 @@ Consumer styles should define at least:
 - `.snap-indicator`
 - appearance/disappearance animation classes
 
-Without this contract, behavior remains functional but UX quality degrades (maximize/snap visuals, transitions, affordances).
+Without this contract, behavior remains functional but UX quality degrades (maximize/snap visuals, transitions,
+affordances).
 
 ### Fetch contract
 

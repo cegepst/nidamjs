@@ -16,6 +16,7 @@ export default class WindowManager extends BaseManager {
   // Configuration
   _config = {
     zIndexBase: 40,
+    layoutStabilizationMs: 450,
     cascadeOffset: 30,
     cooldownMs: 500,
     maxWindows: 10,
@@ -442,13 +443,14 @@ export default class WindowManager extends BaseManager {
 
     this._root.appendChild(winElement);
 
+    const cascadeIndex = this._windows.size;
     const defaultSnap = winElement.dataset.defaultSnap;
     if (defaultSnap) {
       const vw = window.innerWidth;
       const vh = window.innerHeight - this._config.taskbarHeight;
       this._snapWindow(winElement, defaultSnap, vw, vh);
     } else {
-      this._positionWindow(winElement);
+      this._positionWindow(winElement, cascadeIndex);
     }
 
     this._windows.set(endpoint, winElement);
@@ -456,13 +458,16 @@ export default class WindowManager extends BaseManager {
     if (activate) this._focusWindow(winElement);
 
     winElement.style.visibility = "";
+    if (!defaultSnap) {
+      this._stabilizeInitialPlacement(winElement, cascadeIndex);
+    }
 
     if (focusSelector) {
       this._handleFocusSelector(winElement, focusSelector);
     }
   }
 
-  _positionWindow(winElement) {
+  _positionWindow(winElement, cascadeIndexOverride = null) {
     const width =
       winElement.offsetWidth ||
       parseInt(winElement.style.width) ||
@@ -475,7 +480,10 @@ export default class WindowManager extends BaseManager {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
 
-    const cascadeIndex = this._windows.size;
+    const cascadeIndex =
+      Number.isFinite(cascadeIndexOverride) && cascadeIndexOverride >= 0
+        ? cascadeIndexOverride
+        : this._windows.size;
     const cascadeX = cascadeIndex * this._config.cascadeOffset;
     const cascadeY = cascadeIndex * this._config.cascadeOffset;
 
@@ -489,6 +497,73 @@ export default class WindowManager extends BaseManager {
     winElement.style.left = `${Math.round(left)}px`;
     winElement.style.top = `${Math.round(top)}px`;
     this._savePositionRatios(winElement);
+  }
+
+  _stabilizeInitialPlacement(winElement, cascadeIndex) {
+    if (!winElement?.isConnected) return;
+
+    const settleMs =
+      Number.isFinite(this._config.layoutStabilizationMs) &&
+      this._config.layoutStabilizationMs > 0
+        ? this._config.layoutStabilizationMs
+        : 450;
+    const now =
+      typeof performance !== "undefined"
+        ? () => performance.now()
+        : () => Date.now();
+    const startedAt = now();
+    let active = true;
+    /** @type {ResizeObserver|null} */
+    let resizeObserver = null;
+    let lastW = winElement.offsetWidth;
+    let lastH = winElement.offsetHeight;
+
+    const cleanup = () => {
+      if (!active) return;
+      active = false;
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+        resizeObserver = null;
+      }
+    };
+
+    const maybeRecenter = () => {
+      if (!active || !winElement.isConnected) {
+        cleanup();
+        return;
+      }
+      if (
+        winElement.classList.contains("tiled") ||
+        winElement.classList.contains("maximized")
+      ) {
+        return;
+      }
+
+      const w = winElement.offsetWidth;
+      const h = winElement.offsetHeight;
+      if (w !== lastW || h !== lastH) {
+        lastW = w;
+        lastH = h;
+        this._positionWindow(winElement, cascadeIndex);
+      }
+    };
+
+    const loop = () => {
+      if (!active) return;
+      maybeRecenter();
+      if (now() - startedAt < settleMs) {
+        requestAnimationFrame(loop);
+        return;
+      }
+      cleanup();
+    };
+    requestAnimationFrame(loop);
+
+    if (typeof ResizeObserver === "function") {
+      resizeObserver = new ResizeObserver(() => maybeRecenter());
+      resizeObserver.observe(winElement);
+    }
+    setTimeout(() => cleanup(), settleMs);
   }
 
   // Save relative position ratios (Center-based)

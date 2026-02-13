@@ -16,6 +16,15 @@ Open `http://localhost:8080`.
 - `GET /page-one`: first window content
 - `GET /page-two`: second window content
 
+## WindowManager config used in demo
+
+The demo sets `windowManager.config.layoutStabilizationMs` to stabilize first-window centering when CSS (for example
+Tailwind CDN classes) finishes applying after initial DOM insertion.
+
+Current demo value:
+
+- `layoutStabilizationMs: 650`
+
 ## File structure
 
 ```text

@@ -6,6 +6,7 @@ const app = createNidamApp({
     config: {
       maxWindows: 4,
       taskbarHeight: 0,
+      layoutStabilizationMs: 650,
     },
     notify: (level, message) => {
       if (level === "error") console.error(message);

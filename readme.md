@@ -27,12 +27,18 @@ const app = createNidamApp({
   modalContainer: "#target",
   registry: [],
   windowManager: {
+    config: {
+      layoutStabilizationMs: 450,
+    },
     notify: (level, message) => console.log(level, message),
   },
 });
 
 app.initialize();
 ```
+
+`layoutStabilizationMs` controls how long the first window can auto-recenter if late CSS changes its rendered size after
+open.
 
 ## Documentation
 
