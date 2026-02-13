@@ -167,6 +167,12 @@ export default class WindowManager extends BaseManager {
   // Toggle between maximized and normal state
   toggleMaximize(winElement) {
     winElement.classList.add("window-toggling");
+    if (!winElement.classList.contains("maximized")) {
+      winElement.dataset.prevState = JSON.stringify({
+        width: `${winElement.offsetWidth}px`,
+        height: `${winElement.offsetHeight}px`,
+      });
+    }
     const isMaximized = winElement.classList.toggle("maximized");
 
     const icon = winElement.querySelector("[data-maximize] i");
