@@ -1,6 +1,9 @@
 import BaseManager from "../../core/BaseManager.js";
-import ContentInitializer from "../../core/ContentInitializer.js";
-import { showToast } from "../../utils/toast.js";
+import {
+  applyWindowState,
+  readWindowState,
+  saveWindowState,
+} from "../../utils/windowState.js";
 
 /**
  * WindowManager handles multi-window interface including:
@@ -13,6 +16,7 @@ export default class WindowManager extends BaseManager {
   // Configuration
   _config = {
     zIndexBase: 40,
+    layoutStabilizationMs: 450,
     cascadeOffset: 30,
     cooldownMs: 500,
     maxWindows: 10,
@@ -32,15 +36,39 @@ export default class WindowManager extends BaseManager {
   _windows = new Map();
   _zIndexCounter = this._config.zIndexBase;
   _getModules = null;
+  _notify = null;
+  _fetchWindowContent = null;
+  _initializeContent = null;
+  _resolveEndpoint = null;
   _lastOpenTimestamps = new Map();
   _pendingRequests = new Map();
 
   // Tiling & Snapping properties
   _snapIndicator = null;
 
-  constructor(container, delegator, getModules = null) {
+  constructor(container, delegator, options = {}) {
     super(container, delegator);
+    const {
+      getModules = null,
+      config = null,
+      notify = null,
+      fetchWindowContent = null,
+      initializeContent = null,
+      resolveEndpoint = null,
+    } = options || {};
+
     this._getModules = getModules;
+    this._notify = notify || this._defaultNotify.bind(this);
+    this._fetchWindowContent =
+      fetchWindowContent || this._defaultFetchWindowContent.bind(this);
+    this._initializeContent = initializeContent || (() => {});
+    this._resolveEndpoint = resolveEndpoint || this._defaultResolveEndpoint;
+
+    if (config && typeof config === "object") {
+      this._config = { ...this._config, ...config };
+    }
+    this._zIndexCounter = this._config.zIndexBase;
+
     this._initSnapIndicator();
   }
 
@@ -144,17 +172,59 @@ export default class WindowManager extends BaseManager {
 
   // Toggle between maximized and normal state
   toggleMaximize(winElement) {
+    const wasMaximized = winElement.classList.contains("maximized");
+    const wasTiledAndSnapped =
+      winElement.classList.contains("tiled") &&
+      typeof winElement.dataset.snapType === "string" &&
+      winElement.dataset.snapType.length > 0;
     winElement.classList.add("window-toggling");
+    // Preserve original free-window geometry when maximizing from tiled state.
+    // Tiling already captured prevState, so re-capturing here would overwrite it.
+    if (!wasMaximized && !winElement.classList.contains("tiled")) {
+      saveWindowState(winElement, "prevState", { includePosition: false });
+    }
     const isMaximized = winElement.classList.toggle("maximized");
+    let shouldSaveRatiosAfterToggle = false;
 
-    const icon = winElement.querySelector("[data-maximize] i");
-    if (icon) {
-      icon.classList.toggle("fa-expand", !isMaximized);
-      icon.classList.toggle("fa-compress", isMaximized);
+    this._updateMaximizeIcon(winElement, isMaximized);
+
+    if (!isMaximized) {
+      if (wasTiledAndSnapped) {
+        const layout = this._getSnapLayout(
+          winElement.dataset.snapType,
+          window.innerWidth,
+          window.innerHeight - this._config.taskbarHeight,
+        );
+        Object.assign(winElement.style, layout);
+      } else {
+        const savedState = readWindowState(winElement);
+        applyWindowState(winElement, savedState);
+
+        const widthPx =
+          this._parseCssPixelValue(savedState?.width) ||
+          this._parseCssPixelValue(winElement.style.width) ||
+          winElement.offsetWidth;
+        const heightPx =
+          this._parseCssPixelValue(savedState?.height) ||
+          this._parseCssPixelValue(winElement.style.height) ||
+          winElement.offsetHeight;
+
+        this._repositionWindowFromRatios(
+          winElement,
+          window.innerWidth,
+          window.innerHeight,
+          {
+            widthPx,
+            heightPx,
+          },
+        );
+        shouldSaveRatiosAfterToggle = true;
+      }
     }
 
     setTimeout(() => {
       winElement.classList.remove("window-toggling");
+      if (shouldSaveRatiosAfterToggle) this._savePositionRatios(winElement);
     }, this._config.animationDurationMs);
   }
 
@@ -168,7 +238,7 @@ export default class WindowManager extends BaseManager {
       const msg =
         document.body.dataset.errorMaxWindows ||
         `Maximum of ${this._config.maxWindows} windows allowed.`;
-      showToast("error", msg.replace("%s", String(this._config.maxWindows)));
+      this._notify("error", msg.replace("%s", String(this._config.maxWindows)));
       return Promise.reject(new Error("Max windows reached"));
     }
 
@@ -198,12 +268,15 @@ export default class WindowManager extends BaseManager {
     // 5. Fetch and Create
     const openPromise = (async () => {
       try {
-        const response = await fetch(`/${endpoint}`, {
-          headers: { "X-Modal-Request": "1" },
-          cache: "no-cache",
+        const html = await this._fetchWindowContent(endpoint, {
+          force,
+          focusSelector,
+          activate,
+          manager: this,
         });
-
-        const html = await response.text();
+        if (typeof html !== "string") {
+          throw new TypeError("fetchWindowContent must return an HTML string");
+        }
 
         // Handle Refresh
         if (this._windows.has(endpoint) && force) {
@@ -233,7 +306,7 @@ export default class WindowManager extends BaseManager {
         console.error("Error opening window:", error);
         const msg =
           document.body.dataset.errorOpenFailed || "Failed to open window.";
-        showToast("error", msg);
+        this._notify("error", msg);
         throw error;
       } finally {
         this._pendingRequests.delete(endpoint);
@@ -284,7 +357,9 @@ export default class WindowManager extends BaseManager {
   _refreshWindowContent(winElement, html) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
-    const newContent = doc.querySelector(".window");
+    const newContent = /** @type {HTMLElement|null} */ (
+      doc.querySelector(".window")
+    );
 
     if (!newContent) return;
 
@@ -346,7 +421,9 @@ export default class WindowManager extends BaseManager {
   _createWindowElement(html, endpoint) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
-    const winElement = doc.querySelector(".window");
+    const winElement = /** @type {HTMLElement|null} */ (
+      doc.querySelector(".window")
+    );
 
     if (winElement) {
       winElement.dataset.endpoint = endpoint;
@@ -366,13 +443,14 @@ export default class WindowManager extends BaseManager {
 
     this._root.appendChild(winElement);
 
+    const cascadeIndex = this._windows.size;
     const defaultSnap = winElement.dataset.defaultSnap;
     if (defaultSnap) {
       const vw = window.innerWidth;
       const vh = window.innerHeight - this._config.taskbarHeight;
       this._snapWindow(winElement, defaultSnap, vw, vh);
     } else {
-      this._positionWindow(winElement);
+      this._positionWindow(winElement, cascadeIndex);
     }
 
     this._windows.set(endpoint, winElement);
@@ -380,13 +458,16 @@ export default class WindowManager extends BaseManager {
     if (activate) this._focusWindow(winElement);
 
     winElement.style.visibility = "";
+    if (!defaultSnap) {
+      this._stabilizeInitialPlacement(winElement, cascadeIndex);
+    }
 
     if (focusSelector) {
       this._handleFocusSelector(winElement, focusSelector);
     }
   }
 
-  _positionWindow(winElement) {
+  _positionWindow(winElement, cascadeIndexOverride = null) {
     const width =
       winElement.offsetWidth ||
       parseInt(winElement.style.width) ||
@@ -399,7 +480,10 @@ export default class WindowManager extends BaseManager {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
 
-    const cascadeIndex = this._windows.size;
+    const cascadeIndex =
+      Number.isFinite(cascadeIndexOverride) && cascadeIndexOverride >= 0
+        ? cascadeIndexOverride
+        : this._windows.size;
     const cascadeX = cascadeIndex * this._config.cascadeOffset;
     const cascadeY = cascadeIndex * this._config.cascadeOffset;
 
@@ -415,6 +499,73 @@ export default class WindowManager extends BaseManager {
     this._savePositionRatios(winElement);
   }
 
+  _stabilizeInitialPlacement(winElement, cascadeIndex) {
+    if (!winElement?.isConnected) return;
+
+    const settleMs =
+      Number.isFinite(this._config.layoutStabilizationMs) &&
+      this._config.layoutStabilizationMs > 0
+        ? this._config.layoutStabilizationMs
+        : 450;
+    const now =
+      typeof performance !== "undefined"
+        ? () => performance.now()
+        : () => Date.now();
+    const startedAt = now();
+    let active = true;
+    /** @type {ResizeObserver|null} */
+    let resizeObserver = null;
+    let lastW = winElement.offsetWidth;
+    let lastH = winElement.offsetHeight;
+
+    const cleanup = () => {
+      if (!active) return;
+      active = false;
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+        resizeObserver = null;
+      }
+    };
+
+    const maybeRecenter = () => {
+      if (!active || !winElement.isConnected) {
+        cleanup();
+        return;
+      }
+      if (
+        winElement.classList.contains("tiled") ||
+        winElement.classList.contains("maximized")
+      ) {
+        return;
+      }
+
+      const w = winElement.offsetWidth;
+      const h = winElement.offsetHeight;
+      if (w !== lastW || h !== lastH) {
+        lastW = w;
+        lastH = h;
+        this._positionWindow(winElement, cascadeIndex);
+      }
+    };
+
+    const loop = () => {
+      if (!active) return;
+      maybeRecenter();
+      if (now() - startedAt < settleMs) {
+        requestAnimationFrame(loop);
+        return;
+      }
+      cleanup();
+    };
+    requestAnimationFrame(loop);
+
+    if (typeof ResizeObserver === "function") {
+      resizeObserver = new ResizeObserver(() => maybeRecenter());
+      resizeObserver.observe(winElement);
+    }
+    setTimeout(() => cleanup(), settleMs);
+  }
+
   // Save relative position ratios (Center-based)
   _savePositionRatios(winElement) {
     if (
@@ -428,6 +579,35 @@ export default class WindowManager extends BaseManager {
 
     winElement.dataset.xRatio = String(centerX / window.innerWidth);
     winElement.dataset.yRatio = String(centerY / window.innerHeight);
+  }
+
+  _parseCssPixelValue(value) {
+    if (!value) return null;
+    const px = parseFloat(value);
+    return Number.isFinite(px) ? px : null;
+  }
+
+  _repositionWindowFromRatios(winElement, vw, vh, size = null) {
+    const xRatio = parseFloat(winElement.dataset.xRatio);
+    const yRatio = parseFloat(winElement.dataset.yRatio);
+
+    if (isNaN(xRatio) || isNaN(yRatio)) return false;
+
+    const width =
+      (size && Number.isFinite(size.widthPx) && size.widthPx > 0
+        ? size.widthPx
+        : null) || winElement.offsetWidth;
+    const height =
+      (size && Number.isFinite(size.heightPx) && size.heightPx > 0
+        ? size.heightPx
+        : null) || winElement.offsetHeight;
+
+    const centerX = xRatio * vw;
+    const centerY = yRatio * vh;
+
+    winElement.style.left = `${Math.round(centerX - width / 2)}px`;
+    winElement.style.top = `${Math.round(centerY - height / 2)}px`;
+    return true;
   }
 
   _handleFocusSelector(winElement, selector) {
@@ -622,12 +802,7 @@ export default class WindowManager extends BaseManager {
 
     if (this._dragState.snap !== snap) {
       this._dragState.snap = snap;
-      this._updateSnapIndicator(
-        snap,
-        view.w,
-        view.h,
-        this._dragState.winElement,
-      );
+      this._updateSnapIndicator(snap, view.w, view.h);
     }
   }
 
@@ -660,28 +835,22 @@ export default class WindowManager extends BaseManager {
   _restoreWindowInternal(winElement, xRatio) {
     // Determine target dimensions
     let width, height;
+    const savedState = readWindowState(winElement);
 
     if (xRatio === null) {
       // Tiled Restore
-      const state = winElement.dataset.prevState
-        ? JSON.parse(winElement.dataset.prevState)
-        : null;
-      if (state) {
-        width = state.width;
-        height = state.height;
+      if (savedState) {
+        width = savedState.width;
+        height = savedState.height;
       }
     } else {
       // Maximized Restore
-      const state = winElement.dataset.prevState
-        ? JSON.parse(winElement.dataset.prevState)
-        : null;
-      width = state?.width || winElement.style.width;
-      height = state?.height || winElement.style.height;
-
-      if (!width || width === "100%") width = this._config.defaultWidth + "px";
-      if (!height || height === "100%")
-        height = this._config.defaultHeight + "px";
+      width = savedState?.width || winElement.style.width;
+      height = savedState?.height || winElement.style.height;
     }
+    if (!width || width === "100%") width = this._config.defaultWidth + "px";
+    if (!height || height === "100%")
+      height = this._config.defaultHeight + "px";
 
     // Apply
     winElement.classList.remove("maximized", "tiled");
@@ -690,10 +859,7 @@ export default class WindowManager extends BaseManager {
     // Add restoration class for width/height transition only (no top/left transition)
     winElement.classList.add("window-toggling", "dragging-restore");
 
-    Object.assign(winElement.style, {
-      width: width,
-      height: height,
-    });
+    applyWindowState(winElement, { width, height });
 
     // Cleanup
     setTimeout(() => {
@@ -729,10 +895,7 @@ export default class WindowManager extends BaseManager {
   _snapWindow(winElement, type, vw, vh) {
     // Save current state before tiling for future restoration
     if (!winElement.classList.contains("tiled")) {
-      winElement.dataset.prevState = JSON.stringify({
-        width: winElement.style.width,
-        height: winElement.style.height,
-      });
+      saveWindowState(winElement, "prevState", { includePosition: false });
     }
 
     winElement.classList.add("window-toggling", "tiled");
@@ -799,20 +962,7 @@ export default class WindowManager extends BaseManager {
         const layout = this._getSnapLayout(type, vw, vhTiled);
         Object.assign(winElement.style, layout);
       } else if (!winElement.classList.contains("maximized")) {
-        // Handle normal window relative positioning (Center-based)
-        const xRatio = parseFloat(winElement.dataset.xRatio);
-        const yRatio = parseFloat(winElement.dataset.yRatio);
-
-        if (!isNaN(xRatio) && !isNaN(yRatio)) {
-          const width = winElement.offsetWidth;
-          const height = winElement.offsetHeight;
-
-          const centerX = xRatio * vw;
-          const centerY = yRatio * vhFull;
-
-          winElement.style.left = `${Math.round(centerX - width / 2)}px`;
-          winElement.style.top = `${Math.round(centerY - height / 2)}px`;
-        }
+        this._repositionWindowFromRatios(winElement, vw, vhFull);
       }
     });
   }
@@ -889,8 +1039,31 @@ export default class WindowManager extends BaseManager {
     return path.join(" > ");
   }
 
+  async _defaultFetchWindowContent(endpoint) {
+    const response = await fetch(this._resolveEndpoint(endpoint), {
+      headers: { "X-Modal-Request": "1" },
+      cache: "no-cache",
+    });
+
+    return response.text();
+  }
+
+  _defaultResolveEndpoint(endpoint) {
+    const normalized = String(endpoint || "").replace(/^\/+/, "");
+    return `/${normalized}`;
+  }
+
+  _defaultNotify(level, message) {
+    const logger = level === "error" ? console.error : console.log;
+    logger(`[nidamjs:${level}]`, message);
+  }
+
   _initializeModalContent(root) {
     const modules = this._getModules ? this._getModules() : null;
-    ContentInitializer.initialize(this._delegator, root, modules);
+    this._initializeContent(root, {
+      delegator: this._delegator,
+      modules: modules,
+      manager: this,
+    });
   }
 }

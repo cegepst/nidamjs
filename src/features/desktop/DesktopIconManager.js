@@ -2,15 +2,20 @@ import BaseManager from "../../core/BaseManager.js";
 
 export default class DesktopIconManager extends BaseManager {
   _dragState = null;
+  _storageKey = "desktop_grid_layout";
+  _storageNamespace = "";
 
-  constructor(container, delegator) {
+  constructor(container, delegator, options = {}) {
     super(container, delegator);
+    this._storageKey = options.storageKey || this._storageKey;
+    this._storageNamespace = options.storageNamespace || "";
     this._loadLayout();
   }
 
   _getStorageKey() {
-    const da = document.body.dataset.da;
-    return `${da ? da + "_" : ""}desktop_grid_layout`;
+    return this._storageNamespace
+      ? `${this._storageNamespace}_${this._storageKey}`
+      : this._storageKey;
   }
 
   _loadLayout() {
@@ -20,7 +25,9 @@ export default class DesktopIconManager extends BaseManager {
 
       if (!savedLayout || !Array.isArray(savedLayout)) return;
 
-      const icons = this._root.querySelectorAll(".desktop-icon");
+      const icons = /** @type {NodeListOf<HTMLElement>} */ (
+        this._root.querySelectorAll(".desktop-icon")
+      );
       icons.forEach((icon) => {
         const id = icon.dataset.modal;
         const savedIcon = savedLayout.find((item) => item.id === id);
@@ -181,7 +188,9 @@ export default class DesktopIconManager extends BaseManager {
     const targetRowClass = `row-start-${rowIndex}`;
 
     const collidingElement = Array.from(
-      this._root.querySelectorAll(".desktop-icon"),
+      /** @type {NodeListOf<HTMLElement>} */ (
+        this._root.querySelectorAll(".desktop-icon")
+      ),
     ).find(
       (icon) =>
         icon !== element &&
@@ -227,7 +236,9 @@ export default class DesktopIconManager extends BaseManager {
 
   _saveLayout() {
     const layout = [];
-    const icons = this._root.querySelectorAll(".desktop-icon");
+    const icons = /** @type {NodeListOf<HTMLElement>} */ (
+      this._root.querySelectorAll(".desktop-icon")
+    );
 
     icons.forEach((icon) => {
       const id = icon.dataset.modal;

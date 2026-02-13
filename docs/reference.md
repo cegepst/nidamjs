@@ -17,7 +17,7 @@ The main class used to initialize the desktop environment.
 
 | Name | Type | Description |
 | :--- | :--- | :--- |
-| `config` | `Object` | Configuration options for the environment. See [Configuration](../guide/configuration.md). |
+| `config` | `Object` | Configuration options for the environment. See [Configuration](guide/configuration.md). |
 
 **Returns**
 

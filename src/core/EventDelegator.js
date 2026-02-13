@@ -46,7 +46,15 @@ export default class EventDelegator {
     }
   }
 
-  on(eventType, selector, handler, { group } = {}) {
+  /**
+   * Register an event handler.
+   * @param {string} eventType
+   * @param {string|null} selector
+   * @param {(e: Event, target: Element|Document) => void} handler
+   * @param {{group?: string}} [options]
+   */
+  on(eventType, selector, handler, options = {}) {
+    const group = options.group;
     if (!this.#handlers.has(eventType)) this.#handlers.set(eventType, []);
     const ref = { selector, handler, group };
     this.#handlers.get(eventType).push(ref);

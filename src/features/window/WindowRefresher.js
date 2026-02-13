@@ -8,9 +8,14 @@ export default class WindowRefresher {
   #refreshMap;
   #refreshTimeout = 200;
 
-  constructor(windowManager) {
+  constructor(windowManager, { refreshMap = null, refreshTimeout = 200 } = {}) {
     this.#windowManager = windowManager;
-    this.#refreshMap = window.window_refresh_map || {};
+    this.#refreshMap = refreshMap || window.window_refresh_map || {};
+    this.#refreshTimeout = refreshTimeout;
+  }
+
+  setRefreshMap(refreshMap = {}) {
+    this.#refreshMap = refreshMap || {};
   }
 
   handleEvent(eventName, payload) {
