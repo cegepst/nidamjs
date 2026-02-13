@@ -1,36 +1,29 @@
 import BaseManager from "../../core/BaseManager.js";
 import storageUtil from "../../utils/storageUtil.js";
 
-export default class DesktopIconManager extends BaseManager {
-  _dragState = null;
-  _storageKey = "desktop_grid_layout";
-  _storageNamespace = "";
-  _storage = storageUtil;
+export default class IconManager extends BaseManager {
 
-  constructor(container, delegator, options = {}) {
+  _key = "desktop-icons";
+
+  /**
+   * @param {string | HTMLElement} container
+   * @param {import("../../index.js").EventDelegator} delegator
+   */
+  constructor(container, delegator) {
     super(container, delegator);
-    this._storageKey = options.storageKey || this._storageKey;
-    this._storageNamespace = options.storageNamespace || "";
-    this._storage = options.storage || storageUtil;
     this._loadLayout();
-  }
-
-  _getStorageKey() {
-    return this._storageNamespace
-      ? `${this._storageNamespace}_${this._storageKey}`
-      : this._storageKey;
   }
 
   _loadLayout() {
     try {
-      const key = this._getStorageKey();
-      const savedLayout = this._storage.get(key, []);
+      const savedLayout = storageUtil.get(this._key, []);
 
       if (!savedLayout || !Array.isArray(savedLayout)) return;
 
       const icons = /** @type {NodeListOf<HTMLElement>} */ (
-        this._root.querySelectorAll(".desktop-icon")
+        this._queryAll("[data-nd-icons]")
       );
+
       icons.forEach((icon) => {
         const id = icon.dataset.modal;
         const savedIcon = savedLayout.find((item) => item.id === id);
@@ -55,7 +48,7 @@ export default class DesktopIconManager extends BaseManager {
   _bindEvents() {
     this._delegator.on(
       "mousedown",
-      ".desktop-icon",
+      "[data-nd-icons]",
       this._handleDragStart.bind(this),
     );
   }
@@ -240,7 +233,7 @@ export default class DesktopIconManager extends BaseManager {
   _saveLayout() {
     const layout = [];
     const icons = /** @type {NodeListOf<HTMLElement>} */ (
-      this._root.querySelectorAll(".desktop-icon")
+      this._root.querySelectorAll("[data-nd-icons]")
     );
 
     icons.forEach((icon) => {
@@ -256,7 +249,6 @@ export default class DesktopIconManager extends BaseManager {
       }
     });
 
-    const key = this._getStorageKey();
-    this._storage.set(key, layout);
+    storageUtil.set(this._key, layout);
   }
 }

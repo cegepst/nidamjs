@@ -4,7 +4,7 @@ export { default as BaseManager } from "./core/BaseManager.js";
 export { default as ContentInitializer } from "./core/ContentInitializer.js";
 export { default as EventDelegator } from "./core/EventDelegator.js";
 
-export { default as DesktopIconManager } from "./features/desktop/DesktopIconManager.js";
+export { default as IconManager } from "./features/desktop/IconManager.js";
 export { default as WindowManager } from "./features/window/WindowManager.js";
 export { default as WindowRefresher } from "./features/window/WindowRefresher.js";
 
