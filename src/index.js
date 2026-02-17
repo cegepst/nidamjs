@@ -1,13 +1,10 @@
 export { default as NidamApp, createNidamApp } from "./bootstrap/NidamApp.js";
-
 export { default as BaseManager } from "./core/BaseManager.js";
 export { default as ContentInitializer } from "./core/ContentInitializer.js";
 export { default as EventDelegator } from "./core/EventDelegator.js";
-
 export { default as DesktopIconManager } from "./features/desktop/DesktopIconManager.js";
 export { default as WindowManager } from "./features/window/WindowManager.js";
 export { default as WindowRefresher } from "./features/window/WindowRefresher.js";
-
 export { DOMUtils } from "./utils/dom.js";
 export { handleRefreshEvent } from "./utils/eventUtils.js";
 export { default as storageUtil } from "./utils/storageUtil.js";
@@ -18,25 +15,11 @@ export {
   saveWindowState,
 } from "./utils/windowState.js";
 
-import "./styles/styles.css";
 import { createNidamApp } from "./bootstrap/NidamApp.js";
 
 if (typeof window !== "undefined") {
   window.addEventListener('DOMContentLoaded', () => {
-    const app = createNidamApp({
-      modalContainer: "#target",
-      windowManager: {
-        config: {
-          maxWindows: 4,
-          taskbarHeight: 0,
-          layoutStabilizationMs: 650,
-        },
-        notify: (level, message) => {
-          if (level === "error") console.error(message);
-        },
-      },
-    });
-
+    const app = createNidamApp(); 
     app.initialize();
   });
 }
