@@ -1,4 +1,1 @@
-@import 'tailwindcss';
-@source "../../src";
-
 @import './components/window.css';

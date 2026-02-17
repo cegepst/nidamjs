@@ -1,2 +1,1 @@
-import 'nidamjs';
-import 'nidamjs/style.css';
+import '/dist/nidam.es.js';

@@ -1,40 +1,34 @@
-import { defineConfig } from 'vite';
-import { resolve } from 'path';
-import tailwindcss from '@tailwindcss/vite';
+import { defineConfig } from "vite";
+import path from "path";
 
-export default defineConfig({
-  plugins: [
-    tailwindcss(),
-  ],
-  root: 'examples/app',
-  resolve: {
-    alias: [
-      { 
-        find: 'nidamjs/style.css', 
-        replacement: resolve(__dirname, './src/styles/styles.css') 
+export default defineConfig(({ mode }) => {
+  if (mode === "lib") {
+    return {
+      build: {
+        cssCodeSplit: true,
+
+        lib: {
+          entry: path.resolve(__dirname, "src/index.js"),
+          name: "Nidam",
+          formats: ["es", "umd"],
+          fileName: (f) => `nidam.${f}.js`,
+        },
+
+        emptyOutDir: true,
       },
-      { 
-        find: 'nidamjs', 
-        replacement: resolve(__dirname, './src/index.js') 
-      },
-    ]
-  },
-  build: {
-    outDir: resolve(__dirname, 'dist'),
-    emptyOutDir: true,
-    lib: {
-      entry: resolve(__dirname, 'src/index.js'),
-      name: 'NidamJS',
-      formats: ['es', 'umd'],
-      fileName: (format) => `nidam.${format}.js`,
-    },
-    rollupOptions: {
-      output: {
-        assetFileNames: (assetInfo) => {
-          if (assetInfo.name && assetInfo.name.endsWith('.css')) return 'nidam.css';
-          return assetInfo.name;
-        }
-      }
-    }
+    };
   }
+
+  return {
+    build: {
+      emptyOutDir: false,
+
+      rollupOptions: {
+        input: path.resolve(__dirname, "src/styles/styles.css"),
+        output: {
+          assetFileNames: "nidam.css",
+        },
+      },
+    },
+  };
 });

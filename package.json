@@ -10,15 +10,12 @@
       "import": "./dist/nidam.es.js",
       "require": "./dist/nidam.umd.js"
     },
-    "./style.css": "./dist/nidam.css"
+    "./nidam.css": "./dist/nidam.css"
   },
   "files": [
     "dist",
     "readme.md"
   ],
-  "peerDependencies": {
-    "tailwindcss": ">=3.0.0"
-  },
   "scripts": {
     "imports": "bun -e \"await import('./src/index.js')\"",
     "test": "vitest run --coverage",
@@ -26,14 +23,13 @@
     "lint": "tsc --noEmit",
     "format": "prettier -w .",
     "quality": "bun run imports && bun run lint && bun run test && bun run format",
-    "build": "vite build",
+    "build": "vite build --mode lib && vite build",
     "preview": "vite preview",
-    "dev": "vite"
+    "dev": "vite",
+    "static": "open examples/app/index.html"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.1.18",
     "prettier": "^3.8.1",
-    "tailwindcss": "^4.0.0",
     "typescript": "^5.9.2",
     "vite": "^7.3.1",
     "vitest": "^3.2.4"
