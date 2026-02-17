@@ -2,7 +2,7 @@ import { renderHomePage } from "./templates/layout.js";
 import {
   renderPageOneWindow,
   renderPageTwoWindow,
-} from "./templates/windows.js";
+} from "./templates/window.js";
 
 export function registerExampleRoutes(app) {
   app.get("/", (_req, res) => {

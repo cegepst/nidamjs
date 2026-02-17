@@ -4,7 +4,8 @@ icon: file
 
 # Icons
 
-Icons are the primary interactive elements on the desktop surface. They represent applications, files, shortcuts, or system actions. NidamJS provides a grid-based icon system with support for drag-and-drop, selection, and execution.
+Icons are the primary interactive elements on the desktop surface. They represent applications, files, shortcuts, or
+system actions. NidamJS provides a grid-based icon system with support for drag-and-drop, selection, and execution.
 
 ## Defining Icons
 
@@ -65,7 +66,8 @@ Icons are automatically snapped to a grid to keep the desktop organized.
 
 ### Auto-Arrangement
 
-By default, icons are arranged vertically starting from the top-left corner. When an icon is moved, it snaps to the nearest available grid cell.
+By default, icons are arranged vertically starting from the top-left corner. When an icon is moved, it snaps to the
+nearest available grid cell.
 
 ### Grid Configuration
 
