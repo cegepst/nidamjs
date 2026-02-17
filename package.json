@@ -27,8 +27,7 @@
     "quality": "bun run imports && bun run lint && bun run test && bun run format",
     "build": "vite build --mode lib && vite build --mode css",
     "csr": "bun run build && vite --open /examples/csr/index.html",
-    "ssr": "bun run build && bun examples/ssr/main.js",
-    "static": "bun run build && bun scripts/openFile.js examples/static/index.html"
+    "ssr": "bun run build && bun examples/ssr/main.js"
   },
   "devDependencies": {
     "prettier": "^3.8.1",
