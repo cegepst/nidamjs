@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <title>NidamJS Demo</title>
-    <script src="main.js" type="module"></script>
     <link href="/dist/nidam.css" rel="stylesheet" />
     <link href="/examples/shared/demo.css" rel="stylesheet" />
+    <script type="module" src="/dist/nidam.es.js"></script>
   </head>
   <body>
     <div class="demo-root">
@@ -32,6 +32,15 @@
       </footer>
 
       <div class="demo-target" data-pending-modal="" id="target"></div>
+
+      <div nd-taskbar>
+        <button nd-icon class="toolbar-btn" data-modal="examples/shared/page-one.html">
+          Page One
+        </button>
+        <button nd-icon class="toolbar-btn" data-modal="examples/shared/page-two.html">
+          Page Two
+        </button>
+      </div>
     </div>
   </body>
 </html>

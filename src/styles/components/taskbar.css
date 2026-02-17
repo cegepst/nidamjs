@@ -1,0 +1,88 @@
+[nd-taskbar] {
+  --tb-pad-y: 0.5rem;
+  --tb-pad-x: 1rem;
+  --tb-offset: 10px;
+  --tb-bg: rgba(255, 255, 255, 0.1);
+
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: var(--tb-pad-y) var(--tb-pad-x);
+
+  border-radius: 20px;
+  background: var(--tb-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+  z-index: 1000;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  bottom: var(--tb-offset);
+  left: 50%;
+  transform: translateX(-50%);
+  flex-direction: row;
+
+  width: fit-content;
+  min-width: 300px;
+}
+
+[nd-taskbar][tb-position="left"] {
+  --tb-offset: 20px;
+
+  top: 50%;
+  left: var(--tb-offset);
+  bottom: auto;
+  right: auto;
+
+  transform: translateY(-50%);
+  flex-direction: column;
+
+  height: fit-content;
+}
+
+[nd-taskbar][tb-position="right"],
+[nd-taskbar][tb-position="left"]{
+  --tb-pad-y: 1rem;
+  --tb-pad-x: 0.5rem;
+  
+  min-height: 200px;
+  min-width: fit-content;
+  
+  & [nd-icon]{
+    max-width: 4rem;
+  }
+}
+
+[nd-taskbar][tb-position="right"] {
+  --tb-offset: 30px;
+
+  top: 50%;
+  right: var(--tb-offset);
+  left: auto;
+  bottom: auto;
+
+  transform: translateY(-50%);
+  flex-direction: column;
+
+  height: fit-content;
+}
+
+[nd-taskbar] [nd-icon] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0.5rem;
+  border-radius: 12px;
+
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+[nd-taskbar] [nd-icon]:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.1);
+}

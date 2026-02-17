@@ -6,23 +6,19 @@ export default defineConfig(({ mode }) => {
     return {
       build: {
         cssCodeSplit: true,
-
         lib: {
           entry: path.resolve(__dirname, "src/index.js"),
           name: "Nidam",
           formats: ["es", "cjs", "umd"],
           fileName: (f) => (f === "cjs" ? "nidam.cjs" : `nidam.${f}.js`),
         },
-
         emptyOutDir: true,
       },
     };
   }
-
   return {
     build: {
       emptyOutDir: false,
-
       rollupOptions: {
         input: path.resolve(__dirname, "src/styles/styles.css"),
         output: {

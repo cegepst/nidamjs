@@ -14,3 +14,8 @@ export {
   readWindowState,
   saveWindowState,
 } from "./utils/windowState.js";
+
+import { createNidamApp } from "./bootstrap/NidamApp.js";
+
+const app = createNidamApp();
+app.initialize();

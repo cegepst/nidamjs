@@ -40,7 +40,6 @@ export default class WindowManager extends BaseManager {
   _fetchWindowContent = null;
   _initializeContent = null;
   _resolveEndpoint = null;
-  _static = false;
   _lastOpenTimestamps = new Map();
   _pendingRequests = new Map();
 
@@ -56,7 +55,6 @@ export default class WindowManager extends BaseManager {
       fetchWindowContent = null,
       initializeContent = null,
       resolveEndpoint = null,
-      static: staticRendering = false,
     } = options || {};
 
     this._getModules = getModules;
@@ -65,7 +63,6 @@ export default class WindowManager extends BaseManager {
       fetchWindowContent || this._defaultFetchWindowContent.bind(this);
     this._initializeContent = initializeContent || (() => {});
     this._resolveEndpoint = resolveEndpoint || this._defaultResolveEndpoint;
-    this._static = Boolean(staticRendering);
 
     if (config && typeof config === "object") {
       this._config = { ...this._config, ...config };
@@ -1043,78 +1040,12 @@ export default class WindowManager extends BaseManager {
   }
 
   async _defaultFetchWindowContent(endpoint) {
-    if (this._static) {
-      const templateContent = this._getStaticTemplateContent(endpoint);
-      if (templateContent !== null) {
-        return templateContent;
-      }
-
-      throw new Error(`Static route not found: ${String(endpoint || "")}`);
-    }
-
     const response = await fetch(this._resolveEndpoint(endpoint), {
       headers: { "X-Modal-Request": "1" },
       cache: "no-cache",
     });
 
     return response.text();
-  }
-
-  _normalizeEndpoint(endpoint) {
-    return String(endpoint || "")
-      .trim()
-      .replace(/^\/+/, "");
-  }
-
-  _buildStaticRouteCandidates(endpoint) {
-    const normalized = this._normalizeEndpoint(endpoint);
-    const candidates = [];
-    const addCandidate = (value) => {
-      const item = String(value || "").trim();
-      if (!item || candidates.includes(item)) {
-        return;
-      }
-      candidates.push(item);
-    };
-
-    addCandidate(normalized);
-
-    const lastSegment = normalized.split("/").pop();
-    addCandidate(lastSegment);
-
-    if (normalized.endsWith(".html")) {
-      addCandidate(normalized.slice(0, -5));
-    }
-    if (lastSegment && lastSegment.endsWith(".html")) {
-      addCandidate(lastSegment.slice(0, -5));
-    }
-
-    return candidates;
-  }
-
-  _getStaticTemplateContent(endpoint) {
-    const templates = document.querySelectorAll("template[data-route]");
-    if (!templates.length) {
-      return null;
-    }
-
-    const routes = new Map();
-    templates.forEach((template) => {
-      const route = template.getAttribute("data-route");
-      if (!route) {
-        return;
-      }
-      routes.set(route.trim(), template.innerHTML);
-    });
-
-    const candidates = this._buildStaticRouteCandidates(endpoint);
-    for (const candidate of candidates) {
-      if (routes.has(candidate)) {
-        return routes.get(candidate);
-      }
-    }
-
-    return null;
   }
 
   _defaultResolveEndpoint(endpoint) {

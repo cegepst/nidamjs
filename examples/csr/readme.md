@@ -6,7 +6,7 @@ This demo uses the core ES bundle with explicit initialization.
 
 ```bash
 bun run build
-bun run dev
+bun run csr
 ```
 
 Open the URL printed by Vite (usually `http://localhost:5173`), then go to `/examples/csr/index.html`.

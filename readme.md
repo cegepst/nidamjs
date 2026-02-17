@@ -7,7 +7,7 @@ NidamJS is a framework-agnostic JavaScript library for desktop-like window compo
 Use the package root export for manual initialization:
 
 ```js
-import { createNidamApp, WindowManager, WindowRefresher } from "nidamjs";
+import { createNidamApp, WindowManager, WindowRefresher } from 'nidamjs';
 ```
 
 Internal paths (`src/*`) are implementation details and not public API.
@@ -26,10 +26,10 @@ bun install
 ## Quick Start
 
 ```js
-import { createNidamApp } from "nidamjs";
+import { createNidamApp } from 'nidamjs';
 
 const app = createNidamApp({
-  modalContainer: "#target",
+  modalContainer: '#target',
   registry: [],
   windowManager: {
     config: {
@@ -51,7 +51,6 @@ open.
 - Additional docs index: [docs/readme.md](docs/readme.md)
 - CSR example: [examples/csr/readme.md](examples/csr/readme.md)
 - SSR example: [examples/ssr/readme.md](examples/ssr/readme.md)
-- Static example: [examples/static/readme.md](examples/static/readme.md)
 
 ## Naming Convention
 
@@ -73,7 +72,6 @@ open.
 - `bun run quality`: aggregate quality command.
 - `bun run csr`: builds bundles then opens the CSR demo.
 - `bun run ssr`: builds bundles then starts the SSR demo server.
-- `bun run static`: builds bundles then opens the static file-based demo.
 
 ## Quality Stack
 
@@ -125,13 +123,9 @@ The window engine expects these selectors/attributes in your modal HTML:
 │   │       └── templates
 │   │           └── layout.js
 │   ├── shared
-│   │   ├── demo.css
-│   │   ├── page-one.html
-│   │   └── page-two.html
-│   └── static
-│       ├── index.html
-│       ├── main.js
-│       └── readme.md
+│       ├── demo.css
+│       ├── page-one.html
+│       └── page-two.html
 ├── package.json
 ├── src
 │   ├── bootstrap
@@ -171,7 +165,6 @@ The window engine expects these selectors/attributes in your modal HTML:
 - `examples/csr/`: ES module client-side example.
 - `examples/ssr/`: Express-based server-side rendering example.
 - `examples/shared/`: shared pages and demo styling reused by CSR/SSR.
-- `examples/static/`: file-open static example using UMD core + `windowManager.static`.
 - `tests/unit/`: focused unit tests for core and window features.
 - `docs/porting_plan.md`: migration decisions and boundaries.
 - `tsconfig.json`: type-lint config for JS (`checkJs`).
