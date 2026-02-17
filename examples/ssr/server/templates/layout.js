@@ -7,6 +7,7 @@ export function renderHomePage() {
     <title>NidamJS Demo</title>
     <link rel="stylesheet" href="/dist/nidam.css" />
     <link rel="stylesheet" href="/examples/shared/demo.css" />
+    <script type="module" src="/dist/nidam.es.js"></script>
   </head>
 
   <body>
@@ -29,8 +30,6 @@ export function renderHomePage() {
 
       <div id="target" data-pending-modal="" class="demo-target"></div>
     </div>
-
-    <script type="module" src="/demo/client.js"></script>
   </body>
 </html>`;
 }
