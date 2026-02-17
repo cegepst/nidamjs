@@ -1,48 +1,54 @@
-# Example App (Minimal Tailwind + NidamJS)
+# Example App (Vite + Tailwind + NidamJS)
 
-This demo keeps only the essentials: one page + two live window routes.
+Cette démo utilise désormais **Vite** pour orchestrer le développement de la bibliothèque et de l'application de test en temps réel.
 
-## Run
+## Procédure de lancement
+
+Pour lancer l'application d'exemple avec le rechargement à chaud (HMR) :
 
 ```bash
-bun examples/app/app.js
+# À la racine du projet
+bun run dev
+
 ```
 
-Open `http://localhost:8080`.
+Ouvrez ensuite votre navigateur sur `http://localhost:8080`.
 
-## Routes
+## Fonctionnement technique
 
-- `GET /`: home page with two buttons
-- `GET /page-one`: first window content
-- `GET /page-two`: second window content
+Le projet utilise maintenant une structure de développement intégrée :
 
-## WindowManager config used in demo
+1. **Serveur de Dev** : Vite sert le dossier `examples/app` comme racine.
+2. **Résolution des Modules** : Grâce aux alias configurés dans `vite.config.js`, l'application importe la bibliothèque directement depuis `/src/index.js` et les styles depuis `/src/styles/styles.css`.
+3. **Tailwind CSS 4** : Les styles sont compilés à la volée par le plugin `@tailwindcss/vite`.
 
-The demo sets `windowManager.config.layoutStabilizationMs` to stabilize first-window centering when CSS (for example
-Tailwind CDN classes) finishes applying after initial DOM insertion.
+## Routes (Simulées ou API)
 
-Current demo value:
+- `GET /` : Page d'accueil gérée par `examples/app/index.html`.
+- `API /page-one` : Contenu de la première fenêtre (géré par votre serveur de routes).
+- `API /page-two` : Contenu de la seconde fenêtre.
 
-- `layoutStabilizationMs: 650`
+## Configuration WindowManager
 
-## File structure
+La démo utilise la configuration par défaut de `createNidamApp()`, stabilisée pour le rendu dynamique :
+
+- `layoutStabilizationMs: 650` : Assure que les fenêtres sont correctement centrées même si les styles Tailwind mettent quelques millisecondes à s'appliquer.
+
+## Nouvelle structure de fichiers
 
 ```text
-examples/app/
-├── app.js
-├── public/
-│   ├── client.js
-│   └── styles.css
-├── server/
-│   ├── routes.js
-│   └── templates/
-│       ├── layout.js
-│       ├── windowShell.js
-│       └── windows.js
-└── readme.md
+. (racine du projet)
+├── src/                    # Code source de la librairie NidamJS
+├── dist/                   # Fichiers compilés (générés via bun run build)
+├── vite.config.js          # Configuration centrale (Alias, Dev server, Build)
+└── examples/app/           # Application de test
+    ├── index.html          # Point d'entrée principal
+    └── main.js             # Import de nidamjs et nidamjs/style.css
+
 ```
 
-## Notes
+## Notes de développement
 
-- Server creation is directly in `app.js`.
-- The demo uses `/lib/index.js` from local source for direct library usage.
+- **Import Direct** : Dans `main.js`, on utilise `import 'nidamjs'` au lieu de chemins relatifs complexes.
+- **Indépendance CSS** : Le fichier de style doit être importé manuellement via `import 'nidamjs/style.css'` pour simuler une utilisation réelle par un utilisateur final.
+- **Production** : Pour tester la version compilée, lancez `bun run build` puis servez le dossier `dist`.
