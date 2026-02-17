@@ -1048,12 +1048,6 @@ export default class WindowManager extends BaseManager {
     return response.text();
   }
 
-  _normalizeEndpoint(endpoint) {
-    return String(endpoint || "")
-      .trim()
-      .replace(/^\/+/, "");
-  }
-
   _defaultResolveEndpoint(endpoint) {
     const normalized = String(endpoint || "").replace(/^\/+/, "");
     return `/${normalized}`;
