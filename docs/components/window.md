@@ -4,11 +4,14 @@ icon: browser
 
 # Window
 
-The `Window` component is the primary container for application content within the NidamJS desktop environment. It mimics the behavior of a native operating system window, supporting dragging, resizing, minimizing, maximizing, and closing.
+The `Window` component is the primary container for application content within the NidamJS desktop environment. It
+mimics the behavior of a native operating system window, supporting dragging, resizing, minimizing, maximizing, and
+closing.
 
 ## Overview
 
-A window consists of a title bar (with controls) and a content body. It floats above the desktop background and other windows, managed by a z-index stacking context.
+A window consists of a title bar (with controls) and a content body. It floats above the desktop background and other
+windows, managed by a z-index stacking context.
 
 ### Features
 

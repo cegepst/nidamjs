@@ -8,7 +8,11 @@ This demo is designed to work from a direct file open (`file://`) without runnin
 bun run static
 ```
 
-On Linux this runs `xdg-open`; on macOS it falls back to `open`.
+The command opens the demo automatically:
+
+- Linux: `xdg-open` (fallback `open`)
+- macOS: `open`
+- Windows: `cmd /c start`
 
 ## Notes
 
@@ -17,4 +21,5 @@ On Linux this runs `xdg-open`; on macOS it falls back to `open`.
 - Initializes manually in `examples/static/index.html`.
 - Enables `windowManager.static: true` in `examples/static/main.js`.
 - Routes use the same keys as CSR/SSR (`examples/shared/page-one.html`, `examples/shared/page-two.html`).
-- Window content is served from in-page `<template data-route="...">` blocks to avoid HTTP `fetch` constraints in `file://`.
+- Window content is served from in-page `<template data-route="...">` blocks to avoid HTTP `fetch` constraints in
+  `file://`.

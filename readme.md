@@ -71,6 +71,8 @@ open.
 - `bun run lint`: type-lints JS with TypeScript (`checkJs`).
 - `bun run format`: rewrites formatting with Prettier.
 - `bun run quality`: aggregate quality command.
+- `bun run csr`: builds bundles then opens the CSR demo.
+- `bun run ssr`: builds bundles then starts the SSR demo server.
 - `bun run static`: builds bundles then opens the static file-based demo.
 
 ## Quality Stack
@@ -151,9 +153,9 @@ The window engine expects these selectors/attributes in your modal HTML:
 ├── tests
 │   ├── readme.md
 │   └── unit
-│       ├── content-initializer.test.js
-│       ├── window-manager.test.js
-│       └── window-refresher.test.js
+│       ├── contentInitializer.test.js
+│       ├── windowManager.test.js
+│       └── windowRefresher.test.js
 ├── tsconfig.json
 └── vitest.config.js
 ```

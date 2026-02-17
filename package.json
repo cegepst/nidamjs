@@ -28,7 +28,7 @@
     "build": "vite build --mode lib && vite build --mode css",
     "csr": "bun run build && vite --open /examples/csr/index.html",
     "ssr": "bun run build && bun examples/ssr/main.js",
-    "static": "bun run build && (xdg-open examples/static/index.html || open examples/static/index.html)"
+    "static": "bun run build && bun scripts/openFile.js examples/static/index.html"
   },
   "devDependencies": {
     "prettier": "^3.8.1",
