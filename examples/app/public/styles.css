@@ -127,3 +127,56 @@
     transform: scale(0.98);
   }
 }
+
+// Icons
+.desktop-icon {
+  max-width: 132px;
+  width: fit-content;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+}
+
+.desktop-icon img {
+  width: 120px;
+  height: 120px;
+  cursor: pointer;
+
+  transition: transform 0.2s ease;
+}
+
+.desktop-icon img:hover {
+  transform: scale(1.25);
+}
+
+.desktop-icon-label {
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(12px);
+
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+
+  padding: 0 8px 4px;
+  max-width: 160px;
+
+  text-align: center;
+  user-select: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .desktop-icon-label {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+}
+
+.desktop-icon-label span {
+  font-size: 0.875rem;
+  line-height: 1;
+}
