@@ -17,3 +17,26 @@ export {
   readWindowState,
   saveWindowState,
 } from "./utils/windowState.js";
+
+import "./styles/styles.css";
+import { createNidamApp } from "./bootstrap/NidamApp.js";
+
+if (typeof window !== "undefined") {
+  window.addEventListener('DOMContentLoaded', () => {
+    const app = createNidamApp({
+      modalContainer: "#target",
+      windowManager: {
+        config: {
+          maxWindows: 4,
+          taskbarHeight: 0,
+          layoutStabilizationMs: 650,
+        },
+        notify: (level, message) => {
+          if (level === "error") console.error(message);
+        },
+      },
+    });
+
+    app.initialize();
+  });
+}
