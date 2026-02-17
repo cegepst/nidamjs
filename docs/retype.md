@@ -1,6 +1,7 @@
 # Using Retype
 
-This project uses [Retype](https://retype.com/) to generate the documentation website. Retype is a high-performance static site generator that builds a website based on simple Markdown text files.
+This project uses [Retype](https://retype.com/) to generate the documentation website. Retype is a high-performance
+static site generator that builds a website based on simple Markdown text files.
 
 Here is a guide to the most useful features available in Retype, along with references to the official documentation.
 
@@ -82,7 +83,8 @@ bun add nidamjs
 
 ## Configuration
 
-The project configuration is located in `retype.yml`. This file controls the site settings, branding, sidebar structure, and more.
+The project configuration is located in `retype.yml`. This file controls the site settings, branding, sidebar structure,
+and more.
 
 ### Basic Settings
 
@@ -96,7 +98,8 @@ branding:
 
 ### Sidebar Configuration
 
-You can control the sidebar navigation order using the `order` metadata in markdown files or by defining specific links in `retype.yml`.
+You can control the sidebar navigation order using the `order` metadata in markdown files or by defining specific links
+in `retype.yml`.
 
 ```yml
 links:

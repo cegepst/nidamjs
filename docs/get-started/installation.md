@@ -4,7 +4,8 @@ icon: download
 
 # Installation
 
-Get started with **NidamJS** by adding it to your project. You can install it via your favorite package manager or include it directly via CDN.
+Get started with **NidamJS** by adding it to your project. You can install it via your favorite package manager or
+include it directly via CDN.
 
 ## Package Manager
 
@@ -32,7 +33,8 @@ yarn add nidamjs
 
 ## CDN
 
-If you prefer not to use a package manager, you can include NidamJS directly in your HTML file via a CDN like unpkg or jsDelivr.
+If you prefer not to use a package manager, you can include NidamJS directly in your HTML file via a CDN like unpkg or
+jsDelivr.
 
 ```html
 <script src="https://unpkg.com/nidamjs/dist/nidam.js"></script>
@@ -40,4 +42,5 @@ If you prefer not to use a package manager, you can include NidamJS directly in 
 
 ## Next Steps
 
-Now that you have installed NidamJS, head over to the [Quick Start](quick-start.md) guide to create your first desktop-like environment.
+Now that you have installed NidamJS, head over to the [Quick Start](quick-start.md) guide to create your first
+desktop-like environment.
