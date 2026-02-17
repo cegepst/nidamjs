@@ -14,12 +14,3 @@ export {
   readWindowState,
   saveWindowState,
 } from "./utils/windowState.js";
-
-import { createNidamApp } from "./bootstrap/NidamApp.js";
-
-if (typeof window !== "undefined") {
-  window.addEventListener('DOMContentLoaded', () => {
-    const app = createNidamApp(); 
-    app.initialize();
-  });
-}

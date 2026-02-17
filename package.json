@@ -2,14 +2,16 @@
   "name": "nidamjs",
   "version": "0.0.1",
   "type": "module",
-  "main": "./dist/nidam.umd.js",
-  "module": "./dist/nidam.js",
+  "main": "./dist/nidam.cjs",
+  "module": "./dist/nidam.es.js",
   "style": "./dist/nidam.css",
   "exports": {
     ".": {
       "import": "./dist/nidam.es.js",
-      "require": "./dist/nidam.umd.js"
+      "require": "./dist/nidam.cjs"
     },
+    "./cjs": "./dist/nidam.cjs",
+    "./umd": "./dist/nidam.umd.js",
     "./nidam.css": "./dist/nidam.css"
   },
   "files": [
@@ -23,10 +25,10 @@
     "lint": "tsc --noEmit",
     "format": "prettier -w .",
     "quality": "bun run imports && bun run lint && bun run test && bun run format",
-    "build": "vite build --mode lib && vite build",
-    "preview": "vite preview",
-    "dev": "vite",
-    "static": "open examples/app/index.html"
+    "build": "vite build --mode lib && vite build --mode css",
+    "csr": "bun run build && vite --open /examples/csr/index.html",
+    "ssr": "bun run build && bun examples/ssr/main.js",
+    "static": "bun run build && (xdg-open examples/static/index.html || open examples/static/index.html)"
   },
   "devDependencies": {
     "prettier": "^3.8.1",
