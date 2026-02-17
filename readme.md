@@ -116,17 +116,19 @@ The window engine expects these selectors/attributes in your modal HTML:
 │   ├── ssr
 │   │   ├── main.js
 │   │   ├── public
-│   │   │   ├── client.js
-│   │   │   └── styles.css
+│   │   │   └── client.js
 │   │   ├── readme.md
 │   │   └── server
 │   │       ├── routes.js
 │   │       └── templates
-│   │           ├── layout.js
-│   │           ├── window.js
-│   │           └── windowShell.js
+│   │           └── layout.js
+│   ├── shared
+│   │   ├── demo.css
+│   │   ├── page-one.html
+│   │   └── page-two.html
 │   └── static
 │       ├── index.html
+│       ├── main.js
 │       └── readme.md
 ├── package.json
 ├── src
@@ -166,7 +168,8 @@ The window engine expects these selectors/attributes in your modal HTML:
 - `src/utils/`: shared utility helpers.
 - `examples/csr/`: ES module client-side example.
 - `examples/ssr/`: Express-based server-side rendering example.
-- `examples/static/`: file-open static example using UMD core + manual init.
+- `examples/shared/`: shared pages and demo styling reused by CSR/SSR.
+- `examples/static/`: file-open static example using UMD core + `windowManager.static`.
 - `tests/unit/`: focused unit tests for core and window features.
 - `docs/porting_plan.md`: migration decisions and boundaries.
 - `tsconfig.json`: type-lint config for JS (`checkJs`).

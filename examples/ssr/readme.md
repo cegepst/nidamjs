@@ -1,49 +1,24 @@
-# Example App (Minimal Tailwind + NidamJS)
+# SSR Example (Express + ES Build)
 
-This demo keeps only the essentials: one page + two live window routes.
+This demo serves an SSR home page and SSR window routes.
 
 ## Run
 
 ```bash
-bun examples/ssr/main.js
+bun run ssr
 ```
 
 Open `http://localhost:8080`.
 
 ## Routes
 
-- `GET /`: home page with two buttons
-- `GET /page-one`: first window content
-- `GET /page-two`: second window content
-
-## WindowManager config used in demo
-
-The demo sets `windowManager.config.layoutStabilizationMs` to stabilize first-window centering when CSS (for example
-Tailwind CDN classes) finishes applying after initial DOM insertion.
-
-Current demo value:
-
-- `layoutStabilizationMs: 650`
-
-## File structure
-
-```text
-examples/app/
-├── app.js
-├── public/
-│   ├── client.js
-│   └── styles.css
-├── server/
-│   ├── routes.js
-│   └── templates/
-│       ├── layout.js
-│       ├── windowShell.js
-│       └── windows.js
-└── readme.md
-```
+- `GET /`: home page with buttons
+- `GET /page-one`: first window content (SSR template)
+- `GET /page-two`: second window content (SSR template)
 
 ## Notes
 
-- Server creation is directly in `app.js`.
-- The demo uses the built ES bundle `/dist/nidam.es.js`.
--
+- Uses the built ES bundle `/dist/nidam.es.js` in the browser.
+- Uses the built library stylesheet `/dist/nidam.css`.
+- Uses shared demo styles from `examples/shared/demo.css`.
+- Window pages are rendered by SSR templates in `examples/ssr/server/templates/`.

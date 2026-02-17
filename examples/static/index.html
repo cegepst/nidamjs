@@ -3,55 +3,42 @@
   <head>
     <meta charset="UTF-8" />
     <title>NidamJS Demo</title>
-
-    <script src="https://cdn.tailwindcss.com"></script>
     <script src="../../dist/nidam.umd.js"></script>
     <link href="../../dist/nidam.css" rel="stylesheet" />
+    <link href="../shared/demo.css" rel="stylesheet" />
   </head>
   <body>
-    <div class="relative min-h-screen p-4 md:p-6">
-      <div
-        class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_10%_10%,rgba(59,130,246,.25),transparent_35%),radial-gradient(circle_at_80%_20%,rgba(16,185,129,.20),transparent_40%),radial-gradient(circle_at_70%_80%,rgba(168,85,247,.22),transparent_50%)]"
-      ></div>
+    <div class="demo-root">
+      <div class="demo-bg"></div>
 
-      <header
-        class="mb-4 rounded-xl border border-slate-600/40 bg-slate-900/55 p-4"
-      >
-        <h1 class="text-xl md:text-2xl font-semibold tracking-wide">
-          NidamJS Minimal Demo
-        </h1>
-        <p class="text-sm text-slate-300 mt-1">
+      <header class="demo-header">
+        <h1 class="demo-title">NidamJS Minimal Demo</h1>
+        <p class="demo-subtitle">
           Two live routes opened as windows from one page.
         </p>
       </header>
 
-      <section class="mb-4 flex flex-wrap gap-2">
-        <button data-modal="page-one" class="toolbar-btn">Open Page One</button>
-        <button data-modal="page-two" class="toolbar-btn">Open Page Two</button>
+      <section class="demo-actions">
+        <button data-modal="examples/shared/page-one.html" class="toolbar-btn">
+          Open Page One
+        </button>
+        <button data-modal="examples/shared/page-two.html" class="toolbar-btn">
+          Open Page Two
+        </button>
       </section>
 
-      <footer class="mt-3 text-sm text-slate-300">
+      <footer class="demo-footer">
         Tip: drag windows by the title bar and use close/maximize buttons.
       </footer>
 
-      <div
-        id="target"
-        data-pending-modal=""
-        class="absolute inset-0 z-40 pointer-events-none"
-      ></div>
+      <div id="target" data-pending-modal="" class="demo-target"></div>
     </div>
 
-    <template data-route="page-one">
-      <div
-        class="window animate-appearance w-[640px] h-[360px] max-w-[95vw] max-h-[88vh] border border-slate-600/70 bg-slate-900 shadow-2xl overflow-hidden rounded-2xl"
-        data-default-snap
-      >
-        <div
-          data-bar
-          class="h-11 px-3 flex items-center justify-between bg-slate-800/90 text-slate-100 border-b border-slate-700/80"
-        >
-          <strong class="font-semibold tracking-wide">Page One</strong>
-          <div class="window-actions flex items-center gap-2">
+    <template data-route="examples/shared/page-one.html">
+      <div class="window window-shell animate-appearance" data-default-snap>
+        <div data-bar class="window-bar">
+          <strong class="window-title">Page One</strong>
+          <div class="window-actions">
             <button data-maximize class="mini-btn" title="Maximize">
               <i class="not-italic">[]</i>
             </button>
@@ -60,15 +47,21 @@
             </button>
           </div>
         </div>
-        <div
-          class="window-content-scrollable h-[calc(100%-44px)] overflow-auto bg-slate-900/90 p-4"
-        >
-          <div class="space-y-3 text-slate-100 text-sm leading-relaxed">
+        <div class="window-content-scrollable window-content-shell">
+          <div class="window-content">
             <p>
-              This static window comes from an in-page template (no HTTP fetch
-              needed).
+              This window is served by
+              <code>GET /examples/shared/page-one.html</code>.
             </p>
-            <button data-modal="page-two" class="toolbar-btn">
+            <p>
+              Click a button with
+              <code>data-modal="examples/shared/page-one.html"</code> to open
+              it.
+            </p>
+            <button
+              data-modal="examples/shared/page-two.html"
+              class="toolbar-btn"
+            >
               Open Page Two
             </button>
           </div>
@@ -76,17 +69,11 @@
       </div>
     </template>
 
-    <template data-route="page-two">
-      <div
-        class="window animate-appearance w-[640px] h-[360px] max-w-[95vw] max-h-[88vh] border border-slate-600/70 bg-slate-900 shadow-2xl overflow-hidden rounded-2xl"
-        data-default-snap
-      >
-        <div
-          data-bar
-          class="h-11 px-3 flex items-center justify-between bg-slate-800/90 text-slate-100 border-b border-slate-700/80"
-        >
-          <strong class="font-semibold tracking-wide">Page Two</strong>
-          <div class="window-actions flex items-center gap-2">
+    <template data-route="examples/shared/page-two.html">
+      <div class="window window-shell animate-appearance" data-default-snap>
+        <div data-bar class="window-bar">
+          <strong class="window-title">Page Two</strong>
+          <div class="window-actions">
             <button data-maximize class="mini-btn" title="Maximize">
               <i class="not-italic">[]</i>
             </button>
@@ -95,14 +82,16 @@
             </button>
           </div>
         </div>
-        <div
-          class="window-content-scrollable h-[calc(100%-44px)] overflow-auto bg-slate-900/90 p-4"
-        >
-          <div class="space-y-3 text-slate-100 text-sm leading-relaxed">
+        <div class="window-content-scrollable window-content-shell">
+          <div class="window-content">
             <p>
-              This proves fully static modal routing works from local file open.
+              This second route proves the same app can open multiple
+              independent window pages.
             </p>
-            <button data-modal="page-one" class="toolbar-btn">
+            <button
+              data-modal="examples/shared/page-one.html"
+              class="toolbar-btn"
+            >
               Back To Page One
             </button>
           </div>

@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>NidamJS Demo</title>
+  </head>
+  <body>
+    <div class="window window-shell animate-appearance" data-default-snap>
+      <div data-bar class="window-bar">
+        <strong class="window-title">Page One</strong>
+        <div class="window-actions">
+          <button data-maximize class="mini-btn" title="Maximize">
+            <i class="not-italic">[]</i>
+          </button>
+          <button data-close class="mini-btn" title="Close">
+            <i class="not-italic">x</i>
+          </button>
+        </div>
+      </div>
+      <div class="window-content-scrollable window-content-shell">
+        <div class="window-content">
+          <p>
+            This window is served by
+            <code class="text-cyan-300">GET /examples/shared/page-one.html</code
+            >.
+          </p>
+          <p>
+            Click a button with
+            <code>data-modal="examples/shared/page-one.html"</code> to open it.
+          </p>
+          <button
+            data-modal="examples/shared/page-two.html"
+            class="toolbar-btn"
+          >
+            Open Page Two
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

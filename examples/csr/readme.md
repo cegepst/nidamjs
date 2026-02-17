@@ -15,4 +15,5 @@ Open the URL printed by Vite (usually `http://localhost:5173`), then go to `/exa
 
 - Uses `dist/nidam.es.js` (core bundle).
 - Startup is explicit in `examples/csr/main.js` via `createNidamApp(...).initialize()`.
-- Modal routes point to static HTML files in `examples/csr/`.
+- Uses `dist/nidam.css` from the library and shared demo styles from `examples/shared/demo.css`.
+- Modal routes point to shared HTML files in `examples/shared/`.
