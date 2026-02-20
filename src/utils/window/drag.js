@@ -1,16 +1,22 @@
+/**
+ * Drag utility for handling window movement, snapping, and restoration.
+ * This class is static and operates on a shared state object provided by the caller.
+ */
 export default class Drag {
   /**
-   * Initialise le processus de drag
-   * @param {MouseEvent} e
-   * @param {HTMLElement} winElement
-   * @param {Object} config - Configuration (dragThreshold, taskbarHeight)
-   * @param {Object} state - Objet d'état à remplir (géré par le manager)
-   * @param {Object} callbacks - Fonctions de rappel (onRestore, onMaximize, onSnap, etc.)
+   * Initializes the drag process for a window.
+   * Attaches mousemove and mouseup listeners to the document.
+   * 
+   * @param {MouseEvent} e - The initial mousedown event.
+   * @param {HTMLElement} winElement - The window element to drag.
+   * @param {Object} config - Configuration object (dragThreshold, taskbarHeight).
+   * @param {Object} state - Shared drag state object to be populated.
+   * @param {Object} callbacks - Hooks for external actions (onRestore, onMaximize, onSnap, etc.).
    */
   static drag(e, winElement, config, state, callbacks) {
     if (state.active) return;
 
-    // Initialisation de l'état local du drag
+    // Initialize local drag state
     Object.assign(state, {
       active: true,
       winElement: winElement,
@@ -41,7 +47,7 @@ export default class Drag {
 
     const stopHandler = () => Drag._handleDragStop(config, state, callbacks);
 
-    state._moveHandler = moveHandler; // Stocké pour pouvoir le supprimer
+    state._moveHandler = moveHandler;
 
     document.addEventListener("mousemove", moveHandler, { passive: true });
     document.addEventListener("mouseup", stopHandler, { once: true });
@@ -49,26 +55,36 @@ export default class Drag {
     requestAnimationFrame(() => Drag._dragLoop(config, state, callbacks));
   }
 
+  /**
+   * Internal animation loop for smooth dragging.
+   * @private
+   */
   static _dragLoop(config, state, callbacks) {
     if (!state.active) return;
     Drag._updateDragPosition(config, state, callbacks);
     requestAnimationFrame(() => Drag._dragLoop(config, state, callbacks));
   }
 
+  /**
+   * Core logic for calculating the new window position during a drag.
+   * Handles automatic restoration from maximized/tiled states and snap zone detection.
+   * 
+   * @private
+   */
   static _updateDragPosition(config, state, callbacks) {
     const { winElement, currentX, currentY, startX, startY } = state;
 
     const deltaX = currentX - startX;
     const deltaY = currentY - startY;
 
-    // Détection du seuil de mouvement pour considérer que le drag a commencé
+    // Movement threshold detection
     if (!state.isDragging && (Math.abs(deltaX) > config.dragThreshold || Math.abs(deltaY) > config.dragThreshold)) {
       state.isDragging = true;
     }
 
     if (!state.isDragging) return;
 
-    // Gestion de la sortie du mode maximisé/tuilé
+    // Handle restoration from maximized/tiled states on drag start
     if ((state.initialState.tiled || state.initialState.maximized) && !state.isRestored) {
       if (state.initialState.maximized) {
         state.restoreXRatio = startX / window.innerWidth;
@@ -85,7 +101,7 @@ export default class Drag {
       state.isRestored = true;
     }
 
-    // Calcul de la position
+    // Position calculation
     let newLeft, newTop;
     if (state.isRestored && state.restoreXRatio !== null) {
       newLeft = currentX - state.restoreXRatio * winElement.offsetWidth;
@@ -98,13 +114,13 @@ export default class Drag {
     winElement.style.left = `${newLeft}px`;
     winElement.style.top = `${newTop}px`;
 
-    // Nettoyage visuel immédiat
+    // Immediate visual cleanup of state classes
     if (state.isRestored || (!state.initialState.tiled && !state.initialState.maximized)) {
       winElement.classList.remove("tiled", "maximized");
       callbacks.onUpdateMaximizeIcon(winElement, false);
     }
 
-    // Zone de snap
+    // Snap zone detection
     const snap = callbacks.detectSnapZone(currentX, currentY, state.view);
     if (state.snap !== snap) {
       state.snap = snap;
@@ -112,6 +128,10 @@ export default class Drag {
     }
   }
 
+  /**
+   * Finalizes the drag process, removes listeners, and applies final snapping or state saving.
+   * @private
+   */
   static _handleDragStop(config, state, callbacks) {
     if (!state.active) return;
 

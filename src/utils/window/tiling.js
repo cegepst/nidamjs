@@ -1,8 +1,18 @@
 import { applyWindowState, readWindowState, saveWindowState } from "../windowState.js";
 
+/**
+ * Tiling utility for window snapping and layout management.
+ * Responsible for edge detection and calculating grid-based positions.
+ */
 export default class Tiling {
   /**
-   * Détecte la zone de snap en fonction de la position de la souris
+   * Detects the snap zone based on current mouse coordinates.
+   * 
+   * @param {Object} config - Configuration object (snapThreshold, edgeDetectionRatio).
+   * @param {number} x - Mouse X coordinate.
+   * @param {number} y - Mouse Y coordinate.
+   * @param {Object} view - Viewport dimensions.
+   * @returns {string|null} The snap zone identifier (tl, tr, bl, br, left, right, maximize) or null.
    */
   static detectSnapZone(config, x, y, view) {
     const threshold = config.snapThreshold;
@@ -30,7 +40,12 @@ export default class Tiling {
   }
 
   /**
-   * Applique le snap à une fenêtre
+   * Snaps a window to a specific zone and saves the previous state for restoration.
+   * 
+   * @param {HTMLElement} winElement - The window element.
+   * @param {string} type - The snap zone type.
+   * @param {Object} config - Configuration object.
+   * @param {Object} view - Viewport dimensions.
    */
   static snapWindow(winElement, type, config, view) {
     if (!winElement.classList.contains("tiled")) {
@@ -44,7 +59,13 @@ export default class Tiling {
   }
 
   /**
-   * Calcule les dimensions et la position pour un type de snap donné
+   * Calculates the CSS layout properties for a specific snap zone.
+   * 
+   * @param {string} type - Snap zone type.
+   * @param {Object} config - Configuration object.
+   * @param {number} vw - Viewport width.
+   * @param {number} vh - Viewport height.
+   * @returns {Object} CSS properties (width, height, top, left).
    */
   static getSnapLayout(type, config, vw, vh) {
     const gap = config.snapGap;
@@ -77,7 +98,12 @@ export default class Tiling {
   }
 
   /**
-   * Gère le redimensionnement de toutes les fenêtres (utilisé lors du resize de la fenêtre globale)
+   * Adjusts all tiled windows to the new viewport size.
+   * Called during window resize events.
+   * 
+   * @param {Map} windows - Map of all windows.
+   * @param {Object} config - Configuration object.
+   * @param {Object} callbacks - Hooks (repositionFromRatios).
    */
   static handleResize(windows, config, callbacks) {
     const vw = window.innerWidth;
@@ -96,7 +122,12 @@ export default class Tiling {
   }
 
   /**
-   * Restaure une fenêtre après un drag ou une sortie de maximisation
+   * Restores a window to its free-floating state with original dimensions.
+   * 
+   * @param {HTMLElement} winElement - The window element.
+   * @param {number|null} xRatio - Optional X ratio for centered restoration during drag.
+   * @param {Object} config - Configuration object.
+   * @param {Object} callbacks - Hooks (onUpdateMaximizeIcon, onSavePositionRatios).
    */
   static restoreWindowInternal(winElement, xRatio, config, callbacks) {
     let width, height;

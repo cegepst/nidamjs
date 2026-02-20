@@ -1,29 +1,43 @@
 import State from './state.js';
 import Tiling from './tiling.js';
 
+/**
+ * Lifecycle utility for window creation, destruction, focus, and content management.
+ * Acts as the primary orchestrator for window state transitions.
+ */
 export default class Lifecycle {
   /**
-   * Ouvre une fenêtre
+   * Opens a window for a given endpoint.
+   * Handles window limits, cooldowns, and existing window activation/refreshing.
+   * 
+   * @param {string} endpoint - The unique identifier/route for the window.
+   * @param {Object} options - { force: boolean, focusSelector: string, activate: boolean }.
+   * @param {Object} context - Execution context containing shared state and configuration.
+   * @returns {Promise<HTMLElement>} The window element.
    */
   static async open(endpoint, options, context) {
     const { windows, config, pendingRequests, lastOpenTimestamps, notify, fetchWindowContent } = context;
 
+    // Check maximum window limit
     if (windows.size >= config.maxWindows && !windows.has(endpoint)) {
       const msg = document.body.dataset.errorMaxWindows || `Maximum of ${config.maxWindows} windows allowed.`;
       notify("error", msg.replace("%s", String(config.maxWindows)));
       return Promise.reject(new Error("Max windows reached"));
     }
 
+    // Return existing window if not forced
     if (windows.has(endpoint) && !options.force) {
       const winElement = windows.get(endpoint);
       if (options.activate) Lifecycle.focusWindow(winElement, context);
       return Promise.resolve(winElement);
     }
 
+    // Prevent duplicate pending requests
     if (pendingRequests.has(endpoint)) {
       return pendingRequests.get(endpoint);
     }
 
+    // Cooldown check
     const now = Date.now();
     if (!options.force && now - (lastOpenTimestamps.get(endpoint) || 0) < config.cooldownMs) {
       return Promise.resolve();
@@ -37,6 +51,7 @@ export default class Lifecycle {
           throw new TypeError("fetchWindowContent must return an HTML string");
         }
 
+        // Handle refresh for existing windows
         if (windows.has(endpoint) && options.force) {
           const existingWin = windows.get(endpoint);
           if (!options.activate && Lifecycle.isWindowBusy(existingWin)) {
@@ -48,6 +63,7 @@ export default class Lifecycle {
           return existingWin;
         }
 
+        // Create new window
         const winElement = Lifecycle.createWindowElement(html, endpoint);
         if (!winElement) {
           console.warn(`No .window element found for ${endpoint}`);
@@ -71,7 +87,10 @@ export default class Lifecycle {
   }
 
   /**
-   * Ferme une fenêtre
+   * Closes a window with an animation.
+   * 
+   * @param {HTMLElement} winElement - The window element to close.
+   * @param {Map} windows - The Map tracking active windows.
    */
   static close(winElement, windows) {
     const endpoint = winElement.dataset.endpoint;
@@ -86,7 +105,10 @@ export default class Lifecycle {
   }
 
   /**
-   * Alterne l'état maximisé d'une fenêtre
+   * Toggles the maximization state of a window.
+   * 
+   * @param {HTMLElement} winElement - The window element.
+   * @param {Object} context - Execution context.
    */
   static toggleMaximize(winElement, context) {
     const { config, callbacks } = context;
@@ -135,7 +157,10 @@ export default class Lifecycle {
   }
 
   /**
-   * Donne le focus à une fenêtre
+   * Focuses a window and brings it to the front.
+   * 
+   * @param {HTMLElement} winElement - The window to focus.
+   * @param {Object} context - Execution context.
    */
   static focusWindow(winElement, context) {
     const { windows } = context;
@@ -148,7 +173,10 @@ export default class Lifecycle {
   }
 
   /**
-   * Vérifie si la fenêtre est occupée (ex: chargement, formulaire en cours)
+   * Checks if a window is marked as busy (loading or processing).
+   * 
+   * @param {HTMLElement} winElement - The window element.
+   * @returns {boolean}
    */
   static isWindowBusy(winElement) {
     if (winElement.dataset.isBusy === "true") return true;
@@ -156,7 +184,12 @@ export default class Lifecycle {
   }
 
   /**
-   * Rafraîchit le contenu d'une fenêtre existante
+   * Silently refreshes the inner content of a window without re-creating the shell.
+   * Maintains scroll positions and window state (maximized, tiled).
+   * 
+   * @param {HTMLElement} winElement - The window to refresh.
+   * @param {string} html - The new HTML content.
+   * @param {Object} context - Execution context.
    */
   static refreshWindowContent(winElement, html, context) {
     const parser = new DOMParser();
@@ -202,7 +235,10 @@ export default class Lifecycle {
   }
 
   /**
-   * Met à jour l'icône de maximisation
+   * Toggles the maximize/compress font-awesome icon.
+   * 
+   * @param {HTMLElement} winElement - The window element.
+   * @param {boolean} isMaximized - Current state.
    */
   static updateMaximizeIcon(winElement, isMaximized) {
     const icon = winElement.querySelector("[data-maximize] i");
@@ -213,7 +249,11 @@ export default class Lifecycle {
   }
 
   /**
-   * Crée l'élément DOM de la fenêtre
+   * Parses raw HTML into a window element.
+   * 
+   * @param {string} html - The HTML string.
+   * @param {string} endpoint - The endpoint identifier.
+   * @returns {HTMLElement|null}
    */
   static createWindowElement(html, endpoint) {
     const parser = new DOMParser();
@@ -226,7 +266,12 @@ export default class Lifecycle {
   }
 
   /**
-   * Configure une nouvelle fenêtre
+   * Configures a newly created window (styles, positioning, initial focus).
+   * 
+   * @param {HTMLElement} winElement - The new window element.
+   * @param {string} endpoint - The endpoint identifier.
+   * @param {Object} options - Activation and focus options.
+   * @param {Object} context - Execution context.
    */
   static setupNewWindow(winElement, endpoint, options, context) {
     const { root, windows, config, callbacks } = context;
@@ -268,7 +313,10 @@ export default class Lifecycle {
   }
 
   /**
-   * Gère le focus automatique d'un élément dans la fenêtre
+   * Focuses a specific element within a window (input, button, etc.).
+   * 
+   * @param {HTMLElement} winElement - The window element.
+   * @param {string} selector - CSS selector for the element.
    */
   static handleFocusSelector(winElement, selector) {
     const element = winElement.querySelector(selector);
@@ -281,7 +329,9 @@ export default class Lifecycle {
   }
 
   /**
-   * Ferme la fenêtre au premier plan
+   * Finds and closes the focused/topmost window.
+   * 
+   * @param {Map} windows - Map of active windows.
    */
   static closeTopmostWindow(windows) {
     let topWin = null;

@@ -1,6 +1,14 @@
+/**
+ * State utility for managing window positions, ratios, and scroll states.
+ * This class is stateless and dependency-free, operating on raw DOM elements and configuration objects.
+ */
 export default class State {
   /**
-   * Positionne une fenêtre avec un effet de cascade
+   * Positions a window using a cascade effect relative to the number of existing windows.
+   * 
+   * @param {HTMLElement} winElement - The window element to position.
+   * @param {number} windowsCount - Current number of open windows for cascade calculation.
+   * @param {Object} config - Configuration object containing cascadeOffset and minMargin.
    */
   static positionWindow(winElement, windowsCount, config) {
     const width = winElement.offsetWidth || parseInt(winElement.style.width) || config.defaultWidth;
@@ -26,7 +34,12 @@ export default class State {
   }
 
   /**
-   * Stabilise le placement initial après le rendu
+   * Stabilizes a window's placement after initial rendering to account for dynamic content sizing.
+   * Uses a ResizeObserver and an animation loop for a short period.
+   * 
+   * @param {HTMLElement} winElement - The window element to stabilize.
+   * @param {number} windowsCount - Current number of open windows for repositioning.
+   * @param {Object} config - Configuration object containing layoutStabilizationMs.
    */
   static stabilizeInitialPlacement(winElement, windowsCount, config) {
     if (!winElement?.isConnected) return;
@@ -89,7 +102,10 @@ export default class State {
   }
 
   /**
-   * Sauvegarde les ratios de position relative à la fenêtre
+   * Calculates and saves the window's center position as ratios relative to the viewport.
+   * This allows the window to maintain its relative position during browser resizing.
+   * 
+   * @param {HTMLElement} winElement - The window element.
    */
   static savePositionRatios(winElement) {
     if (winElement.classList.contains("tiled") || winElement.classList.contains("maximized")) return;
@@ -100,7 +116,10 @@ export default class State {
   }
 
   /**
-   * Helper pour parser les valeurs CSS
+   * Safely parses a CSS pixel value into a number.
+   * 
+   * @param {string} value - The CSS value (e.g., "100px").
+   * @returns {number|null} The parsed number or null if invalid.
    */
   static parseCssPixelValue(value) {
     if (!value) return null;
@@ -109,7 +128,13 @@ export default class State {
   }
 
   /**
-   * Repositionne une fenêtre en utilisant ses ratios sauvegardés
+   * Repositions a window based on previously saved coordinate ratios.
+   * 
+   * @param {HTMLElement} winElement - The window element.
+   * @param {number} vw - Viewport width.
+   * @param {number} vh - Viewport height.
+   * @param {Object} [size=null] - Optional size override (widthPx, heightPx).
+   * @returns {boolean} True if repositioning was successful.
    */
   static repositionWindowFromRatios(winElement, vw, vh, size = null) {
     const xRatio = parseFloat(winElement.dataset.xRatio);
@@ -127,7 +152,11 @@ export default class State {
   }
 
   /**
-   * Capture l'état du scroll de la fenêtre et de ses enfants
+   * Captures the current scroll position of the window root and all its scrollable descendants.
+   * Used before refreshing window content to maintain user scroll position.
+   * 
+   * @param {HTMLElement} winElement - The window element.
+   * @returns {Map<string, Object>} A map of element paths to their scroll positions.
    */
   static captureScrollState(winElement) {
     const state = new Map();
@@ -143,7 +172,12 @@ export default class State {
   }
 
   /**
-   * Restaure l'état du scroll
+   * Restores scroll positions from a captured state Map.
+   * Uses a ResizeObserver to re-apply scroll if content takes time to render.
+   * 
+   * @param {HTMLElement} winElement - The window element.
+   * @param {Map} state - The captured scroll state.
+   * @param {Object} config - Configuration object containing scrollRestoreTimeoutMs.
    */
   static restoreScrollState(winElement, state, config) {
     const apply = () => {
@@ -175,7 +209,11 @@ export default class State {
   }
 
   /**
-   * Génère un chemin unique pour un élément enfant
+   * Generates a unique CSS-like path for a child element relative to the window root.
+   * 
+   * @param {HTMLElement} winElement - The window root element.
+   * @param {HTMLElement} element - The target child element.
+   * @returns {string} The unique selector path.
    */
   static getElementPath(winElement, element) {
     let path = [];
