@@ -8,12 +8,18 @@ export default class NidamApp {
   #config;
   #modules = new Map();
   #delegator = null;
-
+  /**
+   * @param {import('../nidam.config.js').NidamConfig | string} config - The app configuration object or JSON string.
+   */
   constructor(config = {}) {
     let parsedConfig = this._parseConfig(config);
+    let globalConfig = typeof window !== "undefined" && window.nidamConfig ? window.nidamConfig : {};
 
+    console.log("globalConfig", globalConfig);
+    console.log("parsedConfig", parsedConfig);
     this.#config = {
       ...defaultConfig,
+      ...globalConfig,
       ...parsedConfig,
     };
   }
