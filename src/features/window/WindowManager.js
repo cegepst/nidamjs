@@ -5,7 +5,12 @@ import Lifecycle from "../../utils/window/lifecycle.js";
 import Drag from "../../utils/window/drag.js";
 import Tiling from "../../utils/window/tiling.js";
 import State from "../../utils/window/state.js";
+import WindowLoader from "../../utils/window/loader.js";
 
+/**
+ * WindowManager is the main orchestrator for the window system.
+ * It manages the lifecycle, dragging, and tiling services.
+ */
 export default class WindowManager extends BaseManager {
   _config = { ...defaultConfig };
   _windows = new Map();
@@ -21,6 +26,11 @@ export default class WindowManager extends BaseManager {
   _snapIndicator = null;
   _dragState = { active: false };
 
+  /**
+   * @param {HTMLElement|string} container - Root element or selector.
+   * @param {EventDelegator} delegator - Global event delegator.
+   * @param {Object} options - Custom configuration and overrides.
+   */
   constructor(container, delegator, options = {}) {
     super(container, delegator);
     const {
@@ -35,10 +45,17 @@ export default class WindowManager extends BaseManager {
 
     this._getModules = getModules;
     this._notify = notify || this._defaultNotify.bind(this);
-    this._fetchWindowContent = fetchWindowContent || this._defaultFetchWindowContent.bind(this);
     this._initializeContent = initializeContent || (() => {});
-    this._resolveEndpoint = resolveEndpoint || this._defaultResolveEndpoint;
+    this._resolveEndpoint = resolveEndpoint;
     this._static = Boolean(staticRendering);
+
+    // If a custom fetcher is provided, use it; otherwise, wrap the WindowLoader.
+    this._fetchWindowContent = fetchWindowContent || ((endpoint, opts) => {
+      return WindowLoader.load(endpoint, opts, {
+        isStatic: this._static,
+        resolveEndpoint: this._resolveEndpoint
+      });
+    });
 
     if (config && typeof config === "object") {
       this._config = { ...this._config, ...config };
@@ -48,16 +65,18 @@ export default class WindowManager extends BaseManager {
     this._initSnapIndicator();
   }
 
+  /**
+   * Initializes the visual indicator for window snapping.
+   */
   _initSnapIndicator() {
     this._snapIndicator = document.createElement("div");
     this._snapIndicator.className = "snap-indicator";
     document.body.appendChild(this._snapIndicator);
   }
 
-  _cacheElements() {
-    return {};
-  }
-
+  /**
+   * Binds global and scoped events using the delegator.
+   */
   _bindEvents() {
     this._delegator.on("click", "[data-modal]", (e, target) => {
       e.preventDefault();
@@ -109,6 +128,10 @@ export default class WindowManager extends BaseManager {
     });
   }
 
+  /**
+   * Builds the shared context object for Lifecycle operations.
+   * @private
+   */
   _getLifecycleContext() {
     return {
       root: this._root,
@@ -118,7 +141,7 @@ export default class WindowManager extends BaseManager {
       pendingRequests: this._pendingRequests,
       lastOpenTimestamps: this._lastOpenTimestamps,
       notify: this._notify,
-      fetchWindowContent: this._fetchWindowContent.bind(this),
+      fetchWindowContent: this._fetchWindowContent,
       callbacks: {
         initializeContent: (root) => this._initializeModalContent(root),
         saveWindowState: saveWindowState,
@@ -128,20 +151,32 @@ export default class WindowManager extends BaseManager {
     };
   }
 
+  /**
+   * Public API to open a window.
+   */
   open(endpoint, force = false, focusSelector = null, activate = true) {
     return Lifecycle.open(endpoint, { force, focusSelector, activate }, this._getLifecycleContext());
   }
 
+  /**
+   * Public API to close a window.
+   */
   close(winElement) {
     return Lifecycle.close(winElement, this._windows);
   }
 
+  /**
+   * Brings a window to the front.
+   */
   focus(winElement) {
     const ctx = this._getLifecycleContext();
     Lifecycle.focusWindow(winElement, ctx);
     this._zIndexCounter = ctx.zIndexCounter;
   }
   
+  /**
+   * Starts a drag operation.
+   */
   drag(e, winElement) {
     const callbacks = {
       onRestore: (win, ratio, isMaximized) => Tiling.restoreWindowInternal(win, ratio, this._config, {
@@ -159,6 +194,10 @@ export default class WindowManager extends BaseManager {
     return Drag.drag(e, winElement, this._config, this._dragState, callbacks);
   }
 
+  /**
+   * Visual update for the snap indicator element.
+   * @private
+   */
   _updateSnapIndicator(type, view) {
     if (!this._snapIndicator) return;
     if (!type) {
@@ -175,79 +214,24 @@ export default class WindowManager extends BaseManager {
     this._snapIndicator.classList.add("visible");
   }
 
+  /**
+   * Public API to maximize or restore a window.
+   */
   toggleMaximize(winElement) {
     return Lifecycle.toggleMaximize(winElement, this._getLifecycleContext());
   }
 
-  async _defaultFetchWindowContent(endpoint) {
-    if (this._static) {
-      const templateContent = this._getStaticTemplateContent(endpoint);
-      if (templateContent !== null) {
-        return templateContent;
-      }
-      throw new Error(`Static route not found: ${String(endpoint || "")}`);
-    }
-    const response = await fetch(this._resolveEndpoint(endpoint), {
-      headers: { "X-Modal-Request": "1" },
-      cache: "no-cache",
-    });
-    return response.text();
-  }
-
-  _normalizeEndpoint(endpoint) {
-    return String(endpoint || "").trim().replace(/^\/+/, "");
-  }
-
-  _buildStaticRouteCandidates(endpoint) {
-    const normalized = this._normalizeEndpoint(endpoint);
-    const candidates = [];
-    const addCandidate = (value) => {
-      const item = String(value || "").trim();
-      if (!item || candidates.includes(item)) {
-        return;
-      }
-      candidates.push(item);
-    };
-    addCandidate(normalized);
-    const lastSegment = normalized.split("/").pop();
-    addCandidate(lastSegment);
-    if (normalized.endsWith(".html")) {
-      addCandidate(normalized.slice(0, -5));
-    }
-    if (lastSegment && lastSegment.endsWith(".html")) {
-      addCandidate(lastSegment.slice(0, -5));
-    }
-    return candidates;
-  }
-
-  _getStaticTemplateContent(endpoint) {
-    const templates = document.querySelectorAll("template[data-route]");
-    if (!templates.length) return null;
-    const routes = new Map();
-    templates.forEach((template) => {
-      const route = template.getAttribute("data-route");
-      if (!route) return;
-      routes.set(route.trim(), template.innerHTML);
-    });
-    const candidates = this._buildStaticRouteCandidates(endpoint);
-    for (const candidate of candidates) {
-      if (routes.has(candidate)) {
-        return routes.get(candidate);
-      }
-    }
-    return null;
-  }
-
-  _defaultResolveEndpoint(endpoint) {
-    const normalized = String(endpoint || "").replace(/^\/+/, "");
-    return `/${normalized}`;
-  }
-
+  /**
+   * Default notification handler.
+   */
   _defaultNotify(level, message) {
     const logger = level === "error" ? console.error : console.log;
     logger(`[nidamjs:${level}]`, message);
   }
 
+  /**
+   * Initializes content within a window using modules and custom logic.
+   */
   _initializeModalContent(root) {
     const modules = this._getModules ? this._getModules() : null;
     this._initializeContent(root, {
