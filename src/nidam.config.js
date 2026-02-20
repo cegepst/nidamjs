@@ -8,7 +8,6 @@
  * @property {number} [refreshTimeout] - Timeout in ms for refreshing windows (default: 200)
  * @property {Function} [notify] - Custom notification logger (default: defaultNotify)
  * @property {Object} [windowManager] - Configuration for WindowManager (default: {})
- * @property {Object} [ui] - UI Configuration (default: { theme: "light", taskbar_size: "medium" })
  */
 
 export const defaultNotify = (level, message) => {
@@ -25,9 +24,5 @@ export default {
     refreshMap: null,
     refreshTimeout: 200,
     notify: defaultNotify,
-    windowManager: {},
-    ui: {
-        theme: "light",
-        taskbar_size: "medium",
-    }
+    windowManager: {}
 };
