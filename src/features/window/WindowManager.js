@@ -179,9 +179,9 @@ export default class WindowManager extends BaseManager {
       winElement.dataset.snapType.length > 0;
     winElement.classList.add("window-toggling");
     // Preserve original free-window geometry when maximizing from tiled state.
-    // Tiling already captured prevState, so re-capturing here would overwrite it.
+    // Tiling already captured prevState, so maximize should only capture once.
     if (!wasMaximized && !winElement.classList.contains("tiled")) {
-      saveWindowState(winElement, "prevState", { includePosition: false });
+      this._ensureRestoreState(winElement);
     }
     const isMaximized = winElement.classList.toggle("maximized");
     let shouldSaveRatiosAfterToggle = false;
@@ -464,6 +464,7 @@ export default class WindowManager extends BaseManager {
       this._snapWindow(winElement, defaultSnap, vw, vh);
     } else {
       this._positionWindow(winElement, cascadeIndex);
+      this._ensureRestoreState(winElement);
     }
 
     this._windows.set(endpoint, winElement);
@@ -592,6 +593,12 @@ export default class WindowManager extends BaseManager {
 
     winElement.dataset.xRatio = String(centerX / window.innerWidth);
     winElement.dataset.yRatio = String(centerY / window.innerHeight);
+  }
+
+  _ensureRestoreState(winElement) {
+    const savedState = readWindowState(winElement);
+    if (savedState?.width && savedState?.height) return savedState;
+    return saveWindowState(winElement, "prevState", { includePosition: false });
   }
 
   _parseCssPixelValue(value) {
@@ -908,7 +915,7 @@ export default class WindowManager extends BaseManager {
   _snapWindow(winElement, type, vw, vh) {
     // Save current state before tiling for future restoration
     if (!winElement.classList.contains("tiled")) {
-      saveWindowState(winElement, "prevState", { includePosition: false });
+      this._ensureRestoreState(winElement);
     }
 
     winElement.classList.add("window-toggling", "tiled");
