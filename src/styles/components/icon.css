@@ -1,19 +1,29 @@
-/* Desktop Grid */
+/* =========================================
+   Desktop Container
+   ========================================= */
 
 [nd-icons] {
   --nd-cols: 8;
   --nd-rows: 5;
-  --nd-cell-size: 110px;
+  --nd-gap: 12px;
 
   display: grid;
-  grid-template-columns: repeat(var(--nd-cols), var(--nd-cell-size));
-  grid-template-rows: repeat(var(--nd-rows), var(--nd-cell-size));
 
-  gap: 12px;
+  width: 100%;
+  height: 100%;
+
+  grid-template-columns: repeat(var(--nd-cols), 1fr);
+  grid-template-rows: repeat(var(--nd-rows), 1fr);
+
+  gap: var(--nd-gap);
   padding: 16px;
+
+  box-sizing: border-box;
 }
 
-/* Icons */
+/* =========================================
+   Icon Base
+   ========================================= */
 
 [nd-icon] {
   display: flex;
@@ -21,13 +31,21 @@
   align-items: center;
   justify-content: center;
 
+  width: 100%;
+  height: 100%;
+
   cursor: pointer;
+  user-select: none;
+  touch-action: none;
 }
 
 [nd-icon] img {
-  width: 64px;
-  height: 64px;
+  width: clamp(48px, 50%, 96px);
+  height: auto;
+
   pointer-events: none;
+  -webkit-user-drag: none;
+
   transition: transform 0.18s ease;
 }
 
@@ -35,10 +53,33 @@
   transform: scale(1.15);
 }
 
+/* =========================================
+   Icon Label
+   ========================================= */
+
 [nd-icon] span {
   margin-top: 6px;
-  padding: 2px 6px;
-  font-size: 0.8rem;
+
+  padding: 2px 8px 4px;
+
+  font-size: 0.875rem;
+  line-height: 1.1;
+  text-align: center;
+
   border-radius: 4px;
+
   background: rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(12px);
+
+  border: 1px solid rgba(0, 0, 0, 0.15);
+
+  max-width: 100%;
+  word-break: break-word;
+}
+
+@media (prefers-color-scheme: dark) {
+  [nd-icon] span {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
 }
