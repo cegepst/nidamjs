@@ -301,6 +301,12 @@ export default class WindowManager extends BaseManager {
         }
 
         this._setupNewWindow(winElement, endpoint, focusSelector, activate);
+        this._root.dispatchEvent(
+          new CustomEvent("window:opened", {
+            detail: { endpoint, winElement },
+            bubbles: true,
+          }),
+        );
         return winElement;
       } catch (error) {
         console.error("Error opening window:", error);
@@ -324,6 +330,13 @@ export default class WindowManager extends BaseManager {
     if (this._windows.get(endpoint) === winElement) {
       this._windows.delete(endpoint);
     }
+
+    this._root.dispatchEvent(
+      new CustomEvent("window:closed", {
+        detail: { endpoint, winElement },
+        bubbles: true,
+      }),
+    );
 
     winElement.classList.add("animate-disappearance");
     winElement.classList.remove("animate-appearance");
