@@ -1,52 +1,45 @@
-function _handleModalTrigger(e, target) {
+import Lifecycle from "./lifecycle.js";
+import Drag from "./drag.js";
+
+export default class WindowEvents {
+  static _handleModalTrigger(manager, e, target) {
     e.preventDefault();
-    this.open(target.dataset.modal).catch((err) => {
-        console.debug("Modal trigger failed:", err);
+    Lifecycle.open(manager, target.dataset.modal).catch((err) => {
+      console.debug("Modal trigger failed:", err);
     });
-}
+  }
 
-function _handleCloseTrigger(e, target) {
+  static _handleCloseTrigger(manager, e, target) {
     e.preventDefault();
     const winElement = target.closest(".window");
-    if (winElement) this.close(winElement);
-}
+    if (winElement) Lifecycle.close(manager, winElement);
+  }
 
-function _handleWindowFocus(e, target) {
-    if (e.target.closest("[data-close]") || e.target.closest("[data-modal]"))
-        return;
+  static _handleWindowFocus(manager, e, target) {
+    if (e.target.closest("[data-close]") || e.target.closest("[data-modal]")) return;
     const winElement = target.closest(".window");
-    if (winElement) this._focusWindow(winElement);
-}
+    if (winElement) Lifecycle._focusWindow(manager, winElement);
+  }
 
-function _handleMaximizeTrigger(e, target) {
+  static _handleMaximizeTrigger(manager, e, target) {
     e.preventDefault();
     const winElement = target.closest(".window");
-    if (winElement) this.toggleMaximize(winElement);
-}
+    if (winElement) manager.toggleMaximize(winElement);
+  }
 
-function _handleWindowDragStart(e, target) {
-    if (e.target.closest("[data-close]") || e.target.closest("[data-maximize]"))
-        return;
+  static _handleWindowDragStart(manager, e, target) {
+    if (e.target.closest("[data-close]") || e.target.closest("[data-maximize]")) return;
     e.preventDefault();
     const winElement = target.closest(".window");
-
     if (winElement) {
-        this._focusWindow(winElement);
-        this.drag(e, winElement);
+      Lifecycle._focusWindow(manager, winElement);
+      Drag.drag(manager, e, winElement);
     }
-}
+  }
 
-function _handleGlobalKeydown(e) {
+  static _handleGlobalKeydown(manager, e) {
     if (e.key === "Escape" && !e.repeat) {
-        this._closeTopmostWindow();
+      Lifecycle._closeTopmostWindow(manager);
     }
-}
-
-export {
-    _handleModalTrigger,
-    _handleCloseTrigger,
-    _handleWindowFocus,
-    _handleMaximizeTrigger,
-    _handleWindowDragStart,
-    _handleGlobalKeydown
+  }
 }
