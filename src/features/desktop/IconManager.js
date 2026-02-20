@@ -31,52 +31,74 @@ export default class IconManager extends BaseManager {
     if (e.button !== 0) return;
     e.preventDefault();
 
-    const containerRect = this._root.getBoundingClientRect();
-    const style = getComputedStyle(this._root);
-    const gridConfig = {
-      cols: parseInt(style.getPropertyValue("--nd-cols"), 10),
-      rows: parseInt(style.getPropertyValue("--nd-rows"), 10)
-    };
+    const dragDelay = 200;
+    const deadzone = 40;
+    const startX = e.clientX;
+    const startY = e.clientY;
 
-    const ghost = target.cloneNode(true);
-    ghost.classList.add("nd-icon-ghost");
-    ghost.removeAttribute("nd-icon");
-    document.body.appendChild(ghost);
-    
-    target.classList.add("is-dragging");
+    let ghost, lastX, lastY;
+    let move, stop;
+    let dragStarted = false;
 
-    let lastX = e.clientX;
-    let lastY = e.clientY;
+    const timer = setTimeout(() => {
+      move = (ev) => {
+        const deltaX = ev.clientX - startX;
+        const deltaY = ev.clientY - startY;
 
-    ghost.style.left = `${lastX}px`;
-    ghost.style.top = `${lastY}px`;
+        if (!dragStarted && Math.hypot(deltaX, deltaY) < deadzone) return;
 
-    const move = (ev) => {
-      lastX = ev.clientX;
-      lastY = ev.clientY;
-      ghost.style.left = `${lastX}px`;
-      ghost.style.top = `${lastY}px`;
-    };
+        if (!dragStarted) {
+          dragStarted = true;
 
-    const stop = () => {
-      document.removeEventListener("mousemove", move);
-      document.removeEventListener("mouseup", stop);
+          ghost = target.cloneNode(true);
+          ghost.classList.add("nd-icon-ghost");
+          ghost.removeAttribute("nd-icon");
+          document.body.appendChild(ghost);
+          target.classList.add("is-dragging");
 
-      ghost.remove();
-      target.classList.remove("is-dragging");
+          lastX = startX;
+          lastY = startY;
 
-      if (lastX === undefined) return;
+          ghost.style.left = `${lastX}px`;
+          ghost.style.top = `${lastY}px`;
+        }
 
-      const { posString } = calculateGridPosition(lastX, lastY, containerRect, gridConfig);
-      const icons = this._queryAll("[nd-icon]");
+        lastX = ev.clientX;
+        lastY = ev.clientY;
+        ghost.style.left = `${lastX}px`;
+        ghost.style.top = `${lastY}px`;
+      };
 
-      if (isPositionOccupied(icons, target, posString)) return;
+      stop = () => {
+        document.removeEventListener("mousemove", move);
+        document.removeEventListener("mouseup", stop);
 
-      target.setAttribute("nd-icon", posString);
-      this.#updateGridStyles();
-    };
+        if (ghost) ghost.remove();
+        target.classList.remove("is-dragging");
 
-    document.addEventListener("mousemove", move);
-    document.addEventListener("mouseup", stop);
+        if (!dragStarted || lastX === undefined) return;
+
+        const containerRect = this._root.getBoundingClientRect();
+        const style = getComputedStyle(this._root);
+        const gridConfig = {
+          cols: parseInt(style.getPropertyValue("--nd-cols"), 10),
+          rows: parseInt(style.getPropertyValue("--nd-rows"), 10)
+        };
+
+        const { posString } = calculateGridPosition(lastX, lastY, containerRect, gridConfig);
+        const icons = this._queryAll("[nd-icon]");
+
+        if (isPositionOccupied(icons, target, posString)) return;
+
+        target.setAttribute("nd-icon", posString);
+        this.#updateGridStyles();
+      };
+
+      document.addEventListener("mousemove", move);
+      document.addEventListener("mouseup", stop);
+    }, dragDelay);
+
+    const cancelDrag = () => clearTimeout(timer);
+    document.addEventListener("mouseup", cancelDrag, { once: true });
   }
 }
