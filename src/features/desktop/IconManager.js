@@ -48,9 +48,9 @@ export default class IconManager extends BaseManager {
     });
   }
 
-  /**
+/**
    * @param {{ button: number; preventDefault: () => void; }} e
-   * @param {{ setAttribute: (arg0: string, arg1: string) => void; }} target
+   * @param {HTMLElement} target
    */
   _handleStartDrag(e, target) {
     if (e.button !== 0) return;
@@ -89,8 +89,15 @@ export default class IconManager extends BaseManager {
       col = Math.max(1, Math.min(col, cols));
       row = Math.max(1, Math.min(row, rows));
 
-      target.setAttribute("nd-icon", `${col}:${row}`);
+      const newPos = `${col}:${row}`;
 
+      const isOccupied = Array.from(this._queryAll("[nd-icon]")).some(icon => {
+        return icon !== target && icon.getAttribute("nd-icon") === newPos;
+      });
+
+      if (isOccupied) return;
+
+      target.setAttribute("nd-icon", newPos);
       this.#initIcons();
     };
 
