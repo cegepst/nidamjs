@@ -25,13 +25,19 @@ export function renderHomePage() {
       </section>
 
       <section nd-icons>
-        <div nd-icon class="desktop-icon" data-modal="page-one">
-          <img src="/examples/shared/images/icons/group-icon.png" alt="Page One" />
-          <span class="desktop-icon-label">Page One</span>
+        <div nd-icon="1:1">
+          <img src="examples/shared/images/icons/algo-icon.png">
+          <span>Page One</span>
         </div>
-        <div nd-icon class="desktop-icon" data-modal="page-two">
-          <img src="/examples/shared/images/icons/arena-icon.png" alt="Page Two" />
-          <span class="desktop-icon-label">Page Two</span>
+
+        <div nd-icon="3:2">
+          <img src="examples/shared/images/icons/arena-icon.png">
+          <span>Page Two</span>
+        </div>
+
+        <div nd-icon="2:3">
+          <img src="examples/shared/images/icons/group-icon.png">
+          <span>Mail</span>
         </div>
       </section>
 

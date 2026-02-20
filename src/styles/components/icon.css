@@ -1,69 +1,44 @@
-.desktop-icon {
-  max-width: 132px;
-  width: fit-content;
+/* Desktop Grid */
 
+[nd-icons] {
+  --nd-cols: 8;
+  --nd-rows: 5;
+  --nd-cell-size: 110px;
+
+  display: grid;
+  grid-template-columns: repeat(var(--nd-cols), var(--nd-cell-size));
+  grid-template-rows: repeat(var(--nd-rows), var(--nd-cell-size));
+
+  gap: 12px;
+  padding: 16px;
+}
+
+/* Icons */
+
+[nd-icon] {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
 
   cursor: pointer;
-  user-select: none;
-  touch-action: none;
 }
 
-.desktop-icon img {
-  width: 120px;
-  height: 120px;
-  cursor: pointer;
-
-  transition: transform 0.2s ease;
-}
-
-.desktop-icon img:hover {
-  transform: scale(1.25);
-}
-
-.desktop-icon-label {
-  background: rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(12px);
-
-  border: 2px solid rgba(0, 0, 0, 0.2);
-  border-radius: 2px;
-
-  padding: 0 8px 4px;
-  max-width: 160px;
-
-  text-align: center;
-  user-select: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  .desktop-icon-label {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
-  }
-}
-
-.desktop-icon-label span {
-  font-size: 0.875rem;
-  line-height: 1;
-}
-
-[nd-icons] {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-}
-
-.desktop-icon.dragging {
-  z-index: 1000;
-  cursor: grabbing;
-  transition: none !important;
-}
-
-.desktop-icon img {
+[nd-icon] img {
+  width: 64px;
+  height: 64px;
   pointer-events: none;
-  -webkit-user-drag: none;
+  transition: transform 0.18s ease;
+}
+
+[nd-icon]:hover img {
+  transform: scale(1.15);
+}
+
+[nd-icon] span {
+  margin-top: 6px;
+  padding: 2px 6px;
+  font-size: 0.8rem;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.12);
 }
