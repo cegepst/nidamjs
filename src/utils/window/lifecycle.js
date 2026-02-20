@@ -2,78 +2,81 @@ import State from './state.js';
 import Tiling from './tiling.js';
 
 export default class Lifecycle {
-  static async open(manager, endpoint, force = false, focusSelector = null, activate = true) {
-    if (manager._windows.size >= manager._config.maxWindows && !manager._windows.has(endpoint)) {
-      const msg = document.body.dataset.errorMaxWindows || `Maximum of ${manager._config.maxWindows} windows allowed.`;
-      manager._notify("error", msg.replace("%s", String(manager._config.maxWindows)));
+  /**
+   * Ouvre une fenêtre
+   */
+  static async open(endpoint, options, context) {
+    const { windows, config, pendingRequests, lastOpenTimestamps, notify, fetchWindowContent } = context;
+
+    if (windows.size >= config.maxWindows && !windows.has(endpoint)) {
+      const msg = document.body.dataset.errorMaxWindows || `Maximum of ${config.maxWindows} windows allowed.`;
+      notify("error", msg.replace("%s", String(config.maxWindows)));
       return Promise.reject(new Error("Max windows reached"));
     }
 
-    if (manager._windows.has(endpoint) && !force) {
-      const winElement = manager._windows.get(endpoint);
-      if (activate) Lifecycle._focusWindow(manager, winElement);
+    if (windows.has(endpoint) && !options.force) {
+      const winElement = windows.get(endpoint);
+      if (options.activate) Lifecycle.focusWindow(winElement, context);
       return Promise.resolve(winElement);
     }
 
-    if (manager._pendingRequests.has(endpoint)) {
-      return manager._pendingRequests.get(endpoint);
+    if (pendingRequests.has(endpoint)) {
+      return pendingRequests.get(endpoint);
     }
 
     const now = Date.now();
-    if (!force && now - (manager._lastOpenTimestamps.get(endpoint) || 0) < manager._config.cooldownMs) {
+    if (!options.force && now - (lastOpenTimestamps.get(endpoint) || 0) < config.cooldownMs) {
       return Promise.resolve();
     }
-    manager._lastOpenTimestamps.set(endpoint, now);
+    lastOpenTimestamps.set(endpoint, now);
 
     const openPromise = (async () => {
       try {
-        const html = await manager._fetchWindowContent(endpoint, {
-          force,
-          focusSelector,
-          activate,
-          manager,
-        });
+        const html = await fetchWindowContent(endpoint, options);
         if (typeof html !== "string") {
           throw new TypeError("fetchWindowContent must return an HTML string");
         }
 
-        if (manager._windows.has(endpoint) && force) {
-          const existingWin = manager._windows.get(endpoint);
-          if (!activate && Lifecycle._isWindowBusy(manager, existingWin)) {
+        if (windows.has(endpoint) && options.force) {
+          const existingWin = windows.get(endpoint);
+          if (!options.activate && Lifecycle.isWindowBusy(existingWin)) {
             return existingWin;
           }
-          Lifecycle._refreshWindowContent(manager, existingWin, html);
-          if (activate) Lifecycle._focusWindow(manager, existingWin);
-          if (focusSelector) Lifecycle._handleFocusSelector(manager, existingWin, focusSelector);
+          Lifecycle.refreshWindowContent(existingWin, html, context);
+          if (options.activate) Lifecycle.focusWindow(existingWin, context);
+          if (options.focusSelector) Lifecycle.handleFocusSelector(existingWin, options.focusSelector);
           return existingWin;
         }
 
-        const winElement = Lifecycle._createWindowElement(manager, html, endpoint);
+        const winElement = Lifecycle.createWindowElement(html, endpoint);
         if (!winElement) {
           console.warn(`No .window element found for ${endpoint}`);
           return;
         }
 
-        Lifecycle._setupNewWindow(manager, winElement, endpoint, focusSelector, activate);
+        Lifecycle.setupNewWindow(winElement, endpoint, options, context);
         return winElement;
       } catch (error) {
         console.error("Error opening window:", error);
         const msg = document.body.dataset.errorOpenFailed || "Failed to open window.";
-        manager._notify("error", msg);
+        notify("error", msg);
         throw error;
       } finally {
-        manager._pendingRequests.delete(endpoint);
+        pendingRequests.delete(endpoint);
       }
     })();
 
-    manager._pendingRequests.set(endpoint, openPromise);
+    pendingRequests.set(endpoint, openPromise);
     return openPromise;
   }
 
-  static close(manager, winElement) {
+  /**
+   * Ferme une fenêtre
+   */
+  static close(winElement, windows) {
     const endpoint = winElement.dataset.endpoint;
-    if (manager._windows.get(endpoint) === winElement) {
-      manager._windows.delete(endpoint);
+    if (windows.get(endpoint) === winElement) {
+      windows.delete(endpoint);
     }
     winElement.classList.add("animate-disappearance");
     winElement.classList.remove("animate-appearance");
@@ -82,26 +85,86 @@ export default class Lifecycle {
     }, { once: true });
   }
 
-  static _focusWindow(manager, winElement) {
-    manager._zIndexCounter++;
-    winElement.style.zIndex = manager._zIndexCounter;
+  /**
+   * Alterne l'état maximisé d'une fenêtre
+   */
+  static toggleMaximize(winElement, context) {
+    const { config, callbacks } = context;
+    const wasMaximized = winElement.classList.contains("maximized");
+    const wasTiledAndSnapped =
+      winElement.classList.contains("tiled") &&
+      typeof winElement.dataset.snapType === "string" &&
+      winElement.dataset.snapType.length > 0;
+    
+    winElement.classList.add("window-toggling");
+    
+    if (!wasMaximized && !winElement.classList.contains("tiled")) {
+      callbacks.saveWindowState(winElement, "prevState", { includePosition: false });
+    }
+    
+    const isMaximized = winElement.classList.toggle("maximized");
+    let shouldSaveRatiosAfterToggle = false;
+
+    Lifecycle.updateMaximizeIcon(winElement, isMaximized);
+
+    if (!isMaximized) {
+      if (wasTiledAndSnapped) {
+        const layout = Tiling.getSnapLayout(
+          winElement.dataset.snapType,
+          config,
+          window.innerWidth,
+          window.innerHeight - config.taskbarHeight,
+        );
+        Object.assign(winElement.style, layout);
+      } else {
+        const savedState = callbacks.readWindowState(winElement);
+        callbacks.applyWindowState(winElement, savedState);
+
+        const widthPx = State.parseCssPixelValue(savedState?.width) || State.parseCssPixelValue(winElement.style.width) || winElement.offsetWidth;
+        const heightPx = State.parseCssPixelValue(savedState?.height) || State.parseCssPixelValue(winElement.style.height) || winElement.offsetHeight;
+
+        State.repositionWindowFromRatios(winElement, window.innerWidth, window.innerHeight, { widthPx, heightPx });
+        shouldSaveRatiosAfterToggle = true;
+      }
+    }
+
+    setTimeout(() => {
+      winElement.classList.remove("window-toggling");
+      if (shouldSaveRatiosAfterToggle) State.savePositionRatios(winElement);
+    }, config.animationDurationMs);
+  }
+
+  /**
+   * Donne le focus à une fenêtre
+   */
+  static focusWindow(winElement, context) {
+    const { windows } = context;
+    context.zIndexCounter++;
+    winElement.style.zIndex = context.zIndexCounter;
     winElement.classList.add("focused");
-    manager._windows.forEach((w) => {
+    windows.forEach((w) => {
       if (w !== winElement) w.classList.remove("focused");
     });
   }
 
-  static _isWindowBusy(manager, winElement) {
+  /**
+   * Vérifie si la fenêtre est occupée (ex: chargement, formulaire en cours)
+   */
+  static isWindowBusy(winElement) {
     if (winElement.dataset.isBusy === "true") return true;
     return winElement.querySelector('[data-is-busy="true"]') !== null;
   }
 
-  static _refreshWindowContent(manager, winElement, html) {
+  /**
+   * Rafraîchit le contenu d'une fenêtre existante
+   */
+  static refreshWindowContent(winElement, html, context) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
     const newContent = doc.querySelector(".window");
     if (!newContent) return;
 
+    const { config, callbacks } = context;
     const snapType = winElement.dataset.snapType;
     const prevState = winElement.dataset.prevState;
     const xRatio = winElement.dataset.xRatio;
@@ -110,7 +173,7 @@ export default class Lifecycle {
     const isMaximized = winElement.classList.contains("maximized");
     const isTiled = winElement.classList.contains("tiled");
 
-    const scrollState = State._captureScrollState(manager, winElement);
+    const scrollState = State.captureScrollState(winElement);
 
     winElement.innerHTML = newContent.innerHTML;
     winElement.className = newContent.className;
@@ -123,7 +186,7 @@ export default class Lifecycle {
     if (isTiled) winElement.classList.add("tiled");
     if (isMaximized) {
       winElement.classList.add("maximized");
-      Lifecycle._updateMaximizeIcon(manager, winElement, true);
+      Lifecycle.updateMaximizeIcon(winElement, true);
     }
 
     if (!isTiled && !isMaximized) {
@@ -134,11 +197,14 @@ export default class Lifecycle {
     winElement.style.margin = "0";
     winElement.style.transform = "none";
 
-    State._restoreScrollState(manager, winElement, scrollState);
-    manager._initializeModalContent(winElement);
+    State.restoreScrollState(winElement, scrollState, config);
+    callbacks.initializeContent(winElement);
   }
 
-  static _updateMaximizeIcon(manager, winElement, isMaximized) {
+  /**
+   * Met à jour l'icône de maximisation
+   */
+  static updateMaximizeIcon(winElement, isMaximized) {
     const icon = winElement.querySelector("[data-maximize] i");
     if (icon) {
       icon.classList.toggle("fa-expand", !isMaximized);
@@ -146,7 +212,10 @@ export default class Lifecycle {
     }
   }
 
-  static _createWindowElement(manager, html, endpoint) {
+  /**
+   * Crée l'élément DOM de la fenêtre
+   */
+  static createWindowElement(html, endpoint) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
     const winElement = doc.querySelector(".window");
@@ -156,7 +225,12 @@ export default class Lifecycle {
     return winElement;
   }
 
-  static _setupNewWindow(manager, winElement, endpoint, focusSelector, activate = true) {
+  /**
+   * Configure une nouvelle fenêtre
+   */
+  static setupNewWindow(winElement, endpoint, options, context) {
+    const { root, windows, config, callbacks } = context;
+
     Object.assign(winElement.style, {
       position: "absolute",
       pointerEvents: "auto",
@@ -165,33 +239,38 @@ export default class Lifecycle {
       visibility: "hidden",
     });
 
-    manager._root.appendChild(winElement);
+    root.appendChild(winElement);
 
-    const cascadeIndex = manager._windows.size;
+    const cascadeIndex = windows.size;
     const defaultSnap = winElement.dataset.defaultSnap;
+    
     if (defaultSnap) {
-      const vw = window.innerWidth;
-      const vh = window.innerHeight - manager._config.taskbarHeight;
-      Tiling._snapWindow(manager, winElement, defaultSnap, vw, vh);
+      const view = { w: window.innerWidth, h: window.innerHeight - config.taskbarHeight };
+      Tiling.snapWindow(winElement, defaultSnap, config, view);
     } else {
-      State._positionWindow(manager, winElement, cascadeIndex);
+      State.positionWindow(winElement, cascadeIndex, config);
     }
 
-    manager._windows.set(endpoint, winElement);
-    manager._initializeModalContent(winElement);
-    if (activate) Lifecycle._focusWindow(manager, winElement);
+    windows.set(endpoint, winElement);
+    callbacks.initializeContent(winElement);
+    
+    if (options.activate) Lifecycle.focusWindow(winElement, context);
 
     winElement.style.visibility = "";
+    
     if (!defaultSnap) {
-      State._stabilizeInitialPlacement(manager, winElement, cascadeIndex);
+      State.stabilizeInitialPlacement(winElement, cascadeIndex, config);
     }
 
-    if (focusSelector) {
-      Lifecycle._handleFocusSelector(manager, winElement, focusSelector);
+    if (options.focusSelector) {
+      Lifecycle.handleFocusSelector(winElement, options.focusSelector);
     }
   }
 
-  static _handleFocusSelector(manager, winElement, selector) {
+  /**
+   * Gère le focus automatique d'un élément dans la fenêtre
+   */
+  static handleFocusSelector(winElement, selector) {
     const element = winElement.querySelector(selector);
     if (element) {
       if (element.type === "radio" || element.type === "checkbox") {
@@ -201,10 +280,13 @@ export default class Lifecycle {
     }
   }
 
-  static _closeTopmostWindow(manager) {
+  /**
+   * Ferme la fenêtre au premier plan
+   */
+  static closeTopmostWindow(windows) {
     let topWin = null;
     let maxZ = 0;
-    manager._windows.forEach((winElement) => {
+    windows.forEach((winElement) => {
       if (winElement.classList.contains("animate-disappearance")) return;
       const z = parseInt(winElement.style.zIndex || 0, 10);
       if (z > maxZ) {
@@ -212,6 +294,6 @@ export default class Lifecycle {
         topWin = winElement;
       }
     });
-    if (topWin) Lifecycle.close(manager, topWin);
+    if (topWin) Lifecycle.close(topWin, windows);
   }
 }

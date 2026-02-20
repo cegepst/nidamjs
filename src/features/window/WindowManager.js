@@ -5,7 +5,6 @@ import Lifecycle from "../../utils/window/lifecycle.js";
 import Drag from "../../utils/window/drag.js";
 import Tiling from "../../utils/window/tiling.js";
 import State from "../../utils/window/state.js";
-import WindowEvents from "../../utils/window/windowEventsHandlers.js";
 
 export default class WindowManager extends BaseManager {
   _config = { ...defaultConfig };
@@ -20,8 +19,7 @@ export default class WindowManager extends BaseManager {
   _lastOpenTimestamps = new Map();
   _pendingRequests = new Map();
   _snapIndicator = null;
-  _dragState = null;
-  _dragHandlers = null;
+  _dragState = { active: false };
 
   constructor(container, delegator, options = {}) {
     super(container, delegator);
@@ -61,72 +59,124 @@ export default class WindowManager extends BaseManager {
   }
 
   _bindEvents() {
-    this._delegator.on("click", "[data-modal]", (e, target) => WindowEvents._handleModalTrigger(this, e, target));
-    this._delegator.on("click", "[data-maximize]", (e, target) => WindowEvents._handleMaximizeTrigger(this, e, target));
-    this._delegator.on("click", "[data-close]", (e, target) => WindowEvents._handleCloseTrigger(this, e, target));
-    this._delegator.on("mousedown", ".window", (e, target) => WindowEvents._handleWindowFocus(this, e, target));
-    this._delegator.on("mousedown", "[data-bar]", (e, target) => WindowEvents._handleWindowDragStart(this, e, target));
-    document.addEventListener("keydown", (e) => WindowEvents._handleGlobalKeydown(this, e));
+    this._delegator.on("click", "[data-modal]", (e, target) => {
+      e.preventDefault();
+      this.open(target.dataset.modal);
+    });
+
+    this._delegator.on("click", "[data-maximize]", (e, target) => {
+      e.preventDefault();
+      const winElement = target.closest(".window");
+      if (winElement) this.toggleMaximize(winElement);
+    });
+
+    this._delegator.on("click", "[data-close]", (e, target) => {
+      e.preventDefault();
+      const winElement = target.closest(".window");
+      if (winElement) this.close(winElement);
+    });
+
+    this._delegator.on("mousedown", ".window", (e, target) => {
+      if (e.target.closest("[data-close]") || e.target.closest("[data-modal]")) return;
+      const winElement = target.closest(".window");
+      if (winElement) this.focus(winElement);
+    });
+
+    this._delegator.on("mousedown", "[data-bar]", (e, target) => {
+      if (e.target.closest("[data-close]") || e.target.closest("[data-maximize]")) return;
+      e.preventDefault();
+      const winElement = target.closest(".window");
+      if (winElement) {
+        this.focus(winElement);
+        this.drag(e, winElement);
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !e.repeat) {
+        Lifecycle.closeTopmostWindow(this._windows);
+      }
+    });
 
     let resizeTimer;
     window.addEventListener("resize", () => {
       clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => Tiling._handleResize(this), this._config.resizeDebounceMs);
+      resizeTimer = setTimeout(() => {
+        Tiling.handleResize(this._windows, this._config, {
+          repositionFromRatios: (win, vw, vh) => State.repositionWindowFromRatios(win, vw, vh)
+        });
+      }, this._config.resizeDebounceMs);
     });
   }
 
+  _getLifecycleContext() {
+    return {
+      root: this._root,
+      windows: this._windows,
+      config: this._config,
+      zIndexCounter: this._zIndexCounter,
+      pendingRequests: this._pendingRequests,
+      lastOpenTimestamps: this._lastOpenTimestamps,
+      notify: this._notify,
+      fetchWindowContent: this._fetchWindowContent.bind(this),
+      callbacks: {
+        initializeContent: (root) => this._initializeModalContent(root),
+        saveWindowState: saveWindowState,
+        readWindowState: readWindowState,
+        applyWindowState: applyWindowState
+      }
+    };
+  }
+
   open(endpoint, force = false, focusSelector = null, activate = true) {
-    return Lifecycle.open(this, endpoint, force, focusSelector, activate);
+    return Lifecycle.open(endpoint, { force, focusSelector, activate }, this._getLifecycleContext());
   }
 
   close(winElement) {
-    return Lifecycle.close(this, winElement);
+    return Lifecycle.close(winElement, this._windows);
+  }
+
+  focus(winElement) {
+    const ctx = this._getLifecycleContext();
+    Lifecycle.focusWindow(winElement, ctx);
+    this._zIndexCounter = ctx.zIndexCounter;
   }
   
   drag(e, winElement) {
-    return Drag.drag(this, e, winElement);
+    const callbacks = {
+      onRestore: (win, ratio, isMaximized) => Tiling.restoreWindowInternal(win, ratio, this._config, {
+        onUpdateMaximizeIcon: (w, isMax) => Lifecycle.updateMaximizeIcon(w, isMax),
+        onSavePositionRatios: (w) => State.savePositionRatios(w)
+      }),
+      onUpdateMaximizeIcon: (win, isMax) => Lifecycle.updateMaximizeIcon(win, isMax),
+      detectSnapZone: (x, y, view) => Tiling.detectSnapZone(this._config, x, y, view),
+      updateSnapIndicator: (snap, view) => this._updateSnapIndicator(snap, view),
+      onMaximize: (win) => this.toggleMaximize(win),
+      onSnap: (win, snap, view) => Tiling.snapWindow(win, snap, this._config, view),
+      onSaveState: (win) => State.savePositionRatios(win)
+    };
+
+    return Drag.drag(e, winElement, this._config, this._dragState, callbacks);
+  }
+
+  _updateSnapIndicator(type, view) {
+    if (!this._snapIndicator) return;
+    if (!type) {
+      this._snapIndicator.classList.remove("visible");
+      return;
+    }
+    let layout;
+    if (type === "maximize") {
+      layout = { top: "0px", left: "0px", width: `${view.w}px`, height: `${view.h}px` };
+    } else {
+      layout = Tiling.getSnapLayout(type, this._config, view.w, view.h);
+    }
+    Object.assign(this._snapIndicator.style, layout);
+    this._snapIndicator.classList.add("visible");
   }
 
   toggleMaximize(winElement) {
-    const wasMaximized = winElement.classList.contains("maximized");
-    const wasTiledAndSnapped =
-      winElement.classList.contains("tiled") &&
-      typeof winElement.dataset.snapType === "string" &&
-      winElement.dataset.snapType.length > 0;
-    winElement.classList.add("window-toggling");
-    if (!wasMaximized && !winElement.classList.contains("tiled")) {
-      saveWindowState(winElement, "prevState", { includePosition: false });
-    }
-    const isMaximized = winElement.classList.toggle("maximized");
-    let shouldSaveRatiosAfterToggle = false;
-
-    Lifecycle._updateMaximizeIcon(this, winElement, isMaximized);
-
-    if (!isMaximized) {
-      if (wasTiledAndSnapped) {
-        const layout = Tiling._getSnapLayout(
-          this,
-          winElement.dataset.snapType,
-          window.innerWidth,
-          window.innerHeight - this._config.taskbarHeight,
-        );
-        Object.assign(winElement.style, layout);
-      } else {
-        const savedState = readWindowState(winElement);
-        applyWindowState(winElement, savedState);
-
-        const widthPx = State._parseCssPixelValue(this, savedState?.width) || State._parseCssPixelValue(this, winElement.style.width) || winElement.offsetWidth;
-        const heightPx = State._parseCssPixelValue(this, savedState?.height) || State._parseCssPixelValue(this, winElement.style.height) || winElement.offsetHeight;
-
-        State._repositionWindowFromRatios(this, winElement, window.innerWidth, window.innerHeight, { widthPx, heightPx });
-        shouldSaveRatiosAfterToggle = true;
-      }
-    }
-
-    setTimeout(() => {
-      winElement.classList.remove("window-toggling");
-      if (shouldSaveRatiosAfterToggle) State._savePositionRatios(this, winElement);
-    }, this._config.animationDurationMs);
+    return Lifecycle.toggleMaximize(winElement, this._getLifecycleContext());
   }
 
   async _defaultFetchWindowContent(endpoint) {

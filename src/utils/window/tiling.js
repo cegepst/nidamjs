@@ -1,15 +1,13 @@
 import { applyWindowState, readWindowState, saveWindowState } from "../windowState.js";
-import Lifecycle from './lifecycle.js';
-import State from "./state.js";
-
 
 export default class Tiling {
-  static _detectSnapZone(manager, x, y) {
-    if (!manager._dragState) return;
-    const { view } = manager._dragState;
-    const threshold = manager._config.snapThreshold;
-    const zoneW = view.w * manager._config.edgeDetectionRatio;
-    const zoneH = view.h * manager._config.edgeDetectionRatio;
+  /**
+   * Détecte la zone de snap en fonction de la position de la souris
+   */
+  static detectSnapZone(config, x, y, view) {
+    const threshold = config.snapThreshold;
+    const zoneW = view.w * config.edgeDetectionRatio;
+    const zoneH = view.h * config.edgeDetectionRatio;
     let snap = null;
 
     if (y < threshold) {
@@ -28,41 +26,28 @@ export default class Tiling {
       snap = x < view.w / 2 ? "bl" : "br";
     }
 
-    if (manager._dragState.snap !== snap) {
-      manager._dragState.snap = snap;
-      Tiling._updateSnapIndicator(manager, snap, view.w, view.h);
-    }
+    return snap;
   }
 
-  static _updateSnapIndicator(manager, type, vw, vh) {
-    if (!manager._snapIndicator) return;
-    if (!type) {
-      manager._snapIndicator.classList.remove("visible");
-      return;
-    }
-    let layout;
-    if (type === "maximize") {
-      layout = { top: "0px", left: "0px", width: `${vw}px`, height: `${vh}px` };
-    } else {
-      layout = Tiling._getSnapLayout(manager, type, vw, vh);
-    }
-    Object.assign(manager._snapIndicator.style, layout);
-    manager._snapIndicator.classList.add("visible");
-  }
-
-  static _snapWindow(manager, winElement, type, vw, vh) {
+  /**
+   * Applique le snap à une fenêtre
+   */
+  static snapWindow(winElement, type, config, view) {
     if (!winElement.classList.contains("tiled")) {
       saveWindowState(winElement, "prevState", { includePosition: false });
     }
     winElement.classList.add("window-toggling", "tiled");
     winElement.dataset.snapType = type;
-    const layout = Tiling._getSnapLayout(manager, type, vw, vh);
+    const layout = Tiling.getSnapLayout(type, config, view.w, view.h);
     Object.assign(winElement.style, layout);
-    setTimeout(() => winElement.classList.remove("window-toggling"), manager._config.animationDurationMs);
+    setTimeout(() => winElement.classList.remove("window-toggling"), config.animationDurationMs);
   }
 
-  static _getSnapLayout(manager, type, vw, vh) {
-    const gap = manager._config.snapGap;
+  /**
+   * Calcule les dimensions et la position pour un type de snap donné
+   */
+  static getSnapLayout(type, config, vw, vh) {
+    const gap = config.snapGap;
     const halfW = (vw - gap * 3) / 2;
     const halfH = (vh - gap * 3) / 2;
     const fullH = vh - gap * 2;
@@ -79,7 +64,10 @@ export default class Tiling {
       left: { top: topY, left: leftX, width: halfW, height: fullH },
       right: { top: topY, left: rightX, width: halfW, height: fullH },
     };
+    
     const layout = layouts[type];
+    if (!layout) return {};
+
     return {
       width: `${layout.width}px`,
       height: `${layout.height}px`,
@@ -88,24 +76,32 @@ export default class Tiling {
     };
   }
 
-  static _handleResize(manager) {
+  /**
+   * Gère le redimensionnement de toutes les fenêtres (utilisé lors du resize de la fenêtre globale)
+   */
+  static handleResize(windows, config, callbacks) {
     const vw = window.innerWidth;
     const vhFull = window.innerHeight;
-    const vhTiled = vhFull - manager._config.taskbarHeight;
-    manager._windows.forEach((winElement) => {
+    const vhTiled = vhFull - config.taskbarHeight;
+
+    windows.forEach((winElement) => {
       if (winElement.classList.contains("tiled") && winElement.dataset.snapType) {
         const type = winElement.dataset.snapType;
-        const layout = Tiling._getSnapLayout(manager, type, vw, vhTiled);
+        const layout = Tiling.getSnapLayout(type, config, vw, vhTiled);
         Object.assign(winElement.style, layout);
       } else if (!winElement.classList.contains("maximized")) {
-        State._repositionWindowFromRatios(manager, winElement, vw, vhFull);
+        callbacks.repositionFromRatios(winElement, vw, vhFull);
       }
     });
   }
 
-  static _restoreWindowInternal(manager, winElement, xRatio) {
+  /**
+   * Restaure une fenêtre après un drag ou une sortie de maximisation
+   */
+  static restoreWindowInternal(winElement, xRatio, config, callbacks) {
     let width, height;
     const savedState = readWindowState(winElement);
+    
     if (xRatio === null) {
       if (savedState) {
         width = savedState.width;
@@ -115,17 +111,19 @@ export default class Tiling {
       width = savedState?.width || winElement.style.width;
       height = savedState?.height || winElement.style.height;
     }
-    if (!width || width === "100%") width = manager._config.defaultWidth + "px";
-    if (!height || height === "100%") height = manager._config.defaultHeight + "px";
+
+    if (!width || width === "100%") width = config.defaultWidth + "px";
+    if (!height || height === "100%") height = config.defaultHeight + "px";
 
     winElement.classList.remove("maximized", "tiled");
-    Lifecycle._updateMaximizeIcon(manager, winElement, false);
+    callbacks.onUpdateMaximizeIcon(winElement, false);
     winElement.classList.add("window-toggling", "dragging-restore");
+    
     applyWindowState(winElement, { width, height });
 
     setTimeout(() => {
       winElement.classList.remove("window-toggling", "dragging-restore");
-      State._savePositionRatios(manager, winElement);
-    }, manager._config.animationDurationMs);
+      callbacks.onSavePositionRatios(winElement);
+    }, config.animationDurationMs);
   }
 }

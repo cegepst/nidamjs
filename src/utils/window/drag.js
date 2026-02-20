@@ -1,12 +1,17 @@
-import Tiling from './tiling.js';
-import Lifecycle from './lifecycle.js';
-import State from './state.js';
-
 export default class Drag {
-  static drag(manager, e, winElement) {
-    if (manager._dragState?.active) return;
+  /**
+   * Initialise le processus de drag
+   * @param {MouseEvent} e
+   * @param {HTMLElement} winElement
+   * @param {Object} config - Configuration (dragThreshold, taskbarHeight)
+   * @param {Object} state - Objet d'état à remplir (géré par le manager)
+   * @param {Object} callbacks - Fonctions de rappel (onRestore, onMaximize, onSnap, etc.)
+   */
+  static drag(e, winElement, config, state, callbacks) {
+    if (state.active) return;
 
-    manager._dragState = {
+    // Initialisation de l'état local du drag
+    Object.assign(state, {
       active: true,
       winElement: winElement,
       startX: e.clientX,
@@ -23,57 +28,55 @@ export default class Drag {
       },
       view: {
         w: window.innerWidth,
-        h: window.innerHeight - manager._config.taskbarHeight,
+        h: window.innerHeight - config.taskbarHeight,
       },
       snap: null,
-      inhibitSnap: false,
       isDragging: false,
+    });
+
+    const moveHandler = (ev) => {
+      state.currentX = ev.clientX;
+      state.currentY = ev.clientY;
     };
 
-    manager._dragHandlers = {
-      move: (ev) => {
-        if (manager._dragState) {
-          manager._dragState.currentX = ev.clientX;
-          manager._dragState.currentY = ev.clientY;
-        }
-      },
-      stop: () => Drag._handleDragStop(manager),
-    };
+    const stopHandler = () => Drag._handleDragStop(config, state, callbacks);
 
-    document.addEventListener("mousemove", manager._dragHandlers.move, { passive: true });
-    document.addEventListener("mouseup", manager._dragHandlers.stop, { once: true });
+    state._moveHandler = moveHandler; // Stocké pour pouvoir le supprimer
 
-    requestAnimationFrame(() => Drag._dragLoop(manager));
+    document.addEventListener("mousemove", moveHandler, { passive: true });
+    document.addEventListener("mouseup", stopHandler, { once: true });
+
+    requestAnimationFrame(() => Drag._dragLoop(config, state, callbacks));
   }
 
-  static _dragLoop(manager) {
-    if (!manager._dragState?.active) return;
-    Drag._updateDragPosition(manager);
-    requestAnimationFrame(() => Drag._dragLoop(manager));
+  static _dragLoop(config, state, callbacks) {
+    if (!state.active) return;
+    Drag._updateDragPosition(config, state, callbacks);
+    requestAnimationFrame(() => Drag._dragLoop(config, state, callbacks));
   }
 
-  static _updateDragPosition(manager) {
-    const state = manager._dragState;
-    if (!state) return;
+  static _updateDragPosition(config, state, callbacks) {
     const { winElement, currentX, currentY, startX, startY } = state;
 
     const deltaX = currentX - startX;
     const deltaY = currentY - startY;
 
-    if (!state.isDragging && (Math.abs(deltaX) > manager._config.dragThreshold || Math.abs(deltaY) > manager._config.dragThreshold)) {
+    // Détection du seuil de mouvement pour considérer que le drag a commencé
+    if (!state.isDragging && (Math.abs(deltaX) > config.dragThreshold || Math.abs(deltaY) > config.dragThreshold)) {
       state.isDragging = true;
     }
 
     if (!state.isDragging) return;
 
-    if ((state.initialState.tiled || state.initialState.maximized) && !state.isRestored && state.isDragging) {
+    // Gestion de la sortie du mode maximisé/tuilé
+    if ((state.initialState.tiled || state.initialState.maximized) && !state.isRestored) {
       if (state.initialState.maximized) {
         state.restoreXRatio = startX / window.innerWidth;
-        Tiling._restoreWindowInternal(manager, winElement, state.restoreXRatio);
+        callbacks.onRestore(winElement, state.restoreXRatio, true);
         state.startWinTop = 0;
       } else {
         state.restoreXRatio = (startX - winElement.offsetLeft) / winElement.offsetWidth;
-        Tiling._restoreWindowInternal(manager, winElement, null);
+        callbacks.onRestore(winElement, null, false);
         state.startWinTop = winElement.offsetTop;
       }
 
@@ -82,10 +85,10 @@ export default class Drag {
       state.isRestored = true;
     }
 
+    // Calcul de la position
     let newLeft, newTop;
     if (state.isRestored && state.restoreXRatio !== null) {
-      const currentWidth = winElement.offsetWidth;
-      newLeft = currentX - state.restoreXRatio * currentWidth;
+      newLeft = currentX - state.restoreXRatio * winElement.offsetWidth;
       newTop = Math.max(0, state.startWinTop + (currentY - startY));
     } else {
       newLeft = state.startWinLeft + (state.isRestored ? currentX - startX : deltaX);
@@ -95,39 +98,38 @@ export default class Drag {
     winElement.style.left = `${newLeft}px`;
     winElement.style.top = `${newTop}px`;
 
+    // Nettoyage visuel immédiat
     if (state.isRestored || (!state.initialState.tiled && !state.initialState.maximized)) {
-      if (winElement.classList.contains("tiled")) winElement.classList.remove("tiled");
-      if (winElement.classList.contains("maximized")) {
-        winElement.classList.remove("maximized");
-        Lifecycle._updateMaximizeIcon(manager, winElement, false);
-      }
+      winElement.classList.remove("tiled", "maximized");
+      callbacks.onUpdateMaximizeIcon(winElement, false);
     }
 
-    if (state.isDragging) {
-      Tiling._detectSnapZone(manager, currentX, currentY);
+    // Zone de snap
+    const snap = callbacks.detectSnapZone(currentX, currentY, state.view);
+    if (state.snap !== snap) {
+      state.snap = snap;
+      callbacks.updateSnapIndicator(snap, state.view);
     }
   }
 
-  static _handleDragStop(manager) {
-    if (!manager._dragState?.active) return;
+  static _handleDragStop(config, state, callbacks) {
+    if (!state.active) return;
 
-    const { winElement, snap, view } = manager._dragState;
+    const { winElement, snap, view } = state;
 
-    document.removeEventListener("mousemove", manager._dragHandlers.move);
-
-    if (manager._snapIndicator) manager._snapIndicator.classList.remove("visible");
+    document.removeEventListener("mousemove", state._moveHandler);
+    callbacks.updateSnapIndicator(null, view);
 
     if (snap) {
       if (snap === "maximize") {
-        manager.toggleMaximize(winElement);
+        callbacks.onMaximize(winElement);
       } else {
-        Tiling._snapWindow(manager, winElement, snap, view.w, view.h);
+        callbacks.onSnap(winElement, snap, view);
       }
     } else {
-      State._savePositionRatios(manager, winElement);
+      callbacks.onSaveState(winElement);
     }
 
-    manager._dragState = null;
-    manager._dragHandlers = null;
+    state.active = false;
   }
 }

@@ -1,31 +1,47 @@
 export default class State {
-  static _positionWindow(manager, winElement, cascadeIndexOverride = null) {
-    const width = winElement.offsetWidth || parseInt(winElement.style.width) || manager._config.defaultWidth;
-    const height = winElement.offsetHeight || parseInt(winElement.style.height) || manager._config.defaultHeight;
+  /**
+   * Positionne une fenêtre avec un effet de cascade
+   */
+  static positionWindow(winElement, windowsCount, config) {
+    const width = winElement.offsetWidth || parseInt(winElement.style.width) || config.defaultWidth;
+    const height = winElement.offsetHeight || parseInt(winElement.style.height) || config.defaultHeight;
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    const cascadeIndex = Number.isFinite(cascadeIndexOverride) && cascadeIndexOverride >= 0 ? cascadeIndexOverride : manager._windows.size;
-    const cascadeX = cascadeIndex * manager._config.cascadeOffset;
-    const cascadeY = cascadeIndex * manager._config.cascadeOffset;
+    
+    const cascadeIndex = windowsCount;
+    const cascadeX = cascadeIndex * config.cascadeOffset;
+    const cascadeY = cascadeIndex * config.cascadeOffset;
+    
     let left = (vw - width) / 2 + cascadeX;
     let top = (vh - height) / 2 + cascadeY;
-    const margin = manager._config.minMargin;
+    const margin = config.minMargin;
+    
     if (left + width > vw) left = Math.max(margin, vw - width - margin);
     if (top + height > vh) top = Math.max(margin, vh - height - margin);
+    
     winElement.style.left = `${Math.round(left)}px`;
     winElement.style.top = `${Math.round(top)}px`;
-    State._savePositionRatios(manager, winElement);
+    
+    State.savePositionRatios(winElement);
   }
 
-  static _stabilizeInitialPlacement(manager, winElement, cascadeIndex) {
+  /**
+   * Stabilise le placement initial après le rendu
+   */
+  static stabilizeInitialPlacement(winElement, windowsCount, config) {
     if (!winElement?.isConnected) return;
-    const settleMs = Number.isFinite(manager._config.layoutStabilizationMs) && manager._config.layoutStabilizationMs > 0 ? manager._config.layoutStabilizationMs : 450;
+    
+    const settleMs = Number.isFinite(config.layoutStabilizationMs) && config.layoutStabilizationMs > 0 
+      ? config.layoutStabilizationMs 
+      : 450;
+    
     const now = typeof performance !== "undefined" ? () => performance.now() : () => Date.now();
     const startedAt = now();
     let active = true;
     let resizeObserver = null;
     let lastW = winElement.offsetWidth;
     let lastH = winElement.offsetHeight;
+
     const cleanup = () => {
       if (!active) return;
       active = false;
@@ -34,6 +50,7 @@ export default class State {
         resizeObserver = null;
       }
     };
+
     const maybeRecenter = () => {
       if (!active || !winElement.isConnected) {
         cleanup();
@@ -47,9 +64,10 @@ export default class State {
       if (w !== lastW || h !== lastH) {
         lastW = w;
         lastH = h;
-        State._positionWindow(manager, winElement, cascadeIndex);
+        State.positionWindow(winElement, windowsCount, config);
       }
     };
+
     const loop = () => {
       if (!active) return;
       maybeRecenter();
@@ -59,15 +77,21 @@ export default class State {
       }
       cleanup();
     };
+
     requestAnimationFrame(loop);
+    
     if (typeof ResizeObserver === "function") {
       resizeObserver = new ResizeObserver(() => maybeRecenter());
       resizeObserver.observe(winElement);
     }
+    
     setTimeout(() => cleanup(), settleMs);
   }
 
-  static _savePositionRatios(manager, winElement) {
+  /**
+   * Sauvegarde les ratios de position relative à la fenêtre
+   */
+  static savePositionRatios(winElement) {
     if (winElement.classList.contains("tiled") || winElement.classList.contains("maximized")) return;
     const centerX = winElement.offsetLeft + winElement.offsetWidth / 2;
     const centerY = winElement.offsetTop + winElement.offsetHeight / 2;
@@ -75,39 +99,53 @@ export default class State {
     winElement.dataset.yRatio = String(centerY / window.innerHeight);
   }
 
-  static _parseCssPixelValue(manager, value) {
+  /**
+   * Helper pour parser les valeurs CSS
+   */
+  static parseCssPixelValue(value) {
     if (!value) return null;
     const px = parseFloat(value);
     return Number.isFinite(px) ? px : null;
   }
 
-  static _repositionWindowFromRatios(manager, winElement, vw, vh, size = null) {
+  /**
+   * Repositionne une fenêtre en utilisant ses ratios sauvegardés
+   */
+  static repositionWindowFromRatios(winElement, vw, vh, size = null) {
     const xRatio = parseFloat(winElement.dataset.xRatio);
     const yRatio = parseFloat(winElement.dataset.yRatio);
     if (isNaN(xRatio) || isNaN(yRatio)) return false;
-    const width = (size && Number.isFinite(size.widthPx) && size.widthPx > 0 ? size.widthPx : null) || winElement.offsetWidth;
-    const height = (size && Number.isFinite(size.heightPx) && size.heightPx > 0 ? size.heightPx : null) || winElement.offsetHeight;
+
+    const width = (size && size.widthPx > 0 ? size.widthPx : null) || winElement.offsetWidth;
+    const height = (size && size.heightPx > 0 ? size.heightPx : null) || winElement.offsetHeight;
     const centerX = xRatio * vw;
     const centerY = yRatio * vh;
+
     winElement.style.left = `${Math.round(centerX - width / 2)}px`;
     winElement.style.top = `${Math.round(centerY - height / 2)}px`;
     return true;
   }
 
-  static _captureScrollState(manager, winElement) {
+  /**
+   * Capture l'état du scroll de la fenêtre et de ses enfants
+   */
+  static captureScrollState(winElement) {
     const state = new Map();
     if (winElement.scrollTop > 0 || winElement.scrollLeft > 0) {
       state.set("root", { top: winElement.scrollTop, left: winElement.scrollLeft });
     }
     winElement.querySelectorAll("*").forEach((el) => {
       if (el.scrollTop > 0 || el.scrollLeft > 0) {
-        state.set(State._getElementPath(manager, winElement, el), { top: el.scrollTop, left: el.scrollLeft });
+        state.set(State.getElementPath(winElement, el), { top: el.scrollTop, left: el.scrollLeft });
       }
     });
     return state;
   }
 
-  static _restoreScrollState(manager, winElement, state) {
+  /**
+   * Restaure l'état du scroll
+   */
+  static restoreScrollState(winElement, state, config) {
     const apply = () => {
       state.forEach((pos, path) => {
         let el;
@@ -126,14 +164,20 @@ export default class State {
         }
       });
     };
+
     apply();
+    
     const content = winElement.querySelector(".window-content-scrollable > div") || winElement;
     const observer = new ResizeObserver(() => apply());
     observer.observe(content);
-    setTimeout(() => observer.disconnect(), manager._config.scrollRestoreTimeoutMs);
+    
+    setTimeout(() => observer.disconnect(), config.scrollRestoreTimeoutMs);
   }
 
-  static _getElementPath(manager, winElement, element) {
+  /**
+   * Génère un chemin unique pour un élément enfant
+   */
+  static getElementPath(winElement, element) {
     let path = [];
     let current = element;
     while (current && current !== winElement) {
