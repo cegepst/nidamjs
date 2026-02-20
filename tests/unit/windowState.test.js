@@ -1,11 +1,6 @@
-import {
-  applyWindowState,
-  captureWindowState,
-  readWindowState,
-  saveWindowState,
-} from "../../src/utils/windowState.js";
+import WindowState from "../../src/utils/window/state.js";
 
-describe("windowState utils", () => {
+describe("WindowState utility", () => {
   test("captures and saves geometry from live element metrics", () => {
     document.body.innerHTML = `<div id="w"></div>`;
     const win = /** @type {HTMLElement} */ (document.querySelector("#w"));
@@ -24,9 +19,9 @@ describe("windowState utils", () => {
     });
     Object.defineProperty(win, "offsetTop", { value: 80, configurable: true });
 
-    const captured = captureWindowState(win, { includePosition: true });
-    const saved = saveWindowState(win, "prevState", { includePosition: true });
-    const read = readWindowState(win);
+    const captured = WindowState.capture(win, { includePosition: true });
+    const saved = WindowState.save(win, "prevState", { includePosition: true });
+    const read = WindowState.read(win);
 
     expect(captured).toEqual({
       width: "640px",
@@ -42,7 +37,7 @@ describe("windowState utils", () => {
     document.body.innerHTML = `<div id="w"></div>`;
     const win = /** @type {HTMLElement} */ (document.querySelector("#w"));
 
-    const applied = applyWindowState(
+    const applied = WindowState.apply(
       win,
       {
         width: "700px",
@@ -65,8 +60,8 @@ describe("windowState utils", () => {
     const win = /** @type {HTMLElement} */ (document.querySelector("#w"));
 
     win.dataset.prevState = JSON.stringify({ width: "500px", height: "300px" });
-    const first = readWindowState(win);
-    const second = readWindowState(win);
+    const first = WindowState.read(win);
+    const second = WindowState.read(win);
 
     expect(first).toEqual({
       width: "500px",
@@ -77,7 +72,7 @@ describe("windowState utils", () => {
     expect(second).toEqual(first);
 
     win.dataset.prevState = JSON.stringify({ width: "720px", height: "410px" });
-    const third = readWindowState(win);
+    const third = WindowState.read(win);
     expect(third).toEqual({
       width: "720px",
       height: "410px",

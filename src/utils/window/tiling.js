@@ -1,4 +1,4 @@
-import { applyWindowState, readWindowState, ensureRestoreState } from "../windowState.js";
+import WindowState from './state.js';
 
 /**
  * Tiling utility for window snapping and layout management.
@@ -49,7 +49,7 @@ export default class Tiling {
    */
   static snapWindow(winElement, type, config, view) {
     if (!winElement.classList.contains("tiled")) {
-      ensureRestoreState(winElement);
+      WindowState.ensureRestoreState(winElement);
     }
     winElement.classList.add("window-toggling", "tiled");
     winElement.dataset.snapType = type;
@@ -131,7 +131,7 @@ export default class Tiling {
    */
   static restoreWindowInternal(winElement, xRatio, config, callbacks) {
     let width, height;
-    const savedState = readWindowState(winElement);
+    const savedState = WindowState.read(winElement);
     
     if (xRatio === null) {
       if (savedState) {
@@ -150,7 +150,7 @@ export default class Tiling {
     callbacks.onUpdateMaximizeIcon(winElement, false);
     winElement.classList.add("window-toggling", "dragging-restore");
     
-    applyWindowState(winElement, { width, height });
+    WindowState.apply(winElement, { width, height });
 
     setTimeout(() => {
       winElement.classList.remove("window-toggling", "dragging-restore");

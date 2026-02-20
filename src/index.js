@@ -8,9 +8,4 @@ export { default as WindowRefresher } from "./features/window/WindowRefresher.js
 export { DOMUtils } from "./utils/dom.js";
 export { handleRefreshEvent } from "./utils/eventUtils.js";
 export { default as storageUtil } from "./utils/storageUtil.js";
-export {
-  applyWindowState,
-  captureWindowState,
-  readWindowState,
-  saveWindowState,
-} from "./utils/windowState.js";
+export { default as WindowState } from "./utils/window/state.js";

@@ -1,4 +1,4 @@
-import State from './state.js';
+import WindowState from './state.js';
 import Tiling from './tiling.js';
 
 /**
@@ -142,17 +142,17 @@ export default class Lifecycle {
         const savedState = callbacks.readWindowState(winElement);
         callbacks.applyWindowState(winElement, savedState);
 
-        const widthPx = State.parseCssPixelValue(savedState?.width) || State.parseCssPixelValue(winElement.style.width) || winElement.offsetWidth;
-        const heightPx = State.parseCssPixelValue(savedState?.height) || State.parseCssPixelValue(winElement.style.height) || winElement.offsetHeight;
+        const widthPx = WindowState.parseCssPixelValue(savedState?.width) || WindowState.parseCssPixelValue(winElement.style.width) || winElement.offsetWidth;
+        const heightPx = WindowState.parseCssPixelValue(savedState?.height) || WindowState.parseCssPixelValue(winElement.style.height) || winElement.offsetHeight;
 
-        State.repositionWindowFromRatios(winElement, window.innerWidth, window.innerHeight, { widthPx, heightPx });
+        WindowState.repositionWindowFromRatios(winElement, window.innerWidth, window.innerHeight, { widthPx, heightPx });
         shouldSaveRatiosAfterToggle = true;
       }
     }
 
     setTimeout(() => {
       winElement.classList.remove("window-toggling");
-      if (shouldSaveRatiosAfterToggle) State.savePositionRatios(winElement);
+      if (shouldSaveRatiosAfterToggle) WindowState.savePositionRatios(winElement);
     }, config.animationDurationMs);
   }
 
@@ -206,7 +206,7 @@ export default class Lifecycle {
     const isMaximized = winElement.classList.contains("maximized");
     const isTiled = winElement.classList.contains("tiled");
 
-    const scrollState = State.captureScrollState(winElement);
+    const scrollState = WindowState.captureScrollState(winElement);
 
     winElement.innerHTML = newContent.innerHTML;
     winElement.className = newContent.className;
@@ -230,7 +230,7 @@ export default class Lifecycle {
     winElement.style.margin = "0";
     winElement.style.transform = "none";
 
-    State.restoreScrollState(winElement, scrollState, config);
+    WindowState.restoreScrollState(winElement, scrollState, config);
     callbacks.initializeContent(winElement);
   }
 
@@ -293,7 +293,7 @@ export default class Lifecycle {
       const view = { w: window.innerWidth, h: window.innerHeight - config.taskbarHeight };
       Tiling.snapWindow(winElement, defaultSnap, config, view);
     } else {
-      State.positionWindow(winElement, cascadeIndex, config);
+      WindowState.positionWindow(winElement, cascadeIndex, config);
     }
 
     windows.set(endpoint, winElement);
@@ -304,7 +304,7 @@ export default class Lifecycle {
     winElement.style.visibility = "";
     
     if (!defaultSnap) {
-      State.stabilizeInitialPlacement(winElement, cascadeIndex, config);
+      WindowState.stabilizeInitialPlacement(winElement, cascadeIndex, config);
     }
 
     if (options.focusSelector) {

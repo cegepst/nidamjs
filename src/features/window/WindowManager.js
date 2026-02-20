@@ -1,10 +1,9 @@
 import BaseManager from "../../core/BaseManager.js";
-import { applyWindowState, readWindowState, saveWindowState } from "../../utils/windowState.js";
+import WindowState from "../../utils/window/state.js";
 import { config as defaultConfig } from "../../utils/window/config.js";
 import Lifecycle from "../../utils/window/lifecycle.js";
 import Drag from "../../utils/window/drag.js";
 import Tiling from "../../utils/window/tiling.js";
-import State from "../../utils/window/state.js";
 import WindowLoader from "../../utils/window/loader.js";
 
 /**
@@ -122,7 +121,7 @@ export default class WindowManager extends BaseManager {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
         Tiling.handleResize(this._windows, this._config, {
-          repositionFromRatios: (win, vw, vh) => State.repositionWindowFromRatios(win, vw, vh)
+          repositionFromRatios: (win, vw, vh) => WindowState.repositionWindowFromRatios(win, vw, vh)
         });
       }, this._config.resizeDebounceMs);
     });
@@ -144,9 +143,9 @@ export default class WindowManager extends BaseManager {
       fetchWindowContent: this._fetchWindowContent,
       callbacks: {
         initializeContent: (root) => this._initializeModalContent(root),
-        saveWindowState: saveWindowState,
-        readWindowState: readWindowState,
-        applyWindowState: applyWindowState
+        saveWindowState: (el, key, opts) => WindowState.save(el, key, opts),
+        readWindowState: (el, key) => WindowState.read(el, key),
+        applyWindowState: (el, state, opts) => WindowState.apply(el, state, opts)
       }
     };
   }
@@ -181,14 +180,14 @@ export default class WindowManager extends BaseManager {
     const callbacks = {
       onRestore: (win, ratio, isMaximized) => Tiling.restoreWindowInternal(win, ratio, this._config, {
         onUpdateMaximizeIcon: (w, isMax) => Lifecycle.updateMaximizeIcon(w, isMax),
-        onSavePositionRatios: (w) => State.savePositionRatios(w)
+        onSavePositionRatios: (w) => WindowState.savePositionRatios(w)
       }),
       onUpdateMaximizeIcon: (win, isMax) => Lifecycle.updateMaximizeIcon(win, isMax),
       detectSnapZone: (x, y, view) => Tiling.detectSnapZone(this._config, x, y, view),
       updateSnapIndicator: (snap, view) => this._updateSnapIndicator(snap, view),
       onMaximize: (win) => this.toggleMaximize(win),
       onSnap: (win, snap, view) => Tiling.snapWindow(win, snap, this._config, view),
-      onSaveState: (win) => State.savePositionRatios(win)
+      onSaveState: (win) => WindowState.savePositionRatios(win)
     };
 
     return Drag.drag(e, winElement, this._config, this._dragState, callbacks);

@@ -1,14 +1,151 @@
 /**
- * State utility for managing window positions, ratios, and scroll states.
- * This class is stateless and dependency-free, operating on raw DOM elements and configuration objects.
+ * WindowState utility for managing window geometry, persistence, and scroll states.
+ * This class combines runtime geometric calculations with dataset-based persistence.
+ * It is static and stateless, using an internal WeakMap for performance caching.
  */
-export default class State {
+export default class WindowState {
+  /**
+   * Cache parsed JSON states by element to avoid repeated JSON.parse calls.
+   * @private
+   */
+  static #parseCache = new WeakMap();
+
+  // --- PERSISTENCE (Geometry & Dataset) ---
+
+  /**
+   * Captures the current geometry of a window element.
+   * 
+   * @param {HTMLElement} winElement - The window element to measure.
+   * @param {Object} [options={}] - Options like { includePosition: boolean }.
+   * @returns {Object} Geometry object { width, height, left, top }.
+   */
+  static capture(winElement, options = {}) {
+    const includePosition = options.includePosition === true;
+    let computed = null;
+    
+    const getComputed = () => {
+      if (!computed) computed = window.getComputedStyle(winElement);
+      return computed;
+    };
+
+    const width = (winElement.offsetWidth > 0 ? WindowState.#toPx(winElement.offsetWidth) : "") ||
+                 WindowState.#normalizeCss(winElement.style.width) ||
+                 WindowState.#normalizeCss(getComputed().width);
+
+    const height = (winElement.offsetHeight > 0 ? WindowState.#toPx(winElement.offsetHeight) : "") ||
+                  WindowState.#normalizeCss(winElement.style.height) ||
+                  WindowState.#normalizeCss(getComputed().height);
+
+    let left = "";
+    let top = "";
+    
+    if (includePosition) {
+      left = WindowState.#toPx(winElement.offsetLeft) ||
+             WindowState.#normalizeCss(winElement.style.left) ||
+             WindowState.#normalizeCss(getComputed().left);
+      top = WindowState.#toPx(winElement.offsetTop) ||
+            WindowState.#normalizeCss(winElement.style.top) ||
+            WindowState.#normalizeCss(getComputed().top);
+    }
+
+    return { width: width || "", height: height || "", left, top };
+  }
+
+  /**
+   * Saves the current window geometry to a dataset attribute.
+   * 
+   * @param {HTMLElement} winElement - The window element.
+   * @param {string} [key="prevState"] - The dataset key to use.
+   * @param {Object} [options={}] - Capture options.
+   * @returns {Object} The saved geometry.
+   */
+  static save(winElement, key = "prevState", options = {}) {
+    const state = WindowState.capture(winElement, options);
+    const raw = JSON.stringify(state);
+    
+    winElement.dataset[key] = raw;
+    WindowState.#getCache(winElement).set(key, { raw, parsed: state });
+    
+    return state;
+  }
+
+  /**
+   * Reads a saved window geometry from a dataset attribute.
+   * 
+   * @param {HTMLElement} winElement - The window element.
+   * @param {string} [key="prevState"] - The dataset key to read.
+   * @returns {Object|null} The parsed geometry or null.
+   */
+  static read(winElement, key = "prevState") {
+    const raw = winElement.dataset[key];
+    if (!raw) return null;
+
+    const cached = WindowState.#getCache(winElement).get(key);
+    if (cached && cached.raw === raw) {
+      return cached.parsed;
+    }
+
+    try {
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") return null;
+
+      const state = {
+        width: WindowState.#normalizeCss(parsed.width),
+        height: WindowState.#normalizeCss(parsed.height),
+        left: WindowState.#normalizeCss(parsed.left),
+        top: WindowState.#normalizeCss(parsed.top),
+      };
+
+      WindowState.#getCache(winElement).set(key, { raw, parsed: state });
+      return state;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Applies a geometry state back to a window element's styles.
+   * 
+   * @param {HTMLElement} winElement - The window element.
+   * @param {Object} state - The geometry state to apply.
+   * @param {Object} [options={}] - Options like { includePosition: boolean }.
+   * @returns {boolean} True if state was applied.
+   */
+  static apply(winElement, state, options = {}) {
+    if (!state || typeof state !== "object") return false;
+
+    if (state.width && winElement.style.width !== state.width) {
+      winElement.style.width = state.width;
+    }
+    if (state.height && winElement.style.height !== state.height) {
+      winElement.style.height = state.height;
+    }
+
+    if (options.includePosition) {
+      if (state.left && winElement.style.left !== state.left) {
+        winElement.style.left = state.left;
+      }
+      if (state.top && winElement.style.top !== state.top) {
+        winElement.style.top = state.top;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Ensures that a restoration state exists for the window.
+   */
+  static ensureRestoreState(winElement) {
+    const savedState = WindowState.read(winElement);
+    if (savedState?.width && savedState?.height) return savedState;
+    return WindowState.save(winElement, "prevState", { includePosition: false });
+  }
+
+  // --- GEOMETRY (Layout & Ratios) ---
+
   /**
    * Positions a window using a cascade effect relative to the number of existing windows.
-   * 
-   * @param {HTMLElement} winElement - The window element to position.
-   * @param {number} windowsCount - Current number of open windows for cascade calculation.
-   * @param {Object} config - Configuration object containing cascadeOffset and minMargin.
    */
   static positionWindow(winElement, windowsCount, config) {
     const width = winElement.offsetWidth || parseInt(winElement.style.width) || config.defaultWidth;
@@ -30,16 +167,11 @@ export default class State {
     winElement.style.left = `${Math.round(left)}px`;
     winElement.style.top = `${Math.round(top)}px`;
     
-    State.savePositionRatios(winElement);
+    WindowState.savePositionRatios(winElement);
   }
 
   /**
    * Stabilizes a window's placement after initial rendering to account for dynamic content sizing.
-   * Uses a ResizeObserver and an animation loop for a short period.
-   * 
-   * @param {HTMLElement} winElement - The window element to stabilize.
-   * @param {number} windowsCount - Current number of open windows for repositioning.
-   * @param {Object} config - Configuration object containing layoutStabilizationMs.
    */
   static stabilizeInitialPlacement(winElement, windowsCount, config) {
     if (!winElement?.isConnected) return;
@@ -77,7 +209,7 @@ export default class State {
       if (w !== lastW || h !== lastH) {
         lastW = w;
         lastH = h;
-        State.positionWindow(winElement, windowsCount, config);
+        WindowState.positionWindow(winElement, windowsCount, config);
       }
     };
 
@@ -103,9 +235,6 @@ export default class State {
 
   /**
    * Calculates and saves the window's center position as ratios relative to the viewport.
-   * This allows the window to maintain its relative position during browser resizing.
-   * 
-   * @param {HTMLElement} winElement - The window element.
    */
   static savePositionRatios(winElement) {
     if (winElement.classList.contains("tiled") || winElement.classList.contains("maximized")) return;
@@ -116,25 +245,7 @@ export default class State {
   }
 
   /**
-   * Safely parses a CSS pixel value into a number.
-   * 
-   * @param {string} value - The CSS value (e.g., "100px").
-   * @returns {number|null} The parsed number or null if invalid.
-   */
-  static parseCssPixelValue(value) {
-    if (!value) return null;
-    const px = parseFloat(value);
-    return Number.isFinite(px) ? px : null;
-  }
-
-  /**
    * Repositions a window based on previously saved coordinate ratios.
-   * 
-   * @param {HTMLElement} winElement - The window element.
-   * @param {number} vw - Viewport width.
-   * @param {number} vh - Viewport height.
-   * @param {Object} [size=null] - Optional size override (widthPx, heightPx).
-   * @returns {boolean} True if repositioning was successful.
    */
   static repositionWindowFromRatios(winElement, vw, vh, size = null) {
     const xRatio = parseFloat(winElement.dataset.xRatio);
@@ -151,12 +262,10 @@ export default class State {
     return true;
   }
 
+  // --- SCROLL STATE ---
+
   /**
-   * Captures the current scroll position of the window root and all its scrollable descendants.
-   * Used before refreshing window content to maintain user scroll position.
-   * 
-   * @param {HTMLElement} winElement - The window element.
-   * @returns {Map<string, Object>} A map of element paths to their scroll positions.
+   * Captures the current scroll position of the window root and all scrollable descendants.
    */
   static captureScrollState(winElement) {
     const state = new Map();
@@ -165,7 +274,7 @@ export default class State {
     }
     winElement.querySelectorAll("*").forEach((el) => {
       if (el.scrollTop > 0 || el.scrollLeft > 0) {
-        state.set(State.getElementPath(winElement, el), { top: el.scrollTop, left: el.scrollLeft });
+        state.set(WindowState.getElementPath(winElement, el), { top: el.scrollTop, left: el.scrollLeft });
       }
     });
     return state;
@@ -173,11 +282,6 @@ export default class State {
 
   /**
    * Restores scroll positions from a captured state Map.
-   * Uses a ResizeObserver to re-apply scroll if content takes time to render.
-   * 
-   * @param {HTMLElement} winElement - The window element.
-   * @param {Map} state - The captured scroll state.
-   * @param {Object} config - Configuration object containing scrollRestoreTimeoutMs.
    */
   static restoreScrollState(winElement, state, config) {
     const apply = () => {
@@ -208,12 +312,19 @@ export default class State {
     setTimeout(() => observer.disconnect(), config.scrollRestoreTimeoutMs);
   }
 
+  // --- HELPERS ---
+
   /**
-   * Generates a unique CSS-like path for a child element relative to the window root.
-   * 
-   * @param {HTMLElement} winElement - The window root element.
-   * @param {HTMLElement} element - The target child element.
-   * @returns {string} The unique selector path.
+   * Helper to parse CSS pixel values.
+   */
+  static parseCssPixelValue(value) {
+    if (!value) return null;
+    const px = parseFloat(value);
+    return Number.isFinite(px) ? px : null;
+  }
+
+  /**
+   * Generates a unique selector path for a child element.
    */
   static getElementPath(winElement, element) {
     let path = [];
@@ -224,5 +335,36 @@ export default class State {
       current = current.parentNode;
     }
     return path.join(" > ");
+  }
+
+  /**
+   * Internal helper to normalize CSS values.
+   * @private
+   */
+  static #normalizeCss(value) {
+    if (!value || value === "auto" || value === "normal") return "";
+    return value;
+  }
+
+  /**
+   * Internal helper to convert numbers to pixel strings.
+   * @private
+   */
+  static #toPx(value) {
+    if (!Number.isFinite(value)) return "";
+    return `${Math.round(value)}px`;
+  }
+
+  /**
+   * Internal helper to retrieve or initialize the cache for an element.
+   * @private
+   */
+  static #getCache(winElement) {
+    let byKey = WindowState.#parseCache.get(winElement);
+    if (!byKey) {
+      byKey = new Map();
+      WindowState.#parseCache.set(winElement, byKey);
+    }
+    return byKey;
   }
 }
