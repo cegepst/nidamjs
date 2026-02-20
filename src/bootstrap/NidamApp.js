@@ -2,11 +2,7 @@ import ContentInitializer from "../core/ContentInitializer.js";
 import EventDelegator from "../core/EventDelegator.js";
 import WindowManager from "../features/window/WindowManager.js";
 import WindowRefresher from "../features/window/WindowRefresher.js";
-
-const defaultNotify = (level, message) => {
-  const logger = level === "error" ? console.error : console.log;
-  logger(`[nidamjs:${level}]`, message);
-};
+import defaultConfig, { defaultNotify } from "../nidam.config.js";
 
 export default class NidamApp {
   #config;
@@ -17,14 +13,7 @@ export default class NidamApp {
     let parsedConfig = this._parseConfig(config);
 
     this.#config = {
-      root: document,
-      modalContainer: "#target",
-      pendingModalDatasetKey: "pendingModal",
-      registry: [],
-      refreshMap: null,
-      refreshTimeout: 200,
-      notify: defaultNotify,
-      windowManager: {},
+      ...defaultConfig,
       ...parsedConfig,
     };
   }
