@@ -1,5 +1,6 @@
 import BaseManager from "../../core/BaseManager.js";
 import { parseCoords, calculateGridPosition, isPositionOccupied } from "../../utils/desktop/iconUtil.js";
+import storageUtil from "../../utils/storageUtil.js";
 
 export default class IconManager extends BaseManager {
   _key = "desktop-icons";
@@ -10,11 +11,26 @@ export default class IconManager extends BaseManager {
   }
 
   #init() {
+    this.#loadLayout();
     this.#updateGridStyles();
   }
 
   _bindEvents() {
     this._on("mousedown", "[nd-icon]", this._handleStartDrag.bind(this));
+  }
+
+  #loadLayout() {
+    const savedLayout = storageUtil.get(this._key, {});
+
+    this._queryAll("[nd-icon]").forEach(icon => {
+      const id = icon.getAttribute("nd-id");
+      if (!id) return;
+
+      const savedPosition = savedLayout[id];
+      if (savedPosition) {
+        icon.setAttribute("nd-icon", savedPosition);
+      }
+    });
   }
 
   #updateGridStyles() {
@@ -92,6 +108,7 @@ export default class IconManager extends BaseManager {
 
         target.setAttribute("nd-icon", posString);
         this.#updateGridStyles();
+        this.#saveLayout();
       };
 
       document.addEventListener("mousemove", move);
@@ -100,5 +117,18 @@ export default class IconManager extends BaseManager {
 
     const cancelDrag = () => clearTimeout(timer);
     document.addEventListener("mouseup", cancelDrag, { once: true });
+  }
+
+  #saveLayout() {
+    const layout = {};
+
+    this._queryAll("[nd-icon]").forEach(icon => {
+      const id = icon.getAttribute("nd-id");
+      if (!id) return;
+
+      layout[id] = icon.getAttribute("nd-icon");
+    });
+
+    storageUtil.set(this._key, layout);
   }
 }

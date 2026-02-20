@@ -25,17 +25,17 @@ export function renderHomePage() {
       </section>
 
       <section nd-icons>
-        <div nd-icon="1:1" data-modal="page-one">
+        <div nd-icon="1:1" nd-id="page-one" data-modal="page-one">
           <img src="examples/shared/images/icons/algo-icon.png">
           <span>Page One</span>
         </div>
 
-        <div nd-icon="3:2" data-modal="page-two">
+        <div nd-icon="3:2" nd-id="page-two" data-modal="page-two">
           <img src="examples/shared/images/icons/arena-icon.png">
           <span>Page Two</span>
         </div>
 
-        <div nd-icon="2:3" data-modal="https://mail.google.com/">
+        <div nd-icon="2:3" nd-id="mail" data-modal="page-two">
           <img src="examples/shared/images/icons/group-icon.png">
           <span>Mail</span>
         </div>
