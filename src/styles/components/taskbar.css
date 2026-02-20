@@ -1,17 +1,13 @@
 [nd-taskbar] {
-  --tb-pad-y: 0.5rem;
-  --tb-pad-x: 1rem;
-  --tb-offset: 10px;
-  --tb-bg: rgba(255, 255, 255, 0.1);
-
   position: fixed;
   display: flex;
   align-items: center;
   justify-content: space-evenly;
-  padding: var(--tb-pad-y) var(--tb-pad-x);
+  gap: 1.6rem;
+  padding: var(--tb-pad-y, 0.5rem) var(--tb-pad-x, 1rem);
 
-  border-radius: 20px;
-  background: var(--tb-bg);
+  border-radius: var(--tb-radius, 24px);
+  background: var(--tb-bg, rgba(255, 255, 255, 0.1));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -20,7 +16,7 @@
   z-index: 1000;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-  bottom: var(--tb-offset);
+  bottom: var(--tb-offset, 10px);
   left: 50%;
   transform: translateX(-50%);
   flex-direction: row;
@@ -30,10 +26,8 @@
 }
 
 [nd-taskbar][tb-position="left"] {
-  --tb-offset: 20px;
-
   top: 50%;
-  left: var(--tb-offset);
+  left: var(--tb-offset, 20px);
   bottom: auto;
   right: auto;
 
@@ -45,22 +39,19 @@
 
 [nd-taskbar][tb-position="right"],
 [nd-taskbar][tb-position="left"]{
-  --tb-pad-y: 1rem;
-  --tb-pad-x: 0.5rem;
-  
+  padding: var(--tb-pad-y, 1rem) var(--tb-pad-x, 0.5rem);
+
   min-height: 200px;
   min-width: fit-content;
-  
-  & [nd-icon]{
+
+  & [tb-icon]{
     max-width: 4rem;
   }
 }
 
 [nd-taskbar][tb-position="right"] {
-  --tb-offset: 30px;
-
   top: 50%;
-  right: var(--tb-offset);
+  right: var(--tb-offset, 30px);
   left: auto;
   bottom: auto;
 
@@ -70,19 +61,28 @@
   height: fit-content;
 }
 
-[nd-taskbar] [nd-icon] {
+[nd-taskbar] [tb-icon] {
   display: flex;
   align-items: center;
   justify-content: center;
 
+  width: var(--tb-icon-size, 54px);
+  height: var(--tb-icon-size, 54px);
+
   padding: 0.5rem;
-  border-radius: 12px;
+  border-radius: var(--tb-icon-radius, 14px);
 
   cursor: pointer;
   transition: background 0.2s ease, transform 0.2s ease;
 }
 
-[nd-taskbar] [nd-icon]:hover {
+[nd-taskbar] [tb-icon] > * {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+[nd-taskbar] [tb-icon]:hover {
   background: rgba(255, 255, 255, 0.15);
   transform: scale(1.1);
 }
