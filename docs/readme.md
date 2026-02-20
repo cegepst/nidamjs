@@ -6,7 +6,8 @@ order: 100
 
 # Welcome to NidamJS
 
-**NidamJS** is a framework-agnostic JavaScript library designed to inject desktop-like logic into web frontends. It enables windows, taskbar, icons, and related UI/UX features without requiring backend changes.
+**NidamJS** is a framework-agnostic JavaScript library designed to inject desktop-like logic into web frontends. It
+enables windows, taskbar, icons, and related UI/UX features without requiring backend changes.
 
 ## Why NidamJS?
 

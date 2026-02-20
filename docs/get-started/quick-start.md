@@ -10,7 +10,8 @@ Get your first NidamJS desktop environment running in minutes.
 
 ### 1. Add the container
 
-Create an HTML file and add a container element where the desktop environment will be rendered. Usually, this is the `<body>` tag, but you can restrict it to a specific `div`.
+Create an HTML file and add a container element where the desktop environment will be rendered. Usually, this is the
+`<body>` tag, but you can restrict it to a specific `div`.
 
 ```html
 <!DOCTYPE html>

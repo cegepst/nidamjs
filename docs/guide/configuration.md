@@ -5,7 +5,8 @@ order: 90
 
 # Configuration
 
-NidamJS is highly configurable to suit different application needs. You can pass a configuration object when initializing the library to customize behavior, appearance, and limits.
+NidamJS is highly configurable to suit different application needs. You can pass a configuration object when
+initializing the library to customize behavior, appearance, and limits.
 
 ## Global Options
 

@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>NidamJS Demo</title>
+    <link href="/dist/nidam.css" rel="stylesheet" />
+    <link href="/examples/shared/demo.css" rel="stylesheet" />
+    <script type="module" src="/dist/nidam.es.js"></script>
+  </head>
+  <body>
+    <div class="demo-root">
+      <div class="demo-bg"></div>
+
+      <header class="demo-header">
+        <h1 class="demo-title">NidamJS Minimal Demo</h1>
+        <p class="demo-subtitle">
+          Two live routes opened as windows from one page.
+        </p>
+      </header>
+
+      <section class="demo-actions">
+        <button class="toolbar-btn" data-modal="examples/shared/page-one.html">
+          Open Page One
+        </button>
+        <button class="toolbar-btn" data-modal="examples/shared/page-two.html">
+          Open Page Two
+        </button>
+      </section>
+
+      <footer class="demo-footer">
+        Tip: drag windows by the title bar and use close/maximize buttons.
+      </footer>
+
+      <div class="demo-target" data-pending-modal="" id="target"></div>
+    </div>
+  </body>
+</html>

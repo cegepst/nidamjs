@@ -5,7 +5,8 @@ order: 20
 
 # Window Management
 
-Windows are the fundamental building blocks of the NidamJS desktop environment. They encapsulate content, provide standard controls (minimize, maximize, close), and can be moved or resized by the user.
+Windows are the fundamental building blocks of the NidamJS desktop environment. They encapsulate content, provide
+standard controls (minimize, maximize, close), and can be moved or resized by the user.
 
 ## Creating a Window
 
@@ -70,7 +71,8 @@ win.restore();
 
 ### Focus and Z-Index
 
-NidamJS automatically handles z-index management. When a user clicks a window, it is brought to the front. You can force this programmatically:
+NidamJS automatically handles z-index management. When a user clicks a window, it is brought to the front. You can force
+this programmatically:
 
 ```javascript
 win.focus();
@@ -78,7 +80,8 @@ win.focus();
 
 ## Window Content
 
-The `content` property is flexible. It can be a simple HTML string, a DOM node, or even a mount point for a frontend framework.
+The `content` property is flexible. It can be a simple HTML string, a DOM node, or even a mount point for a frontend
+framework.
 
 ### Using HTML Strings
 
