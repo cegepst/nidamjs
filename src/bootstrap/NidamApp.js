@@ -14,6 +14,8 @@ export default class NidamApp {
   #delegator = null;
 
   constructor(config = {}) {
+    let parsedConfig = this._parseConfig(config);
+
     this.#config = {
       root: document,
       modalContainer: "#target",
@@ -23,7 +25,7 @@ export default class NidamApp {
       refreshTimeout: 200,
       notify: defaultNotify,
       windowManager: {},
-      ...config,
+      ...parsedConfig,
     };
   }
 
@@ -96,6 +98,19 @@ export default class NidamApp {
       this.#modules,
       this.#config.registry,
     );
+  }
+
+  _parseConfig(config) {
+    let parsedConfig = {};
+    if (typeof config === "string") {
+      try {
+        parsedConfig = JSON.parse(config);
+      } catch (e) {
+        defaultNotify("error", "Parsing error, falling back to default settings.");
+        parsedConfig = {};
+      }
+    }
+    return parsedConfig;
   }
 }
 
