@@ -49,3 +49,21 @@
   font-size: 0.875rem;
   line-height: 1;
 }
+
+[nd-icons] {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+}
+
+.desktop-icon.dragging {
+  z-index: 1000;
+  cursor: grabbing;
+  transition: none !important;
+}
+
+.desktop-icon img {
+  pointer-events: none;
+  -webkit-user-drag: none;
+}

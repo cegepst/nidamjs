@@ -25,11 +25,11 @@ export function renderHomePage() {
       </section>
 
       <section nd-icons>
-        <div class="desktop-icon" data-modal="page-one">
+        <div nd-icon class="desktop-icon" data-modal="page-one">
           <img src="/examples/shared/images/icons/group-icon.png" alt="Page One" />
           <span class="desktop-icon-label">Page One</span>
         </div>
-        <div class="desktop-icon" data-modal="page-two">
+        <div nd-icon class="desktop-icon" data-modal="page-two">
           <img src="/examples/shared/images/icons/arena-icon.png" alt="Page Two" />
           <span class="desktop-icon-label">Page Two</span>
         </div>

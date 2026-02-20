@@ -6,7 +6,7 @@ export default class IconManager extends BaseManager {
   _key = "desktop-icons";
 
   /**
-   * @param {string | HTMLElement} container
+   * @param {string} container
    * @param {import("../../index.js").EventDelegator} delegator
    */
   constructor(container, delegator) {
@@ -21,7 +21,7 @@ export default class IconManager extends BaseManager {
       if (!savedLayout || !Array.isArray(savedLayout)) return;
 
       const icons = /** @type {NodeListOf<HTMLElement>} */ (
-        this._queryAll("[nd-icons]")
+        this._queryAll("[nd-icon]")
       );
 
       icons.forEach((icon) => {
@@ -48,7 +48,7 @@ export default class IconManager extends BaseManager {
   _bindEvents() {
     this._delegator.on(
       "mousedown",
-      "[nd-icons]",
+      "[nd-icon]",
       this._handleDragStart.bind(this),
     );
   }
@@ -58,7 +58,7 @@ export default class IconManager extends BaseManager {
 
     e.preventDefault();
 
-    const icon = target.closest(".desktop-icon");
+    const icon = target.closest("[nd-icon]");
     const rect = icon.getBoundingClientRect();
     const containerRect = this._root.getBoundingClientRect();
 
@@ -149,7 +149,7 @@ export default class IconManager extends BaseManager {
       element.classList.add(...originalClasses);
     }
 
-    if (this._saveLayout) this._saveLayout();
+    this._saveLayout();
 
     document.removeEventListener("mousemove", this._dragHandlers.move);
     document.removeEventListener("mouseup", this._dragHandlers.stop);
@@ -185,7 +185,7 @@ export default class IconManager extends BaseManager {
 
     const collidingElement = Array.from(
       /** @type {NodeListOf<HTMLElement>} */ (
-        this._root.querySelectorAll(".desktop-icon")
+        this._root.querySelectorAll("[nd-icon]")
       ),
     ).find(
       (icon) =>
@@ -233,7 +233,7 @@ export default class IconManager extends BaseManager {
   _saveLayout() {
     const layout = [];
     const icons = /** @type {NodeListOf<HTMLElement>} */ (
-      this._root.querySelectorAll("[nd-icons]")
+      this._root.querySelectorAll("[nd-icon]")
     );
 
     icons.forEach((icon) => {
