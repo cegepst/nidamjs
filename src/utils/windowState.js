@@ -141,6 +141,12 @@ export function readWindowState(winElement, key = "prevState") {
   }
 }
 
+export function ensureRestoreState(winElement) {
+  const savedState = readWindowState(winElement);
+  if (savedState?.width && savedState?.height) return savedState;
+  return saveWindowState(winElement, "prevState", { includePosition: false });
+}
+
 /**
  * Apply a saved window geometry back to element styles.
  * Only writes styles that are different to avoid unnecessary style invalidations.
@@ -171,3 +177,5 @@ export function applyWindowState(winElement, state, options = {}) {
 
   return true;
 }
+
+

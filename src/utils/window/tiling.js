@@ -1,4 +1,4 @@
-import { applyWindowState, readWindowState, saveWindowState } from "../windowState.js";
+import { applyWindowState, readWindowState, ensureRestoreState } from "../windowState.js";
 
 /**
  * Tiling utility for window snapping and layout management.
@@ -49,7 +49,7 @@ export default class Tiling {
    */
   static snapWindow(winElement, type, config, view) {
     if (!winElement.classList.contains("tiled")) {
-      saveWindowState(winElement, "prevState", { includePosition: false });
+      ensureRestoreState(winElement);
     }
     winElement.classList.add("window-toggling", "tiled");
     winElement.dataset.snapType = type;
