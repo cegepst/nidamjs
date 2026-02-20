@@ -1,5 +1,4 @@
 import BaseManager from "../../core/BaseManager.js";
-import storageUtil from "../../utils/storageUtil.js";
 
 export default class IconManager extends BaseManager {
 
@@ -19,6 +18,11 @@ export default class IconManager extends BaseManager {
   }
 
   _bindEvents() {
+    this._on(
+      "mousedown",
+      "[nd-icon]",
+      this._handleStartDrag.bind(this)
+    );
   }
 
   #initIcons() {
@@ -42,5 +46,55 @@ export default class IconManager extends BaseManager {
         icon.style.gridRowStart = row.toString();
       }
     });
+  }
+
+  /**
+   * @param {{ button: number; preventDefault: () => void; }} e
+   * @param {{ setAttribute: (arg0: string, arg1: string) => void; }} target
+   */
+  _handleStartDrag(e, target) {
+    if (e.button !== 0) return;
+
+    e.preventDefault();
+
+    const containerRect = this._root.getBoundingClientRect();
+    const style = getComputedStyle(this._root);
+
+    const cols = parseInt(style.getPropertyValue("--nd-cols"), 10);
+    const rows = parseInt(style.getPropertyValue("--nd-rows"), 10);
+
+    const cellW = containerRect.width / cols;
+    const cellH = containerRect.height / rows;
+
+    let lastX;
+    let lastY;
+
+    const move = (ev) => {
+      lastX = ev.clientX;
+      lastY = ev.clientY;
+    };
+
+    const stop = () => {
+      document.removeEventListener("mousemove", move);
+      document.removeEventListener("mouseup", stop);
+
+      if (lastX === undefined) return;
+
+      const x = lastX - containerRect.left;
+      const y = lastY - containerRect.top;
+
+      let col = Math.floor(x / cellW) + 1;
+      let row = Math.floor(y / cellH) + 1;
+
+      col = Math.max(1, Math.min(col, cols));
+      row = Math.max(1, Math.min(row, rows));
+
+      target.setAttribute("nd-icon", `${col}:${row}`);
+
+      this.#initIcons();
+    };
+
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", stop);
   }
 }
