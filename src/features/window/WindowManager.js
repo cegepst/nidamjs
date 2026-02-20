@@ -165,6 +165,14 @@ export default class WindowManager extends BaseManager {
   }
 
   /**
+   * Returns a list of current open windows.
+   * @returns {Array<[string, HTMLElement]>}
+   */
+  getWindows() {
+    return Array.from(this._windows.entries());
+  }
+
+  /**
    * Brings a window to the front.
    */
   focus(winElement) {

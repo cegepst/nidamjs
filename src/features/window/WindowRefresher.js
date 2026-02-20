@@ -1,115 +1,83 @@
+import Router from "../../utils/window/router.js";
+
 /**
- * WindowRefresher
- * Handles silent refreshes on specific windows based on server events.
- * Configuration is provided by the backend via window.window_refresh_map.
+ * WindowRefresher handles silent refreshes and dependency-based closure of windows.
+ * It reacts to server-sent events or custom application events.
  */
 export default class WindowRefresher {
-  #windowManager;
+  /** @type {Object} Map of event names to path patterns */
   #refreshMap;
-  #refreshTimeout = 200;
+  
+  /** @type {number} Delay in ms before triggering a refresh/close */
+  #refreshTimeout;
 
-  constructor(windowManager, { refreshMap = null, refreshTimeout = 200 } = {}) {
-    this.#windowManager = windowManager;
+  /**
+   * @param {Object} windowProvider - An object providing window management methods (getWindows, open, close).
+   * @param {Object} options - Configuration options.
+   */
+  constructor(windowProvider, { refreshMap = null, refreshTimeout = 200 } = {}) {
+    this._provider = windowProvider;
     this.#refreshMap = refreshMap || window.window_refresh_map || {};
     this.#refreshTimeout = refreshTimeout;
   }
 
+  /**
+   * Updates the refresh mapping at runtime.
+   */
   setRefreshMap(refreshMap = {}) {
     this.#refreshMap = refreshMap || {};
   }
 
+  /**
+   * Processes an incoming event and triggers window actions.
+   * 
+   * @param {string} eventName - The event identifier (e.g., "user:updated").
+   * @param {Object} payload - Data associated with the event (must contain id for param matching).
+   */
   handleEvent(eventName, payload) {
-    const patterns = this.#refreshMap[eventName];
+    if (!this._provider) return;
+
     const [category, action] = eventName.split(":");
     const isDestructive = action === "deleted";
     const entityId = payload?.id || null;
+    const patterns = this.#refreshMap[eventName] || [];
 
-    if (!this.#windowManager) return;
+    this._provider.getWindows().forEach(([endpoint, winElement]) => {
+      const currentPath = Router.normalize(endpoint);
 
-    Array.from(this.#windowManager._windows.entries()).forEach(
-      ([endpoint, winElement]) => {
-        const currentPath = endpoint.startsWith("/")
-          ? endpoint.slice(1)
-          : endpoint;
-
-        // 1. Dependency-based Closure
-        if (isDestructive && entityId && winElement.dataset.dependsOn) {
-          const dependencies = winElement.dataset.dependsOn.split("|");
-          const shouldClose = dependencies.some((dep) => {
-            const [depCategory, depId] = dep.split(":");
-            return (
-              category === depCategory && String(depId) === String(entityId)
-            );
-          });
-
-          if (shouldClose) {
-            setTimeout(() => {
-              this.#windowManager.close(winElement);
-            }, this.#refreshTimeout); // timeout to match the refresh
-            return; // Stop processing this window
-          }
+      // 1. Dependency-based Closure
+      if (isDestructive && entityId && winElement.dataset.dependsOn) {
+        if (this._shouldCloseByDependency(winElement.dataset.dependsOn, category, entityId)) {
+          setTimeout(() => this._provider.close(winElement), this.#refreshTimeout);
+          return; // Skip further processing for this window
         }
+      }
 
-        // 2. Standard Refresh Mapping
-        if (patterns) {
-          patterns.forEach((pattern) => {
-            // Refresh if it matches the route (either specifically or generally)
-            if (
-              this.#matchRoute(
-                pattern,
-                currentPath,
-                isDestructive ? null : entityId,
-              )
-            ) {
-              setTimeout(() => {
-                this.#windowManager.open(endpoint, true, null, false);
-              }, this.#refreshTimeout); // timeout to match the refresh
-            }
-          });
-        }
-      },
-    );
+      // 2. Standard Refresh Mapping
+      const shouldRefresh = patterns.some(pattern => 
+        Router.match(pattern, currentPath, isDestructive ? null : entityId)
+      );
+
+      if (shouldRefresh) {
+        setTimeout(() => {
+          // Re-open with force=true and activate=false for silent refresh
+          this._provider.open(endpoint, true, null, false);
+        }, this.#refreshTimeout);
+      }
+    });
   }
 
   /**
-   * Matches a route pattern against an actual path with strict validation.
-   *
-   * Rules:
-   * 1. Exact Match: "team" matches "team", but NOT "team/5" (length mismatch).
-   * 2. Wildcard (*): "team/*" matches "team/5", "team/12/details", etc.
-   * 3. Parameters ({param}): "team/{id}" matches "team/5".
-   *    - If entityId is provided, it MUST match the parameter value (e.g. entityId "5" matches "team/5", but not "team/12").
-   *    - Parameter syntax must be enclosed in braces: {id}.
-   *
-   * @param {string} pattern - The route pattern from configuration.
-   * @param {string} path - The actual window endpoint path.
-   * @param {string|null} entityId - Optional ID to enforce specific parameter matching.
+   * Checks if a window should be closed based on its data-depends-on attribute.
+   * Format: "category:id|category:id"
+   * 
+   * @private
    */
-  #matchRoute(pattern, path, entityId = null) {
-    if (pattern === path) return true;
-
-    const patternSegments = pattern.split("/");
-    const pathSegments = path.split("/");
-
-    // Strict length check unless the last segment is a wildcard
-    const hasWildcard = patternSegments[patternSegments.length - 1] === "*";
-    if (!hasWildcard && patternSegments.length !== pathSegments.length) {
-      return false;
-    }
-
-    return patternSegments.every((seg, i) => {
-      // If we've reached the wildcard, everything else matches
-      if (seg === "*") return true;
-
-      // Strict Parameter Syntax: {param}
-      const isParam = seg.startsWith("{") && seg.endsWith("}");
-      if (isParam) {
-        if (entityId !== null) {
-          return String(pathSegments[i]) === String(entityId);
-        }
-        return true;
-      }
-      return seg === pathSegments[i];
+  _shouldCloseByDependency(dependsOn, category, entityId) {
+    const dependencies = dependsOn.split("|");
+    return dependencies.some((dep) => {
+      const [depCategory, depId] = dep.split(":");
+      return category === depCategory && String(depId) === String(entityId);
     });
   }
 }
