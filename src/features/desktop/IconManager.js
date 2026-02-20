@@ -38,16 +38,32 @@ export default class IconManager extends BaseManager {
       rows: parseInt(style.getPropertyValue("--nd-rows"), 10)
     };
 
-    let lastX, lastY;
+    const ghost = target.cloneNode(true);
+    ghost.classList.add("nd-icon-ghost");
+    ghost.removeAttribute("nd-icon");
+    document.body.appendChild(ghost);
+    
+    target.classList.add("is-dragging");
+
+    let lastX = e.clientX;
+    let lastY = e.clientY;
+
+    ghost.style.left = `${lastX}px`;
+    ghost.style.top = `${lastY}px`;
 
     const move = (ev) => {
       lastX = ev.clientX;
       lastY = ev.clientY;
+      ghost.style.left = `${lastX}px`;
+      ghost.style.top = `${lastY}px`;
     };
 
     const stop = () => {
       document.removeEventListener("mousemove", move);
       document.removeEventListener("mouseup", stop);
+
+      ghost.remove();
+      target.classList.remove("is-dragging");
 
       if (lastX === undefined) return;
 

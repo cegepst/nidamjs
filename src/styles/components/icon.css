@@ -83,3 +83,28 @@
     border-color: rgba(255, 255, 255, 0.2);
   }
 }
+
+/* =========================================
+   Icon Ghost
+   ========================================= */
+
+.nd-icon-ghost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.6;
+  width: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translate(-50%, -50%);
+}
+
+.nd-icon-ghost img {
+  width: 64px;
+  height: auto;
+}
+
+[nd-icon].is-dragging {
+  opacity: 0.3;
+}
