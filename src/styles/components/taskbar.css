@@ -74,6 +74,7 @@
 
   cursor: pointer;
   transition: background 0.2s ease, transform 0.2s ease;
+  position: relative;
 }
 
 [nd-taskbar] [tb-icon] > * {
@@ -84,5 +85,51 @@
 
 [nd-taskbar] [tb-icon]:hover {
   background: rgba(255, 255, 255, 0.15);
-  transform: scale(1.1);
+}
+
+[nd-taskbar] [tb-icon].is-open::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  height: 3px;
+  width: 12px;
+  border-radius: 10px; /* Pill shape instead of 50% for a cleaner line */
+
+  background: var(--tb-indicator-bg, #fff);
+  box-shadow: 0 0 8px var(--tb-indicator-glow, rgba(255, 255, 255, 0.3));
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+/* Vertical Positions (Left/Right) */
+[nd-taskbar][tb-position="left"] [tb-icon].is-open::after,
+[nd-taskbar][tb-position="right"] [tb-icon].is-open::after {
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 12px;
+}
+
+[nd-taskbar][tb-position="left"] [tb-icon].is-open::after {
+  left: -8px;
+}
+
+[nd-taskbar][tb-position="right"] [tb-icon].is-open::after {
+  right: -8px;
+  left: auto;
+}
+
+/* Hover State - Make it feel alive */
+[nd-taskbar] [tb-icon].is-open:hover::after {
+  width: 18px; /* Grow on hover for horizontal */
+  opacity: 1;
+}
+
+[nd-taskbar][tb-position="left"] [tb-icon].is-open:hover::after,
+[nd-taskbar][tb-position="right"] [tb-icon].is-open:hover::after {
+  width: 3px;
+  height: 18px; /* Grow on hover for vertical */
 }
