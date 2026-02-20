@@ -139,6 +139,72 @@ describe("WindowManager", () => {
     expect(win.style.top).toBe("400px");
   });
 
+  test("maximize keeps an existing restore size when viewport temporarily constrains window", () => {
+    document.body.innerHTML = `<div id="target"></div>`;
+    const container = document.querySelector("#target");
+    const delegator = createDelegatorStub();
+
+    Object.defineProperty(window, "innerWidth", {
+      value: 1000,
+      configurable: true,
+      writable: true,
+    });
+    Object.defineProperty(window, "innerHeight", {
+      value: 800,
+      configurable: true,
+      writable: true,
+    });
+
+    const manager = new WindowManager(container, delegator, {
+      initializeContent: vi.fn(),
+      fetchWindowContent: vi.fn(),
+    });
+
+    const win = document.createElement("div");
+    win.className = "window";
+    win.innerHTML = `<button data-maximize><i class="fa-expand"></i></button>`;
+    win.dataset.prevState = JSON.stringify({
+      width: "640px",
+      height: "360px",
+      left: "",
+      top: "",
+    });
+    win.dataset.xRatio = "0.5";
+    win.dataset.yRatio = "0.5";
+    win.style.width = "640px";
+    win.style.height = "360px";
+    win.style.left = "180px";
+    win.style.top = "220px";
+
+    let measuredWidth = 475;
+    let measuredHeight = 280;
+    Object.defineProperty(win, "offsetWidth", {
+      get: () => measuredWidth,
+      configurable: true,
+    });
+    Object.defineProperty(win, "offsetHeight", {
+      get: () => measuredHeight,
+      configurable: true,
+    });
+
+    manager.toggleMaximize(win);
+
+    expect(JSON.parse(win.dataset.prevState)).toMatchObject({
+      width: "640px",
+      height: "360px",
+    });
+
+    window.innerWidth = 1400;
+    window.innerHeight = 900;
+    measuredWidth = 1400;
+    measuredHeight = 900;
+
+    manager.toggleMaximize(win);
+
+    expect(win.style.width).toBe("640px");
+    expect(win.style.height).toBe("360px");
+  });
+
   test("tiled window stays tiled after maximize then unmaximize", () => {
     document.body.innerHTML = `<div id="target"></div>`;
     const container = document.querySelector("#target");
