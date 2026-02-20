@@ -21,7 +21,7 @@ export default class WindowManager extends BaseManager {
     cooldownMs: 500,
     maxWindows: 10,
     snapGap: 6,
-    taskbarHeight: 64,
+    taskbarHeight: 0,
     snapThreshold: 30,
     dragThreshold: 10,
     resizeDebounceMs: 6,
@@ -61,7 +61,7 @@ export default class WindowManager extends BaseManager {
     this._notify = notify || this._defaultNotify.bind(this);
     this._fetchWindowContent =
       fetchWindowContent || this._defaultFetchWindowContent.bind(this);
-    this._initializeContent = initializeContent || (() => {});
+    this._initializeContent = initializeContent || (() => { });
     this._resolveEndpoint = resolveEndpoint || this._defaultResolveEndpoint;
 
     if (config && typeof config === "object") {
@@ -259,7 +259,7 @@ export default class WindowManager extends BaseManager {
     if (
       !force &&
       now - (this._lastOpenTimestamps.get(endpoint) || 0) <
-        this._config.cooldownMs
+      this._config.cooldownMs
     ) {
       return Promise.resolve();
     }
@@ -518,7 +518,7 @@ export default class WindowManager extends BaseManager {
 
     const settleMs =
       Number.isFinite(this._config.layoutStabilizationMs) &&
-      this._config.layoutStabilizationMs > 0
+        this._config.layoutStabilizationMs > 0
         ? this._config.layoutStabilizationMs
         : 450;
     const now =
@@ -766,7 +766,7 @@ export default class WindowManager extends BaseManager {
       newTop = Math.max(
         0,
         state.startWinTop +
-          (state.isRestored ? currentY - state.startY : deltaY),
+        (state.isRestored ? currentY - state.startY : deltaY),
       );
     }
 
