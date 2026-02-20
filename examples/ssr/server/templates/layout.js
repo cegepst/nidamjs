@@ -24,6 +24,17 @@ export function renderHomePage() {
         <button data-modal="page-two" class="toolbar-btn">Open Page Two</button>
       </section>
 
+      <section nd-icons>
+        <div class="desktop-icon" data-modal="page-one">
+          <img src="/examples/shared/images/icons/group-icon.png" alt="Page One" />
+          <span class="desktop-icon-label">Page One</span>
+        </div>
+        <div class="desktop-icon" data-modal="page-two">
+          <img src="/examples/shared/images/icons/arena-icon.png" alt="Page Two" />
+          <span class="desktop-icon-label">Page Two</span>
+        </div>
+      </section>
+
       <footer class="demo-footer">
         Tip: drag windows by the title bar and use close/maximize buttons.
       </footer>

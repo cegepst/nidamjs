@@ -21,7 +21,7 @@ export default class IconManager extends BaseManager {
       if (!savedLayout || !Array.isArray(savedLayout)) return;
 
       const icons = /** @type {NodeListOf<HTMLElement>} */ (
-        this._queryAll("[data-nd-icons]")
+        this._queryAll("[nd-icons]")
       );
 
       icons.forEach((icon) => {
@@ -48,7 +48,7 @@ export default class IconManager extends BaseManager {
   _bindEvents() {
     this._delegator.on(
       "mousedown",
-      "[data-nd-icons]",
+      "[nd-icons]",
       this._handleDragStart.bind(this),
     );
   }
@@ -233,7 +233,7 @@ export default class IconManager extends BaseManager {
   _saveLayout() {
     const layout = [];
     const icons = /** @type {NodeListOf<HTMLElement>} */ (
-      this._root.querySelectorAll("[data-nd-icons]")
+      this._root.querySelectorAll("[nd-icons]")
     );
 
     icons.forEach((icon) => {
