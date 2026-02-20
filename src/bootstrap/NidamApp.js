@@ -31,6 +31,7 @@ export default class NidamApp {
     this.#initializeEventDelegation();
     this.#initializeWindowManagement();
     this.#initializeStaticContent();
+
     return this;
   }
 
