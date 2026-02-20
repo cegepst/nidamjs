@@ -7,7 +7,7 @@ NidamJS is a framework-agnostic JavaScript library for desktop-like window compo
 Use the package root export for manual initialization:
 
 ```js
-import { createNidamApp, WindowManager, WindowRefresher } from 'nidamjs';
+import { createNidamApp, WindowManager, WindowRefresher } from "nidamjs";
 ```
 
 Internal paths (`src/*`) are implementation details and not public API.
@@ -26,10 +26,10 @@ bun install
 ## Quick Start
 
 ```js
-import { createNidamApp } from 'nidamjs';
+import { createNidamApp } from "nidamjs";
 
 const app = createNidamApp({
-  modalContainer: '#target',
+  modalContainer: "#target",
   registry: [],
   windowManager: {
     config: {
