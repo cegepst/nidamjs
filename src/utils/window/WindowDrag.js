@@ -1,8 +1,8 @@
 /**
- * Drag utility for handling window movement, snapping, and restoration.
+ * WindowDrag utility for handling window movement, snapping, and restoration.
  * This class is static and operates on a shared state object provided by the caller.
  */
-export default class Drag {
+export default class WindowDrag {
   /**
    * Initializes the drag process for a window.
    * Attaches mousemove and mouseup listeners to the document.
@@ -45,14 +45,14 @@ export default class Drag {
       state.currentY = ev.clientY;
     };
 
-    const stopHandler = () => Drag._handleDragStop(config, state, callbacks);
+    const stopHandler = () => WindowDrag._handleDragStop(config, state, callbacks);
 
     state._moveHandler = moveHandler;
 
     document.addEventListener("mousemove", moveHandler, { passive: true });
     document.addEventListener("mouseup", stopHandler, { once: true });
 
-    requestAnimationFrame(() => Drag._dragLoop(config, state, callbacks));
+    requestAnimationFrame(() => WindowDrag._dragLoop(config, state, callbacks));
   }
 
   /**
@@ -61,8 +61,8 @@ export default class Drag {
    */
   static _dragLoop(config, state, callbacks) {
     if (!state.active) return;
-    Drag._updateDragPosition(config, state, callbacks);
-    requestAnimationFrame(() => Drag._dragLoop(config, state, callbacks));
+    WindowDrag._updateDragPosition(config, state, callbacks);
+    requestAnimationFrame(() => WindowDrag._dragLoop(config, state, callbacks));
   }
 
   /**

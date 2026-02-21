@@ -1,4 +1,4 @@
-import WindowState from "../../src/utils/window/state.js";
+import WindowState from "../../src/utils/window/WindowState.js";
 
 describe("WindowState utility", () => {
   test("captures and saves geometry from live element metrics", () => {

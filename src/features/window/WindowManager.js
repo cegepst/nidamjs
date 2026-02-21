@@ -1,10 +1,10 @@
 import BaseManager from "../../core/BaseManager.js";
-import WindowState from "../../utils/window/state.js";
-import { config as defaultConfig } from "../../utils/window/config.js";
-import Lifecycle from "../../utils/window/lifecycle.js";
-import Drag from "../../utils/window/drag.js";
-import Tiling from "../../utils/window/tiling.js";
-import WindowLoader from "../../utils/window/loader.js";
+import WindowState from "../../utils/window/WindowState.js";
+import { config as defaultConfig } from "../../utils/window/WindowConfig.js";
+import WindowLifecycle from "../../utils/window/WindowLifecycle.js";
+import WindowDrag from "../../utils/window/WindowDrag.js";
+import WindowTiling from "../../utils/window/WindowTiling.js";
+import WindowLoader from "../../utils/window/WindowLoader.js";
 
 /**
  * WindowManager is the main orchestrator for the window system.
@@ -112,7 +112,7 @@ export default class WindowManager extends BaseManager {
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && !e.repeat) {
-        Lifecycle.closeTopmostWindow(this._windows);
+        WindowLifecycle.closeTopmostWindow(this._windows);
       }
     });
 
@@ -120,7 +120,7 @@ export default class WindowManager extends BaseManager {
     window.addEventListener("resize", () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
-        Tiling.handleResize(this._windows, this._config, {
+        WindowTiling.handleResize(this._windows, this._config, {
           repositionFromRatios: (win, vw, vh) => WindowState.repositionWindowFromRatios(win, vw, vh)
         });
       }, this._config.resizeDebounceMs);
@@ -154,14 +154,14 @@ export default class WindowManager extends BaseManager {
    * Public API to open a window.
    */
   open(endpoint, force = false, focusSelector = null, activate = true) {
-    return Lifecycle.open(endpoint, { force, focusSelector, activate }, this._getLifecycleContext());
+    return WindowLifecycle.open(endpoint, { force, focusSelector, activate }, this._getLifecycleContext());
   }
 
   /**
    * Public API to close a window.
    */
   close(winElement) {
-    return Lifecycle.close(winElement, this._windows);
+    return WindowLifecycle.close(winElement, this._windows);
   }
 
   /**
@@ -177,7 +177,7 @@ export default class WindowManager extends BaseManager {
    */
   focus(winElement) {
     const ctx = this._getLifecycleContext();
-    Lifecycle.focusWindow(winElement, ctx);
+    WindowLifecycle.focusWindow(winElement, ctx);
     this._zIndexCounter = ctx.zIndexCounter;
   }
   
@@ -186,19 +186,19 @@ export default class WindowManager extends BaseManager {
    */
   drag(e, winElement) {
     const callbacks = {
-      onRestore: (win, ratio, isMaximized) => Tiling.restoreWindowInternal(win, ratio, this._config, {
-        onUpdateMaximizeIcon: (w, isMax) => Lifecycle.updateMaximizeIcon(w, isMax),
+      onRestore: (win, ratio, isMaximized) => WindowTiling.restoreWindowInternal(win, ratio, this._config, {
+        onUpdateMaximizeIcon: (w, isMax) => WindowLifecycle.updateMaximizeIcon(w, isMax),
         onSavePositionRatios: (w) => WindowState.savePositionRatios(w)
       }),
-      onUpdateMaximizeIcon: (win, isMax) => Lifecycle.updateMaximizeIcon(win, isMax),
-      detectSnapZone: (x, y, view) => Tiling.detectSnapZone(this._config, x, y, view),
+      onUpdateMaximizeIcon: (win, isMax) => WindowLifecycle.updateMaximizeIcon(win, isMax),
+      detectSnapZone: (x, y, view) => WindowTiling.detectSnapZone(this._config, x, y, view),
       updateSnapIndicator: (snap, view) => this._updateSnapIndicator(snap, view),
       onMaximize: (win) => this.toggleMaximize(win),
-      onSnap: (win, snap, view) => Tiling.snapWindow(win, snap, this._config, view),
+      onSnap: (win, snap, view) => WindowTiling.snapWindow(win, snap, this._config, view),
       onSaveState: (win) => WindowState.savePositionRatios(win)
     };
 
-    return Drag.drag(e, winElement, this._config, this._dragState, callbacks);
+    return WindowDrag.drag(e, winElement, this._config, this._dragState, callbacks);
   }
 
   /**
@@ -215,7 +215,7 @@ export default class WindowManager extends BaseManager {
     if (type === "maximize") {
       layout = { top: "0px", left: "0px", width: `${view.w}px`, height: `${view.h}px` };
     } else {
-      layout = Tiling.getSnapLayout(type, this._config, view.w, view.h);
+      layout = WindowTiling.getSnapLayout(type, this._config, view.w, view.h);
     }
     Object.assign(this._snapIndicator.style, layout);
     this._snapIndicator.classList.add("visible");
@@ -225,7 +225,7 @@ export default class WindowManager extends BaseManager {
    * Public API to maximize or restore a window.
    */
   toggleMaximize(winElement) {
-    return Lifecycle.toggleMaximize(winElement, this._getLifecycleContext());
+    return WindowLifecycle.toggleMaximize(winElement, this._getLifecycleContext());
   }
 
   /**

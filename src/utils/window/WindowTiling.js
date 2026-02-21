@@ -1,10 +1,10 @@
-import WindowState from './state.js';
+import WindowState from './WindowState.js';
 
 /**
- * Tiling utility for window snapping and layout management.
+ * WindowTiling utility for window snapping and layout management.
  * Responsible for edge detection and calculating grid-based positions.
  */
-export default class Tiling {
+export default class WindowTiling {
   /**
    * Detects the snap zone based on current mouse coordinates.
    * 
@@ -53,7 +53,7 @@ export default class Tiling {
     }
     winElement.classList.add("window-toggling", "tiled");
     winElement.dataset.snapType = type;
-    const layout = Tiling.getSnapLayout(type, config, view.w, view.h);
+    const layout = WindowTiling.getSnapLayout(type, config, view.w, view.h);
     Object.assign(winElement.style, layout);
     setTimeout(() => winElement.classList.remove("window-toggling"), config.animationDurationMs);
   }
@@ -113,7 +113,7 @@ export default class Tiling {
     windows.forEach((winElement) => {
       if (winElement.classList.contains("tiled") && winElement.dataset.snapType) {
         const type = winElement.dataset.snapType;
-        const layout = Tiling.getSnapLayout(type, config, vw, vhTiled);
+        const layout = WindowTiling.getSnapLayout(type, config, vw, vhTiled);
         Object.assign(winElement.style, layout);
       } else if (!winElement.classList.contains("maximized")) {
         callbacks.repositionFromRatios(winElement, vw, vhFull);

@@ -1,8 +1,8 @@
 /**
- * Router utility for window path matching.
+ * WindowRouter utility for window path matching.
  * Supports exact matches, wildcards (*), and parameter placeholders ({id}).
  */
-export default class Router {
+export default class WindowRouter {
   /**
    * Checks if a path matches a given pattern.
    * 

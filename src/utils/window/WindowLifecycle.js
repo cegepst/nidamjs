@@ -1,12 +1,14 @@
-import WindowState from './state.js';
-import Tiling from './tiling.js';
+import WindowState from './WindowState.js';
+import WindowTiling from './WindowTiling.js';
 
 /**
- * Lifecycle utility for window creation, destruction, focus, and content management.
+ * WindowLifecycle utility for window creation, destruction, focus, and content management.
  * Acts as the primary orchestrator for window state transitions.
  */
-export default class Lifecycle {
+export default class WindowLifecycle {
   
+  // --- PUBLIC API ---
+
   /**
    * Opens a window for a given endpoint.
    * Orchestrates validation, content fetching, and UI initialization.
@@ -15,7 +17,7 @@ export default class Lifecycle {
     const { pendingRequests } = context;
 
     // 1. Validate if we can proceed
-    const validationError = Lifecycle._getValidationError(endpoint, options, context);
+    const validationError = WindowLifecycle._getValidationError(endpoint, options, context);
     if (validationError) {
       if (validationError === "ALREADY_OPEN") return context.windows.get(endpoint);
       if (validationError === "COOLDOWN") return Promise.resolve();
@@ -36,10 +38,10 @@ export default class Lifecycle {
         const existingWin = context.windows.get(endpoint);
         
         return (existingWin && options.force)
-          ? Lifecycle._refreshExisting(existingWin, html, context, options)
-          : Lifecycle._createAndSetup(endpoint, html, context, options);
+          ? WindowLifecycle._refreshExisting(existingWin, html, context, options)
+          : WindowLifecycle._createAndSetup(endpoint, html, context, options);
       } catch (error) {
-        Lifecycle._handleError(error, context);
+        WindowLifecycle._handleError(error, context);
         throw error;
       } finally {
         pendingRequests.delete(endpoint);
@@ -84,11 +86,11 @@ export default class Lifecycle {
     const nowMaximized = winElement.classList.toggle("maximized");
     let shouldSaveRatios = false;
 
-    Lifecycle.updateMaximizeIcon(winElement, nowMaximized);
+    WindowLifecycle.updateMaximizeIcon(winElement, nowMaximized);
 
     if (!nowMaximized) {
       if (isTiledAndSnapped) {
-        const layout = Tiling.getSnapLayout(winElement.dataset.snapType, config, window.innerWidth, window.innerHeight - config.taskbarHeight);
+        const layout = WindowTiling.getSnapLayout(winElement.dataset.snapType, config, window.innerWidth, window.innerHeight - config.taskbarHeight);
         Object.assign(winElement.style, layout);
       } else {
         const savedState = callbacks.readWindowState(winElement);
@@ -154,7 +156,7 @@ export default class Lifecycle {
         topWin = winElement;
       }
     });
-    if (topWin) Lifecycle.close(topWin, windows);
+    if (topWin) WindowLifecycle.close(topWin, windows);
   }
 
   // --- PRIVATE HELPERS ---
@@ -171,7 +173,7 @@ export default class Lifecycle {
     }
 
     if (windows.has(endpoint) && !options.force) {
-      if (options.activate) Lifecycle.focusWindow(windows.get(endpoint), context);
+      if (options.activate) WindowLifecycle.focusWindow(windows.get(endpoint), context);
       return "ALREADY_OPEN";
     }
 
@@ -189,12 +191,12 @@ export default class Lifecycle {
    * @private
    */
   static _refreshExisting(winElement, html, context, options) {
-    if (!options.activate && Lifecycle.isWindowBusy(winElement)) return winElement;
+    if (!options.activate && WindowLifecycle.isWindowBusy(winElement)) return winElement;
 
-    Lifecycle._applyNewContent(winElement, html, context);
+    WindowLifecycle._applyNewContent(winElement, html, context);
     
-    if (options.activate) Lifecycle.focusWindow(winElement, context);
-    if (options.focusSelector) Lifecycle.handleFocusSelector(winElement, options.focusSelector);
+    if (options.activate) WindowLifecycle.focusWindow(winElement, context);
+    if (options.focusSelector) WindowLifecycle.handleFocusSelector(winElement, options.focusSelector);
     
     return winElement;
   }
@@ -204,11 +206,11 @@ export default class Lifecycle {
    * @private
    */
   static _createAndSetup(endpoint, html, context, options) {
-    const winElement = Lifecycle._parseHTML(html);
+    const winElement = WindowLifecycle._parseHTML(html);
     if (!winElement) throw new Error(`No .window element found in content for ${endpoint}`);
 
     winElement.dataset.endpoint = endpoint;
-    Lifecycle._initializeNewWindow(winElement, endpoint, options, context);
+    WindowLifecycle._initializeNewWindow(winElement, endpoint, options, context);
     
     return winElement;
   }
@@ -228,7 +230,7 @@ export default class Lifecycle {
    * @private
    */
   static _applyNewContent(winElement, html, context) {
-    const newContent = Lifecycle._parseHTML(html);
+    const newContent = WindowLifecycle._parseHTML(html);
     if (!newContent) return;
 
     const { config, callbacks } = context;
@@ -253,7 +255,7 @@ export default class Lifecycle {
     if (prevState.isTiled) winElement.classList.add("tiled");
     if (prevState.isMaximized) {
       winElement.classList.add("maximized");
-      Lifecycle.updateMaximizeIcon(winElement, true);
+      WindowLifecycle.updateMaximizeIcon(winElement, true);
     }
 
     if (!prevState.isTiled && !prevState.isMaximized) {
@@ -283,7 +285,7 @@ export default class Lifecycle {
 
     const defaultSnap = winElement.dataset.defaultSnap;
     if (defaultSnap) {
-      Tiling.snapWindow(winElement, defaultSnap, config, { w: window.innerWidth, h: window.innerHeight - config.taskbarHeight });
+      WindowTiling.snapWindow(winElement, defaultSnap, config, { w: window.innerWidth, h: window.innerHeight - config.taskbarHeight });
     } else {
       WindowState.positionWindow(winElement, windows.size, config);
     }
@@ -291,11 +293,11 @@ export default class Lifecycle {
     windows.set(endpoint, winElement);
     callbacks.initializeContent(winElement);
     
-    if (options.activate) Lifecycle.focusWindow(winElement, context);
+    if (options.activate) WindowLifecycle.focusWindow(winElement, context);
     winElement.style.visibility = "";
     
     if (!defaultSnap) WindowState.stabilizeInitialPlacement(winElement, windows.size - 1, config);
-    if (options.focusSelector) Lifecycle.handleFocusSelector(winElement, options.focusSelector);
+    if (options.focusSelector) WindowLifecycle.handleFocusSelector(winElement, options.focusSelector);
   }
 
   /**

@@ -1,4 +1,4 @@
-import Router from "../../utils/window/router.js";
+import WindowRouter from "../../utils/window/WindowRouter.js";
 
 /**
  * WindowRefresher handles silent refreshes and dependency-based closure of windows.
@@ -43,7 +43,7 @@ export default class WindowRefresher {
     const patterns = this.#refreshMap[eventName] || [];
 
     this._provider.getWindows().forEach(([endpoint, winElement]) => {
-      const currentPath = Router.normalize(endpoint);
+      const currentPath = WindowRouter.normalize(endpoint);
 
       // 1. Dependency-based Closure
       if (isDestructive && entityId && winElement.dataset.dependsOn) {
@@ -55,7 +55,7 @@ export default class WindowRefresher {
 
       // 2. Standard Refresh Mapping
       const shouldRefresh = patterns.some(pattern => 
-        Router.match(pattern, currentPath, isDestructive ? null : entityId)
+        WindowRouter.match(pattern, currentPath, isDestructive ? null : entityId)
       );
 
       if (shouldRefresh) {
