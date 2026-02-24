@@ -1,0 +1,145 @@
+[nd-taskbar="extend"] {
+  --nd-taskbar-width: 100%;
+  --nd-taskbar-min-width: 100%;
+  --nd-taskbar-bottom: 0;
+  --nd-taskbar-left: 0;
+  --nd-taskbar-transform: none;
+  --nd-taskbar-offset: 0;
+  --nd-taskbar-radius: 0;
+  --nd-taskbar-bg: rgb(30 41 59 / 0.9);
+  --nd-taskbar-backdrop-filter: blur(10px);
+  --nd-taskbar-border: none;
+  --nd-taskbar-border-top: 1px solid rgb(71 85 105 / 0.5);
+  --nd-taskbar-box-shadow: none;
+  --nd-taskbar-justify: center;
+  --nd-taskbar-pad-y: 0.5rem;
+  --nd-taskbar-pad-x: 0.25rem;
+  --nd-taskbar-gap: 0.25rem;
+
+  width: var(--nd-taskbar-width);
+  min-width: var(--nd-taskbar-min-width);
+  bottom: var(--nd-taskbar-bottom);
+  left: var(--nd-taskbar-left);
+  transform: var(--nd-taskbar-transform);
+  border-radius: var(--nd-taskbar-radius);
+  background: var(--nd-taskbar-bg);
+  -webkit-backdrop-filter: var(--nd-taskbar-backdrop-filter);
+  backdrop-filter: var(--nd-taskbar-backdrop-filter);
+  border: var(--nd-taskbar-border);
+  border-top: var(--nd-taskbar-border-top);
+  box-shadow: var(--nd-taskbar-box-shadow);
+  justify-content: var(--nd-taskbar-justify);
+  padding: var(--nd-taskbar-pad-y) var(--nd-taskbar-pad-x);
+  gap: var(--nd-taskbar-gap);
+}
+
+[nd-taskbar="extend"] [nd-taskbar-icon] {
+  --nd-taskbar-icon-border: 1px solid transparent;
+  --nd-taskbar-icon-bg: transparent;
+  --nd-taskbar-icon-color: #f1f5f9;
+  --nd-taskbar-icon-radius: 4px;
+  --nd-taskbar-icon-width: auto;
+  --nd-taskbar-icon-min-width: 50px;
+  --nd-taskbar-icon-height: 42px;
+  --nd-taskbar-icon-pad: 0 0.75rem;
+  --nd-taskbar-icon-font-size: 0.85rem;
+  --nd-taskbar-icon-transition: background-color 150ms ease;
+  --nd-taskbar-icon-transform: none;
+
+  border: var(--nd-taskbar-icon-border);
+  background: var(--nd-taskbar-icon-bg);
+  color: var(--nd-taskbar-icon-color);
+  border-radius: var(--nd-taskbar-icon-radius);
+  width: var(--nd-taskbar-icon-width);
+  min-width: var(--nd-taskbar-icon-min-width);
+  height: var(--nd-taskbar-icon-height);
+  padding: var(--nd-taskbar-icon-pad);
+  font-size: var(--nd-taskbar-icon-font-size);
+  transition: var(--nd-taskbar-icon-transition);
+  transform: var(--nd-taskbar-icon-transform);
+}
+
+[nd-taskbar="extend"] [nd-taskbar-icon]:hover {
+  --nd-taskbar-icon-hover: rgb(71 85 105 / 0.7);
+  --nd-taskbar-icon-hover-transform: none;
+  --nd-taskbar-icon-hover-border: transparent;
+
+  background-color: var(--nd-taskbar-icon-hover);
+  transform: var(--nd-taskbar-icon-hover-transform);
+  border-color: var(--nd-taskbar-icon-hover-border);
+}
+
+[nd-taskbar="extend"] [nd-taskbar-icon].is-open {
+  --nd-taskbar-icon-open-bg: rgb(71 85 105 / 0.4);
+
+  background-color: var(--nd-taskbar-icon-open-bg);
+}
+
+[nd-taskbar="extend"] [nd-taskbar-icon].is-open::after {
+  --nd-taskbar-indicator-width: 50%;
+  --nd-taskbar-indicator-height: 2px;
+  --nd-taskbar-indicator-bottom: 4px;
+  --nd-taskbar-indicator-left: 50%;
+  --nd-taskbar-indicator-transform: translateX(-50%);
+  --nd-taskbar-indicator-radius: 0;
+  --nd-taskbar-indicator-shadow: none;
+  --nd-taskbar-indicator-opacity: 1;
+  --nd-taskbar-indicator-transition: width 150ms ease;
+
+  width: var(--nd-taskbar-indicator-width);
+  height: var(--nd-taskbar-indicator-height);
+  bottom: var(--nd-taskbar-indicator-bottom);
+  left: var(--nd-taskbar-indicator-left);
+  transform: var(--nd-taskbar-indicator-transform);
+  border-radius: var(--nd-taskbar-indicator-radius);
+  box-shadow: var(--nd-taskbar-indicator-shadow);
+  opacity: var(--nd-taskbar-indicator-opacity);
+  transition: var(--nd-taskbar-indicator-transition);
+}
+
+[nd-taskbar="extend"] [nd-taskbar-icon].is-open:hover::after {
+  --nd-taskbar-indicator-hover-width: 70%;
+  --nd-taskbar-indicator-hover-height: 2px;
+  --nd-taskbar-indicator-hover-opacity: 1;
+
+  width: var(--nd-taskbar-indicator-hover-width);
+  height: var(--nd-taskbar-indicator-hover-height);
+  opacity: var(--nd-taskbar-indicator-hover-opacity);
+}
+
+[nd-taskbar="extend"][nd-taskbar-position="left"],
+[nd-taskbar="extend"][nd-taskbar-position="right"] {
+  position: fixed;
+  top: auto !important;
+  left: 0 !important;
+  right: auto !important;
+  bottom: 0 !important;
+  transform: none !important;
+  flex-direction: row !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  height: auto !important;
+  min-height: auto !important;
+  padding: 0.25rem !important;
+}
+
+[nd-taskbar="extend"][nd-taskbar-position="left"] [nd-taskbar-icon],
+[nd-taskbar="extend"][nd-taskbar-position="right"] [nd-taskbar-icon] {
+  flex-direction: row !important;
+  max-width: none !important;
+  min-width: 50px !important;
+  height: 42px !important;
+}
+
+[nd-taskbar="extend"][nd-taskbar-position="left"]
+  [nd-taskbar-icon].is-open::after,
+[nd-taskbar="extend"][nd-taskbar-position="right"]
+  [nd-taskbar-icon].is-open::after {
+  top: auto !important;
+  bottom: 4px !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  width: 50% !important;
+  height: 2px !important;
+}
