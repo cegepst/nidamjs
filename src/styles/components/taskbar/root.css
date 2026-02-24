@@ -1,0 +1,68 @@
+:root {
+  --nd-taskbar-position: absolute;
+  --nd-taskbar-align: center;
+  --nd-taskbar-justify: space-evenly;
+  --nd-taskbar-gap: 1.6rem;
+  --nd-taskbar-pad-y: 0.6rem;
+  --nd-taskbar-pad-x: 1rem;
+  --nd-taskbar-radius: 24px;
+  --nd-taskbar-bg: rgba(255, 255, 255, 0.1);
+  --nd-taskbar-backdrop-filter: blur(12px);
+  --nd-taskbar-border: 1px solid rgba(255, 255, 255, 0.2);
+  --nd-taskbar-border-top: none;
+  --nd-taskbar-box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --nd-taskbar-z-index: 1000;
+  --nd-taskbar-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --nd-taskbar-bottom: 10px;
+  --nd-taskbar-left: 50%;
+  --nd-taskbar-transform: translateX(-50%);
+  --nd-taskbar-flex-direction: row;
+  --nd-taskbar-width: fit-content;
+  --nd-taskbar-min-width: 300px;
+  --nd-taskbar-top: auto;
+  --nd-taskbar-right: auto;
+  --nd-taskbar-offset: 10px;
+  --nd-taskbar-height: fit-content;
+  --nd-taskbar-min-height: 200px;
+
+  --nd-taskbar-icon-display: flex;
+  --nd-taskbar-icon-align: center;
+  --nd-taskbar-icon-justify: center;
+  --nd-taskbar-icon-width: 54px;
+  --nd-taskbar-icon-size: 54px;
+  --nd-taskbar-icon-height: 54px;
+  --nd-taskbar-icon-pad: 0.5rem;
+  --nd-taskbar-icon-radius: 14px;
+  --nd-taskbar-icon-cursor: pointer;
+  --nd-taskbar-icon-transition: background 0.2s ease, transform 0.2s ease;
+  --nd-taskbar-icon-position: relative;
+  --nd-taskbar-icon-object-fit: contain;
+  --nd-taskbar-icon-bg: transparent;
+  --nd-taskbar-icon-color: #f1f5f9;
+  --nd-taskbar-icon-min-width: auto;
+  --nd-taskbar-icon-font-size: 0.85rem;
+  --nd-taskbar-icon-transform: none;
+  --nd-taskbar-icon-border: 1px solid transparent;
+  --nd-taskbar-icon-max-width: 4rem;
+
+  --nd-taskbar-icon-hover: rgb(71 85 105 / 0.6);
+  --nd-taskbar-icon-hover-transform: none;
+  --nd-taskbar-icon-hover-border: transparent;
+  --nd-taskbar-icon-open-bg: transparent;
+
+  --nd-taskbar-indicator-bottom: -6px;
+  --nd-taskbar-indicator-left: 50%;
+  --nd-taskbar-indicator-transform: translateX(-50%);
+  --nd-taskbar-indicator-height: 3px;
+  --nd-taskbar-indicator-width: 12px;
+  --nd-taskbar-indicator-radius: 10px;
+  --nd-taskbar-indicator-bg: #fff;
+  --nd-taskbar-indicator-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+  --nd-taskbar-indicator-glow: rgba(255, 255, 255, 0.3);
+  --nd-taskbar-indicator-opacity: 0.8;
+  --nd-taskbar-indicator-transition: all 0.3s ease;
+
+  --nd-taskbar-indicator-hover-width: 18px;
+  --nd-taskbar-indicator-hover-height: auto;
+  --nd-taskbar-indicator-hover-opacity: 1;
+}
