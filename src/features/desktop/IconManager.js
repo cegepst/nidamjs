@@ -1,5 +1,10 @@
 import BaseManager from "../../core/BaseManager.js";
-import { calculateGridPosition, isPositionOccupied, parseCoords } from "../../utils/desktop/iconUtil.js";
+import {
+    calculateGridPosition,
+    findNearestAvailableSpot,
+    isPositionOccupied,
+    parseCoords,
+} from "../../utils/desktop/iconUtil.js";
 import storageUtil from "../../utils/storageUtil.js";
 
 export default class IconManager extends BaseManager {
@@ -51,17 +56,27 @@ export default class IconManager extends BaseManager {
         if (!dimensions) return;
         const [maxCols, maxRows] = dimensions.split(":").map(Number);
 
-        this._queryAll("[nd-icon]").forEach(icon => {
-            const coords = parseCoords(icon.getAttribute("nd-icon"));
+        const icons = this._queryAll("[nd-icon]");
+
+        icons.forEach(icon => {
+            const currentAttr = icon.getAttribute("nd-icon");
+            let coords = parseCoords(currentAttr);
             if (!coords) return;
 
-            const safeCol = Math.max(1, Math.min(coords.col, maxCols));
-            const safeRow = Math.max(1, Math.min(coords.row, maxRows));
+            let col = Math.max(1, Math.min(coords.col, maxCols));
+            let row = Math.max(1, Math.min(coords.row, maxRows));
+            let posString = `${col}:${row}`;
 
-            icon.style.gridColumnStart = safeCol.toString();
-            icon.style.gridRowStart = safeRow.toString();
+            if (isPositionOccupied(icons, icon, posString)) {
+                posString = findNearestAvailableSpot(icons, posString, maxCols, maxRows);
+                const finalCoords = parseCoords(posString);
+                col = finalCoords.col;
+                row = finalCoords.row;
+            }
 
-            icon.setAttribute("nd-icon", `${safeCol}:${safeRow}`);
+            icon.style.gridColumnStart = col.toString();
+            icon.style.gridRowStart = row.toString();
+            icon.setAttribute("nd-icon", posString);
         });
     }
 
