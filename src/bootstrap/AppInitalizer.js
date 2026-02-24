@@ -4,7 +4,6 @@ let appInstance = null;
 
 /**
  * Initializes the NidamApp with an optional custom configuration.
- * If called manually, this prevents the default auto-initialization.
  * 
  * @param {import('../nidam.config.js').NidamConfig | string} [config={}] - The custom configuration
  * @returns {import('./NidamApp.js').default} The initialized app instance
