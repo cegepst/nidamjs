@@ -1,5 +1,6 @@
 import ContentInitializer from "../core/ContentInitializer.js";
 import EventDelegator from "../core/EventDelegator.js";
+import IconManager from "../features/desktop/IconManager.js";
 import WindowManager from "../features/window/WindowManager.js";
 import WindowRefresher from "../features/window/WindowRefresher.js";
 import TaskbarManager from "../features/taskbar/TaskbarManager.js";
@@ -32,7 +33,11 @@ export default class NidamApp {
     this.#initializeEventDelegation();
     this.#initializeWindowManagement();
     this.#initializeStaticContent();
+<<<<<<< HEAD
 
+=======
+    this.#initializeIconManager();
+>>>>>>> dev
     return this;
   }
 
@@ -90,6 +95,11 @@ export default class NidamApp {
       refreshTimeout: this.#config.refreshTimeout,
     });
     this.#modules.set("refresher", refresher);
+  }
+
+  #initializeIconManager() {
+    const iconManager = new IconManager("[nd-icons]", this.#delegator);
+    this.#modules.set("icon", iconManager);
   }
 
   #openPendingWindow(container, windowManager) {
