@@ -3,6 +3,7 @@ import EventDelegator from "../core/EventDelegator.js";
 import WindowManager from "../features/window/WindowManager.js";
 import WindowRefresher from "../features/window/WindowRefresher.js";
 import defaultConfig, { defaultNotify } from "../nidam.config.js";
+import TaskbarManager from "../features/taskbar/TaskbarManager.js";
 
 export default class NidamApp {
   #config;
@@ -63,6 +64,18 @@ export default class NidamApp {
 
     this.#modules.set("window", windowManager);
     this.#openPendingWindow(container, windowManager);
+
+    const taskbarElement = this.#config.root.querySelector("[nd-taskbar]");
+    if (taskbarElement) {
+      const taskbarManager = new TaskbarManager(
+        taskbarElement,
+        this.#delegator,
+        {
+          windowManager: windowManager,
+        },
+      );
+      this.#modules.set("taskbar", taskbarManager);
+    }
 
     const refresher = new WindowRefresher(windowManager, {
       refreshMap: this.#config.refreshMap,
