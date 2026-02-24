@@ -37,9 +37,9 @@ export function renderHomePage() {
       <div class="demo-target" data-pending-modal="" id="target"></div>
 
       <div nd-taskbar>
-        <button tb-icon class="toolbar-btn" data-modal="examples/shared/page-one.html">Page One</button>
-        <button tb-icon class="toolbar-btn" data-modal="examples/shared/page-two.html">Page Two</button>
-        <button tb-icon class="toolbar-btn">Nothing</button>
+        <button nd-taskbar-icon class="toolbar-btn" data-modal="examples/shared/page-one.html">Page One</button>
+        <button nd-taskbar-icon class="toolbar-btn" data-modal="examples/shared/page-two.html">Page Two</button>
+        <button nd-taskbar-icon class="toolbar-btn">Nothing</button>
       </div>
     </div>
   </body>
