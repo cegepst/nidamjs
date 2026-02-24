@@ -1,12 +1,8 @@
 export default class EventDelegator {
   #handlers = new Map();
-  /** @type {Document | HTMLElement} */
   #root;
   #eventListeners = new Map();
 
-  /**
-   * @param {Document | HTMLElement} root
-   */
   constructor(root = document) {
     this.#root = root;
     this.#initDelegation();
