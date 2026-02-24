@@ -14,5 +14,7 @@ export {
   readWindowState,
   saveWindowState,
 } from "./utils/windowState.js";
+export { default as initNidamApp } from "./bootstrap/AppInitalizer.js";
 
-export { default } from "./bootstrap/AppInitalizer.js";
+import { autoInit } from "./bootstrap/AppInitalizer.js";
+autoInit();
