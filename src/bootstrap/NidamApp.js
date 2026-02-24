@@ -3,29 +3,22 @@ import EventDelegator from "../core/EventDelegator.js";
 import IconManager from "../features/desktop/IconManager.js";
 import WindowManager from "../features/window/WindowManager.js";
 import WindowRefresher from "../features/window/WindowRefresher.js";
+import defaultConfig, { defaultNotify } from "../nidam.config.js";
 import TaskbarManager from "../features/taskbar/TaskbarManager.js";
-
-const defaultNotify = (level, message) => {
-  const logger = level === "error" ? console.error : console.log;
-  logger(`[nidamjs:${level}]`, message);
-};
 
 export default class NidamApp {
   #config;
   #modules = new Map();
   #delegator = null;
-
+  /**
+   * @param {import('../nidam.config.js').NidamConfig | string} config - The app configuration object or JSON string.
+   */
   constructor(config = {}) {
+    let parsedConfig = this._parseConfig(config);
+
     this.#config = {
-      root: document,
-      modalContainer: "#target",
-      pendingModalDatasetKey: "pendingModal",
-      registry: [],
-      refreshMap: null,
-      refreshTimeout: 200,
-      notify: defaultNotify,
-      windowManager: {},
-      ...config,
+      ...defaultConfig,
+      ...parsedConfig,
     };
   }
 
@@ -116,6 +109,18 @@ export default class NidamApp {
       this.#modules,
       this.#config.registry,
     );
+  }
+
+  _parseConfig(config) {
+    if (typeof config === "string") {
+      try {
+        return JSON.parse(config);
+      } catch (e) {
+        defaultNotify("error", "Parsing error, falling back to default settings.");
+        return {};
+      }
+    }
+    return config || {};
   }
 }
 
