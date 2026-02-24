@@ -8,8 +8,4 @@ export { default as WindowRefresher } from "./features/window/WindowRefresher.js
 export { DOMUtils } from "./utils/dom.js";
 export { handleRefreshEvent } from "./utils/eventUtils.js";
 export { default as storageUtil } from "./utils/storageUtil.js";
-export { default as initNidamApp } from "./bootstrap/AppInitalizer.js";
-export { default } from "./bootstrap/AppInitalizer.js";
-
-import { autoInit } from "./bootstrap/AppInitalizer.js";
-autoInit();
+export { default as WindowState } from "./utils/window/WindowState.js";
