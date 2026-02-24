@@ -154,14 +154,30 @@ export default class WindowManager extends BaseManager {
    * Public API to open a window.
    */
   open(endpoint, force = false, focusSelector = null, activate = true) {
-    return WindowLifecycle.open(endpoint, { force, focusSelector, activate }, this._getLifecycleContext());
+    WindowLifecycle.open(endpoint, { force, focusSelector, activate }, this._getLifecycleContext());
+    this._root.dispatchEvent(
+      new CustomEvent("window:opened", {
+        detail: { endpoint },
+        bubbles: true,
+      }),
+    );
   }
 
   /**
    * Public API to close a window.
    */
   close(winElement) {
-    return WindowLifecycle.close(winElement, this._windows);
+    const endpoint = winElement.dataset.endpoint;
+    const result = WindowLifecycle.close(winElement, this._windows);
+
+    this._root.dispatchEvent(
+      new CustomEvent("window:closed", {
+        detail: { endpoint },
+        bubbles: true,
+      }),
+    );
+
+    return result;
   }
 
   /**
