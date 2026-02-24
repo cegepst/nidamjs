@@ -36,15 +36,12 @@
 
   transform: var(--nd-taskbar-transform);
   flex-direction: var(--nd-taskbar-flex-direction);
-
-  height: var(--nd-taskbar-height);
 }
 
 [nd-taskbar][nd-taskbar-position="right"],
 [nd-taskbar][nd-taskbar-position="left"] {
   padding: var(--nd-taskbar-pad-y) var(--nd-taskbar-pad-x);
 
-  min-height: var(--nd-taskbar-min-height);
   min-width: var(--nd-taskbar-min-width);
 
   & [nd-taskbar-icon] {
