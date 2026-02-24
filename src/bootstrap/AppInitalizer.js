@@ -9,7 +9,7 @@ let appInstance = null;
  * @param {import('../nidam.config.js').NidamConfig | string} [config={}] - The custom configuration
  * @returns {import('./NidamApp.js').default} The initialized app instance
  */
-export default function init(config = {}) {
+export default function initNidamApp(config = {}) {
     if (appInstance) {
         console.warn("[nidamjs] App is already initialized.");
         return appInstance;
@@ -19,15 +19,13 @@ export default function init(config = {}) {
     return appInstance.initialize();
 }
 
-// Auto-init after DOM is ready && no manual init was called
-setTimeout(() => {
-    if (!appInstance) {
-        if (document.readyState === "loading") {
-            document.addEventListener("DOMContentLoaded", () => {
-                if (!appInstance) init();
-            });
-        } else {
-            init();
-        }
+export function autoInit() {
+    if (typeof document === "undefined") {
+        return;
     }
-}, 0);
+
+    const isManual = document.querySelector('script[data-manual]');
+    if (!appInstance && !isManual) {
+        initNidamApp();
+    }
+}
