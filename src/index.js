@@ -18,7 +18,6 @@ export {
 import { createNidamApp } from "./bootstrap/NidamApp.js";
 
 let appInstance = null;
-let autoInitTimer = null;
 
 /**
  * Initializes the NidamApp with an optional custom configuration.
@@ -28,23 +27,28 @@ let autoInitTimer = null;
  * @returns {import('./bootstrap/NidamApp.js').default} The initialized app instance
  */
 export default function init(config = {}) {
-  if (autoInitTimer) {
-    clearTimeout(autoInitTimer);
-    autoInitTimer = null;
-  }
-
   if (appInstance) {
     console.warn("[nidamjs] App is already initialized.");
     return appInstance;
   }
 
   appInstance = createNidamApp(config);
+  console.log("[nidamjs] App initialized with config:", config.toString());
   return appInstance.initialize();
 }
 
-// Automatically initialize if the user doesn't call `init` synchronously
-autoInitTimer = setTimeout(() => {
+// Auto-init safely: 
+// 1. Give synchronous code a chance to call `init()` first
+// 2. Only initialize when the DOM is ready
+setTimeout(() => {
   if (!appInstance) {
-    init();
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => {
+        // Double check in case they called init() between now and DOM ready
+        if (!appInstance) init();
+      });
+    } else {
+      init();
+    }
   }
 }, 0);
