@@ -1,5 +1,5 @@
 export function renderHomePage() {
-  return `<!doctype html>
+    return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -28,6 +28,23 @@ export function renderHomePage() {
         <button class="toolbar-btn" data-modal="examples/shared/page-two.html">
           Open Page Two
         </button>
+      </section>
+
+      <section nd-icons="5:3">
+        <div nd-icon="1:1" nd-id="page-one" data-modal="page-one">
+          <img src="examples/shared/images/icons/algo-icon.png">
+          <span>Page One</span>
+        </div>
+
+        <div nd-icon="6:2" nd-id="page-two" data-modal="page-two">
+          <img src="examples/shared/images/icons/arena-icon.png">
+          <span>Page Two</span>
+        </div>
+
+        <div nd-icon="2:3" nd-id="mail" data-modal="page-two">
+          <img src="examples/shared/images/icons/group-icon.png">
+          <span>Mail</span>
+        </div>
       </section>
 
       <footer class="demo-footer">

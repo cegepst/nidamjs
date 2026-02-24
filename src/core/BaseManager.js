@@ -64,8 +64,9 @@ export default class BaseManager {
 
   /**
    * Query multiple elements within the root
-   * @param {string} selector - CSS selector
-   * @returns {NodeList}
+   * @template {HTMLElement} T
+   * @param {string} selector
+   * @returns {NodeListOf<T>}
    * @protected
    */
   _queryAll(selector) {
