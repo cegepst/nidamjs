@@ -13,13 +13,10 @@ export default class NidamApp {
    */
   constructor(config = {}) {
     let parsedConfig = this._parseConfig(config);
-    let globalConfig = typeof window !== "undefined" && window.nidamConfig ? window.nidamConfig : {};
 
-    console.log("globalConfig", globalConfig);
     console.log("parsedConfig", parsedConfig);
     this.#config = {
       ...defaultConfig,
-      ...globalConfig,
       ...parsedConfig,
     };
   }
