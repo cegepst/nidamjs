@@ -1,5 +1,5 @@
 [nd-taskbar] {
-  position: fixed;
+  position: absolute;
   display: flex;
   align-items: center;
   justify-content: space-evenly;
@@ -96,7 +96,7 @@
 
   height: 3px;
   width: 12px;
-  border-radius: 10px; /* Pill shape instead of 50% for a cleaner line */
+  border-radius: 10px;
 
   background: var(--tb-indicator-bg, #fff);
   box-shadow: 0 0 8px var(--tb-indicator-glow, rgba(255, 255, 255, 0.3));
@@ -104,7 +104,6 @@
   transition: all 0.3s ease;
 }
 
-/* Vertical Positions (Left/Right) */
 [nd-taskbar][tb-position="left"] [tb-icon].is-open::after,
 [nd-taskbar][tb-position="right"] [tb-icon].is-open::after {
   top: 50%;
@@ -122,14 +121,13 @@
   left: auto;
 }
 
-/* Hover State - Make it feel alive */
 [nd-taskbar] [tb-icon].is-open:hover::after {
-  width: 18px; /* Grow on hover for horizontal */
+  width: 18px;
   opacity: 1;
 }
 
 [nd-taskbar][tb-position="left"] [tb-icon].is-open:hover::after,
 [nd-taskbar][tb-position="right"] [tb-icon].is-open:hover::after {
   width: 3px;
-  height: 18px; /* Grow on hover for vertical */
+  height: 18px;
 }

@@ -11,17 +11,23 @@ export function renderHomePage() {
   </head>
 
   <body>
-    <div class="demo-root">
+    <div nd-desktop class="demo-root">
       <div class="demo-bg"></div>
 
       <header class="demo-header">
         <h1 class="demo-title">NidamJS Minimal Demo</h1>
-        <p class="demo-subtitle">Two live routes opened as windows from one page.</p>
+        <p class="demo-subtitle">
+          Two live routes opened as windows from one page.
+        </p>
       </header>
 
       <section class="demo-actions">
-        <button data-modal="page-one" class="toolbar-btn">Open Page One</button>
-        <button data-modal="page-two" class="toolbar-btn">Open Page Two</button>
+        <button class="toolbar-btn" data-modal="examples/shared/page-one.html">
+          Open Page One
+        </button>
+        <button class="toolbar-btn" data-modal="examples/shared/page-two.html">
+          Open Page Two
+        </button>
       </section>
 
       <section nd-icons="5:3">
@@ -45,7 +51,13 @@ export function renderHomePage() {
         Tip: drag windows by the title bar and use close/maximize buttons.
       </footer>
 
-      <div id="target" data-pending-modal="" class="demo-target"></div>
+      <div class="demo-target" data-pending-modal="" id="target"></div>
+
+      <div nd-taskbar>
+        <button tb-icon class="toolbar-btn" data-modal="examples/shared/page-one.html">Page One</button>
+        <button tb-icon class="toolbar-btn" data-modal="examples/shared/page-two.html">Page Two</button>
+        <button tb-icon class="toolbar-btn">Nothing</button>
+      </div>
     </div>
   </body>
 </html>`;
