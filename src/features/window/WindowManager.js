@@ -21,7 +21,7 @@ export default class WindowManager extends BaseManager {
     cooldownMs: 500,
     maxWindows: 10,
     snapGap: 6,
-    taskbarHeight: 64,
+    taskbarHeight: 0,
     snapThreshold: 30,
     dragThreshold: 10,
     resizeDebounceMs: 6,
@@ -61,7 +61,7 @@ export default class WindowManager extends BaseManager {
     this._notify = notify || this._defaultNotify.bind(this);
     this._fetchWindowContent =
       fetchWindowContent || this._defaultFetchWindowContent.bind(this);
-    this._initializeContent = initializeContent || (() => {});
+    this._initializeContent = initializeContent || (() => { });
     this._resolveEndpoint = resolveEndpoint || this._defaultResolveEndpoint;
 
     if (config && typeof config === "object") {
@@ -179,9 +179,9 @@ export default class WindowManager extends BaseManager {
       winElement.dataset.snapType.length > 0;
     winElement.classList.add("window-toggling");
     // Preserve original free-window geometry when maximizing from tiled state.
-    // Tiling already captured prevState, so re-capturing here would overwrite it.
+    // Tiling already captured prevState, so maximize should only capture once.
     if (!wasMaximized && !winElement.classList.contains("tiled")) {
-      saveWindowState(winElement, "prevState", { includePosition: false });
+      this._ensureRestoreState(winElement);
     }
     const isMaximized = winElement.classList.toggle("maximized");
     let shouldSaveRatiosAfterToggle = false;
@@ -259,7 +259,7 @@ export default class WindowManager extends BaseManager {
     if (
       !force &&
       now - (this._lastOpenTimestamps.get(endpoint) || 0) <
-        this._config.cooldownMs
+      this._config.cooldownMs
     ) {
       return Promise.resolve();
     }
@@ -301,6 +301,12 @@ export default class WindowManager extends BaseManager {
         }
 
         this._setupNewWindow(winElement, endpoint, focusSelector, activate);
+        this._root.dispatchEvent(
+          new CustomEvent("window:opened", {
+            detail: { endpoint, winElement },
+            bubbles: true,
+          }),
+        );
         return winElement;
       } catch (error) {
         console.error("Error opening window:", error);
@@ -324,6 +330,13 @@ export default class WindowManager extends BaseManager {
     if (this._windows.get(endpoint) === winElement) {
       this._windows.delete(endpoint);
     }
+
+    this._root.dispatchEvent(
+      new CustomEvent("window:closed", {
+        detail: { endpoint, winElement },
+        bubbles: true,
+      }),
+    );
 
     winElement.classList.add("animate-disappearance");
     winElement.classList.remove("animate-appearance");
@@ -451,6 +464,7 @@ export default class WindowManager extends BaseManager {
       this._snapWindow(winElement, defaultSnap, vw, vh);
     } else {
       this._positionWindow(winElement, cascadeIndex);
+      this._ensureRestoreState(winElement);
     }
 
     this._windows.set(endpoint, winElement);
@@ -504,7 +518,7 @@ export default class WindowManager extends BaseManager {
 
     const settleMs =
       Number.isFinite(this._config.layoutStabilizationMs) &&
-      this._config.layoutStabilizationMs > 0
+        this._config.layoutStabilizationMs > 0
         ? this._config.layoutStabilizationMs
         : 450;
     const now =
@@ -579,6 +593,12 @@ export default class WindowManager extends BaseManager {
 
     winElement.dataset.xRatio = String(centerX / window.innerWidth);
     winElement.dataset.yRatio = String(centerY / window.innerHeight);
+  }
+
+  _ensureRestoreState(winElement) {
+    const savedState = readWindowState(winElement);
+    if (savedState?.width && savedState?.height) return savedState;
+    return saveWindowState(winElement, "prevState", { includePosition: false });
   }
 
   _parseCssPixelValue(value) {
@@ -746,7 +766,7 @@ export default class WindowManager extends BaseManager {
       newTop = Math.max(
         0,
         state.startWinTop +
-          (state.isRestored ? currentY - state.startY : deltaY),
+        (state.isRestored ? currentY - state.startY : deltaY),
       );
     }
 
@@ -895,7 +915,7 @@ export default class WindowManager extends BaseManager {
   _snapWindow(winElement, type, vw, vh) {
     // Save current state before tiling for future restoration
     if (!winElement.classList.contains("tiled")) {
-      saveWindowState(winElement, "prevState", { includePosition: false });
+      this._ensureRestoreState(winElement);
     }
 
     winElement.classList.add("window-toggling", "tiled");
