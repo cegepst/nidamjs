@@ -1,4 +1,5 @@
-@import "./components/window.css";
-@import "./components/taskbar.css";
+@import './components/window.css';
+@import './components/taskbar.css';
 @import "./components/taskbar-extend.css";
-@import "./components/desktop.css";
+@import './components/icon.css';
+@import './components/desktop.css';
