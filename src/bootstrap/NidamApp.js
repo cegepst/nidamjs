@@ -14,7 +14,6 @@ export default class NidamApp {
   constructor(config = {}) {
     let parsedConfig = this._parseConfig(config);
 
-    console.log("parsedConfig", parsedConfig);
     this.#config = {
       ...defaultConfig,
       ...parsedConfig,
@@ -93,16 +92,15 @@ export default class NidamApp {
   }
 
   _parseConfig(config) {
-    let parsedConfig = {};
     if (typeof config === "string") {
       try {
-        parsedConfig = JSON.parse(config);
+        return JSON.parse(config);
       } catch (e) {
         defaultNotify("error", "Parsing error, falling back to default settings.");
-        parsedConfig = {};
+        return {};
       }
     }
-    return parsedConfig;
+    return config || {};
   }
 }
 
