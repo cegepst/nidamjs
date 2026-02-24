@@ -1,14 +1,43 @@
 /* =========================================
-   Desktop Container
+   Customizable Variables
    ========================================= */
-
-[nd-icons] {
+:root {
+  /* Layout */
   --nd-cols: 8;
   --nd-rows: 5;
   --nd-gap: 12px;
+  --nd-padding: 16px;
 
+  /* Icon Sizing & Animation */
+  --nd-icon-size: clamp(48px, 50%, 96px);
+  --nd-icon-hover-scale: 1.15;
+  --nd-icon-transition: transform 0.18s ease, opacity 0.2s ease;
+  
+  /* Label Styling */
+  --nd-label-font-size: 0.875rem;
+  --nd-label-bg: rgba(0, 0, 0, 0.12);
+  --nd-label-border: 1px solid rgba(0, 0, 0, 0.15);
+  --nd-label-text: inherit;
+  --nd-label-radius: 4px;
+  --nd-label-blur: 12px;
+  
+  /* States */
+  --nd-ghost-opacity: 0.6;
+  --nd-dragging-opacity: 0.3;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --nd-label-bg: rgba(255, 255, 255, 0.12);
+    --nd-label-border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* =========================================
+   Desktop Container
+   ========================================= */
+[nd-icons] {
   display: grid;
-
   width: 100%;
   height: 100%;
   min-height: 100%;
@@ -19,72 +48,58 @@
   grid-template-rows: repeat(var(--nd-rows), 1fr);
 
   gap: var(--nd-gap);
-  padding: 16px;
-
+  padding: var(--nd-padding);
   box-sizing: border-box;
 }
 
 /* =========================================
-   Icon Base
+   Icon Base & Image
    ========================================= */
-
 [nd-icon] {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
   width: 100%;
   height: 100%;
-
   cursor: pointer;
   user-select: none;
   touch-action: none;
+  transition: var(--nd-icon-transition);
 }
 
 [nd-icon] img {
-  width: clamp(48px, 50%, 96px);
+  width: var(--nd-icon-size);
   height: auto;
-
   pointer-events: none;
   -webkit-user-drag: none;
-
-  transition: transform 0.18s ease;
+  transition: var(--nd-icon-transition);
 }
 
 [nd-icon]:hover img {
-  transform: scale(1.15);
+  transform: scale(var(--nd-icon-hover-scale));
 }
 
 /* =========================================
    Icon Label
    ========================================= */
-
 [nd-icon] span {
   margin-top: 6px;
-
   padding: 2px 8px 4px;
-
-  font-size: 0.875rem;
+  font-size: var(--nd-label-font-size);
+  color: var(--nd-label-text);
   line-height: 1.1;
   text-align: center;
-
-  border-radius: 4px;
-
-  background: rgba(0, 0, 0, 0.12);
-  backdrop-filter: blur(12px);
-
-  border: 1px solid rgba(0, 0, 0, 0.15);
-
+  border-radius: var(--nd-label-radius);
+  background: var(--nd-label-bg);
+  backdrop-filter: blur(var(--nd-label-blur));
+  border: var(--nd-label-border);
   max-width: 100%;
   word-break: break-word;
 }
 
-@media (prefers-color-scheme: dark) {
-  [nd-icon] span {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.2);
-  }
+[nd-icon].is-dragging {
+  opacity: var(--nd-dragging-opacity);
 }
 
 /* =========================================
@@ -95,7 +110,7 @@
   position: fixed;
   pointer-events: none;
   z-index: 9999;
-  opacity: 0.6;
+  opacity: var(--nd-ghost-opacity);
   width: 100px;
   display: flex;
   flex-direction: column;
@@ -106,8 +121,4 @@
 .nd-icon-ghost img {
   width: 64px;
   height: auto;
-}
-
-[nd-icon].is-dragging {
-  opacity: 0.3;
 }
