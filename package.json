@@ -1,10 +1,18 @@
 {
-    "name": "@cegepst/nidamjs",
+    "name": "@moonitoring/nidamjs",
     "version": "1.0.0",
-    "type": "module",
     "main": "./dist/nidam.cjs",
     "module": "./dist/nidam.es.js",
-    "style": "./dist/nidam.css",
+    "devDependencies": {
+        "@types/node": "^24.10.13",
+        "@vitest/coverage-v8": "3.2.4",
+        "express": "^5.2.1",
+        "jsdom": "^27.4.0",
+        "prettier": "^3.8.1",
+        "typescript": "^5.9.3",
+        "vite": "^7.3.1",
+        "vitest": "^3.2.4"
+    },
     "exports": {
         ".": {
             "import": "./dist/nidam.es.js",
@@ -33,14 +41,6 @@
         "csr": "bun run build && vite --open /examples/csr/index.html",
         "ssr": "bun run build && bun examples/ssr/main.js"
     },
-    "devDependencies": {
-        "@types/node": "^24.10.13",
-        "@vitest/coverage-v8": "3.2.4",
-        "express": "^5.2.1",
-        "jsdom": "^27.4.0",
-        "prettier": "^3.8.1",
-        "typescript": "^5.9.3",
-        "vite": "^7.3.1",
-        "vitest": "^3.2.4"
-    }
+    "style": "./dist/nidam.css",
+    "type": "module"
 }
