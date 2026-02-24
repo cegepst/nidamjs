@@ -66,3 +66,29 @@
   --nd-taskbar-indicator-hover-height: auto;
   --nd-taskbar-indicator-hover-opacity: 1;
 }
+
+[nd-taskbar][nd-taskbar-position="left"] {
+  --nd-taskbar-left: 10px;
+  --nd-taskbar-right: auto;
+  --nd-taskbar-top: 50%;
+  --nd-taskbar-bottom: auto;
+  --nd-taskbar-transform: translateY(-50%);
+  --nd-taskbar-flex-direction: column;
+  --nd-taskbar-width: auto;
+  --nd-taskbar-min-width: auto;
+  --nd-taskbar-height: fit-content;
+  --nd-taskbar-max-height: calc(100vh - 20px);
+}
+
+[nd-taskbar][nd-taskbar-position="right"] {
+  --nd-taskbar-left: auto;
+  --nd-taskbar-right: 10px;
+  --nd-taskbar-top: 50%;
+  --nd-taskbar-bottom: auto;
+  --nd-taskbar-transform: translateY(-50%);
+  --nd-taskbar-flex-direction: column;
+  --nd-taskbar-width: auto;
+  --nd-taskbar-min-width: auto;
+  --nd-taskbar-height: fit-content;
+  --nd-taskbar-max-height: calc(100vh - 20px);
+}

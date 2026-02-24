@@ -1,8 +1,8 @@
 {
-    "modalContainer": "#target",
-    "refreshTimeout": 300,
-    "windowManager": {
-        "theme": "custom",
-        "debug": true
-    }
+  "modalContainer": "#target",
+  "refreshTimeout": 300,
+  "windowManager": {
+    "theme": "custom",
+    "debug": true
+  }
 }
