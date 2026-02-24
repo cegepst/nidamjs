@@ -19,14 +19,11 @@ export default function init(config = {}) {
     return appInstance.initialize();
 }
 
-// Auto-init safely: 
-// 1. Give synchronous code a chance to call `init()` first
-// 2. Only initialize when the DOM is ready
+// Auto-init after DOM is ready && no manual init was called
 setTimeout(() => {
     if (!appInstance) {
         if (document.readyState === "loading") {
             document.addEventListener("DOMContentLoaded", () => {
-                // Double check in case they called init() between now and DOM ready
                 if (!appInstance) init();
             });
         } else {
