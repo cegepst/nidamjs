@@ -19,10 +19,6 @@ export default function initNidamApp(config = {}) {
 }
 
 export function autoInit() {
-    if (typeof document === "undefined") {
-        return;
-    }
-
     const isManual = document.querySelector('script[data-manual]');
     if (!appInstance && !isManual) {
         initNidamApp();
