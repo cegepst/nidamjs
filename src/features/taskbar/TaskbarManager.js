@@ -22,7 +22,7 @@ export default class TaskbarManager extends BaseManager {
   }
 
   _bindEvents() {
-    this._on("click", "[tb-icon]", this._handleIconClick.bind(this));
+    this._on("click", "[nd-taskbar-icon]", this._handleIconClick.bind(this));
 
     // Listen for window events to update icon states
     document.addEventListener("window:opened", (e) => {
@@ -51,7 +51,7 @@ export default class TaskbarManager extends BaseManager {
    * @param {boolean} isOpen - Whether the window is open
    */
   _updateIconState(endpoint, isOpen) {
-    const icons = this._queryAll(`[tb-icon][data-modal="${endpoint}"]`);
+    const icons = this._queryAll(`[nd-taskbar-icon][data-modal="${endpoint}"]`);
     icons.forEach((icon) => {
       if (isOpen) {
         icon.classList.add("is-open");

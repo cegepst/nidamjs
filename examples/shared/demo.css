@@ -1,3 +1,8 @@
+:root {
+  --nd-taskbar-indicator-bg: #38bdf8;
+  --nd-taskbar-icon-hover: rgb(71 85 105 / 0.6);
+}
+
 * {
   box-sizing: border-box;
 }
