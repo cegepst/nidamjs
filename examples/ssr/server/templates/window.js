@@ -3,6 +3,7 @@ import { renderWindowShell } from "./windowShell.js";
 export function renderPageOneWindow() {
   return renderWindowShell({
     title: "Page One",
+    endpoint: "page-one",
     content: `
       <p>This window is server-rendered by <code>GET /page-one</code>.</p>
       <p>Click a button with <code>data-modal="page-one"</code> to open it.</p>
@@ -14,6 +15,7 @@ export function renderPageOneWindow() {
 export function renderPageTwoWindow() {
   return renderWindowShell({
     title: "Page Two",
+    endpoint: "page-two",
     content: `
       <p>This second route proves SSR can serve multiple independent window pages.</p>
       <button data-modal="page-one" class="toolbar-btn">Back To Page One</button>
