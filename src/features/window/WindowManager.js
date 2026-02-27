@@ -128,7 +128,7 @@ export default class WindowManager extends BaseManager {
       if (winElement) this.focus(winElement);
     });
 
-    this._delegator.on("mousedown", "[data-bar]", (e, target) => {
+    this._delegator.on("mousedown", "[nd-window-header]", (e, target) => {
       if (e.target.closest("[data-close]") || e.target.closest("[data-maximize]")) return;
       e.preventDefault();
       const winElement = target.closest(".window");
