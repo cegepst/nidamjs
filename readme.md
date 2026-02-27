@@ -32,9 +32,7 @@ const app = createNidamApp({
   modalContainer: "#target",
   registry: [],
   windowManager: {
-    config: {
-      layoutStabilizationMs: 450,
-    },
+    layoutStabilizationMs: 450,
   },
 });
 
