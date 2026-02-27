@@ -1,0 +1,14 @@
+.snap-indicator {
+  position: fixed;
+  border: 2px dashed rgba(56, 189, 248, 0.9);
+  border-radius: 0.85rem;
+  background: rgba(14, 165, 233, 0.18);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 110ms ease;
+  z-index: 9999;
+}
+
+.snap-indicator.visible {
+  opacity: 1;
+}

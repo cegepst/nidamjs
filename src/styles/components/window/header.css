@@ -1,0 +1,24 @@
+/* =========================================
+   Window Header
+   ========================================= */
+[nd-window] [nd-window-header] {
+    cursor: move;
+    height: 44px;
+    padding: 0 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid rgba(71, 85, 105, 0.8);
+    background: rgba(30, 41, 59, 0.92);
+    color: rgb(241 245 249);
+}
+
+[nd-window] [nd-window-header] span {
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    margin-right: auto;
+}
+
+[nd-window].focused [nd-window-header] {
+    background: linear-gradient(90deg, rgb(30 64 175), rgb(14 116 144));
+}

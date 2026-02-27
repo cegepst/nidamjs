@@ -1,0 +1,18 @@
+/* =========================================
+   Window Buttons
+   ========================================= */
+[nd-window] [nd-window-button] {
+    border: 1px solid rgba(148, 163, 184, 0.7);
+    border-radius: 0.45rem;
+    background: rgba(15, 23, 42, 0.78);
+    color: rgb(241 245 249);
+    padding: 0.05rem 0.45rem;
+    font-size: 0.72rem;
+    cursor: pointer;
+    height: 2rem;
+    width: 2rem;
+}
+
+[nd-window] [nd-window-button]:hover {
+    border-color: rgb(125 211 252);
+}

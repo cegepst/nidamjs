@@ -1,0 +1,79 @@
+@import "./snap.css";
+@import "./header.css";
+@import "./button.css";
+
+/* =========================================
+   Window Base
+   ========================================= */
+[nd-window] {
+    transform-origin: center;
+    min-width: 768px;
+    min-height: 480px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 1rem;
+    border: 1px solid rgba(71, 85, 105, 0.7);
+    background: rgb(15 23 42);
+    box-shadow: 0 26px 42px rgba(2, 6, 23, 0.48);
+    overflow: hidden;
+}
+
+[nd-window="sm"] {
+    min-width: 480px;
+    min-height: 320px;
+}
+
+[nd-window="lg"] {
+    min-width: 1024px;
+    min-height: 640px;
+}
+
+[nd-window="xl"] {
+    min-width: 1280px;
+    min-height: 800px;
+}
+
+[nd-window="2xl"] {
+    min-width: 1440px;
+    min-height: 900px;
+}
+
+[nd-window].animate-appearance {
+  animation: nd-window-appear 180ms ease-out forwards;
+}
+
+[nd-window].animate-disappearance {
+  animation: nd-window-disappear 140ms ease-in forwards;
+}
+
+/* =========================================
+   Window Content
+   ========================================= */
+[nd-window] [nd-window-content] {
+    padding: 1rem;
+}
+
+/* =========================================
+   Window Animations
+   ========================================= */
+@keyframes nd-window-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes nd-window-disappear {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
