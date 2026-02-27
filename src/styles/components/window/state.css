@@ -1,0 +1,37 @@
+/* =========================================
+   Window State
+   ========================================= */
+[nd-window].maximized {
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+}
+
+[nd-window].tiled {
+  max-width: none !important;
+  max-height: none !important;
+}
+
+[nd-window].window-toggling {
+  transition:
+    top 220ms ease,
+    left 220ms ease,
+    width 220ms ease,
+    height 220ms ease,
+    max-width 220ms ease,
+    max-height 220ms ease,
+    border-radius 220ms ease;
+}
+
+[nd-window].window-toggling.dragging-restore {
+  transition:
+    width 220ms ease,
+    height 220ms ease,
+    max-width 220ms ease,
+    max-height 220ms ease,
+    border-radius 220ms ease;
+}
