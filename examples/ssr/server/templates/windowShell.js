@@ -1,6 +1,6 @@
-export function renderWindowShell({ title, content, defaultSnap = true }) {
+export function renderWindowShell({ title, content, endpoint }) {
     return `
-  <div nd-window class="window">
+  <div nd-window class="window" data-endpoint="${endpoint}">
     <div nd-window-header data-bar>
       <span>${title}</span>
       <button nd-window-button="maximize" data-maximize title="Maximize">[ ]</button>
