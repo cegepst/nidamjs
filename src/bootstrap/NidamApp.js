@@ -3,8 +3,9 @@ import EventDelegator from "../core/EventDelegator.js";
 import IconManager from "../features/desktop/IconManager.js";
 import WindowManager from "../features/window/WindowManager.js";
 import WindowRefresher from "../features/window/WindowRefresher.js";
-import defaultConfig, { defaultNotify } from "../nidam.config.js";
+import defaultConfig from "../nidam.config.js";
 import TaskbarManager from "../features/taskbar/TaskbarManager.js";
+import { toastNotify } from "../utils/toast.js";
 
 export default class NidamApp {
   #config;
@@ -14,7 +15,7 @@ export default class NidamApp {
    * @param {import('../nidam.config.js').NidamConfig | string} config - The app configuration object or JSON string.
    */
   constructor(config = {}) {
-    let parsedConfig = this._parseConfig(config);
+    const parsedConfig = this._parseConfig(config);
 
     this.#config = {
       ...defaultConfig,
@@ -60,7 +61,6 @@ export default class NidamApp {
           ctx.modules,
           this.#config.registry,
         ),
-      notify: this.#config.notify,
       config: this.#config.windowManager || {},
     });
 
@@ -87,7 +87,12 @@ export default class NidamApp {
   }
 
   #initializeIconManager() {
-    const iconManager = new IconManager("[nd-icons]", this.#delegator);
+    const iconRoot = this.#config.root.querySelector("[nd-icons]");
+    if (!iconRoot) {
+      return;
+    }
+
+    const iconManager = new IconManager(iconRoot, this.#delegator);
     this.#modules.set("icon", iconManager);
   }
 
@@ -116,10 +121,14 @@ export default class NidamApp {
       try {
         return JSON.parse(config);
       } catch (e) {
-        defaultNotify("error", "Parsing error, falling back to default settings.");
+        toastNotify(
+          "error",
+          "Parsing error, falling back to default settings.",
+        );
         return {};
       }
     }
+
     return config || {};
   }
 }

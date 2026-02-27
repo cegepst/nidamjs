@@ -5,18 +5,12 @@ import WindowLifecycle from "../../utils/window/WindowLifecycle.js";
 import WindowDrag from "../../utils/window/WindowDrag.js";
 import WindowTiling from "../../utils/window/WindowTiling.js";
 import WindowLoader from "../../utils/window/WindowLoader.js";
-import EventDelegator from "../../core/EventDelegator.js";
 
-/**
- * WindowManager is the main orchestrator for the window system.
- * It manages the lifecycle, dragging, and tiling services.
- */
 export default class WindowManager extends BaseManager {
   _config = { ...nidamConfig.windowManager };
   _windows = new Map();
   _zIndexCounter = this._config.zIndexBase;
   _getModules = null;
-  _notify = null;
   _fetchWindowContent = null;
   _initializeContent = null;
   _resolveEndpoint = null;
@@ -26,17 +20,11 @@ export default class WindowManager extends BaseManager {
   _snapIndicator = null;
   _dragState = { active: false };
 
-  /**
-   * @param {HTMLElement|string} container - Root element or selector.
-   * @param {EventDelegator} delegator - Global event delegator.
-   * @param {Object} options - Custom configuration and overrides.
-   */
   constructor(container, delegator, options = {}) {
     super(container, delegator);
     const {
       getModules = null,
       config = null,
-      notify = null,
       fetchWindowContent = null,
       initializeContent = null,
       resolveEndpoint = null,
@@ -44,18 +32,17 @@ export default class WindowManager extends BaseManager {
     } = options || {};
 
     this._getModules = getModules;
-    this._notify = notify || this._defaultNotify.bind(this);
     this._initializeContent = initializeContent || (() => {});
     this._resolveEndpoint = resolveEndpoint;
     this._static = Boolean(staticRendering);
-
-    // If a custom fetcher is provided, use it; otherwise, wrap the WindowLoader.
-    this._fetchWindowContent = fetchWindowContent || ((endpoint, opts) => {
-      return WindowLoader.load(endpoint, opts, {
-        isStatic: this._static,
-        resolveEndpoint: this._resolveEndpoint
+    this._fetchWindowContent =
+      fetchWindowContent ||
+      ((endpoint, opts) => {
+        return WindowLoader.load(endpoint, opts, {
+          isStatic: this._static,
+          resolveEndpoint: this._resolveEndpoint,
+        });
       });
-    });
 
     if (config && typeof config === "object") {
       this._config = { ...this._config, ...config };
@@ -66,25 +53,19 @@ export default class WindowManager extends BaseManager {
     this._hydrateExistingWindows();
   }
 
-  /**
-   * Scans the DOM for existing windows (SSR support) and populates internal state.
-   * @private
-   */
   _hydrateExistingWindows() {
     const existingWins = this._root.querySelectorAll(".window");
-    existingWins.forEach((win) => {
+    existingWins.forEach((rawWin) => {
+      const win = /** @type {HTMLElement} */ (rawWin);
       const endpoint = win.dataset.endpoint || win.dataset.modal;
       if (endpoint && !this._windows.has(endpoint)) {
-        // Ensure endpoint is set on dataset for future reference (close, focus, etc.)
-        if (!win.dataset.endpoint) win.dataset.endpoint = endpoint;
-        
+        if (!win.dataset.endpoint) {
+          win.dataset.endpoint = endpoint;
+        }
         this._windows.set(endpoint, win);
-        
-        // Ensure the content is initialized (attach listeners, etc.)
         this._initializeModalContent(win);
 
-        // Synchronize zIndexCounter to avoid overlap with new windows
-        const z = parseInt(win.style.zIndex || 0, 10);
+        const z = parseInt(win.style.zIndex || "0", 10);
         if (z > this._zIndexCounter) {
           this._zIndexCounter = z;
         }
@@ -92,44 +73,61 @@ export default class WindowManager extends BaseManager {
     });
   }
 
-  /**
-   * Initializes the visual indicator for window snapping.
-   */
   _initSnapIndicator() {
     this._snapIndicator = document.createElement("div");
     this._snapIndicator.className = "snap-indicator";
     document.body.appendChild(this._snapIndicator);
   }
 
-  /**
-   * Binds global and scoped events using the delegator.
-   */
   _bindEvents() {
     this._delegator.on("click", "[data-modal]", (e, target) => {
+      if (target.hasAttribute("nd-taskbar-icon")) {
+        return;
+      }
       e.preventDefault();
-      this.open(target.dataset.modal);
+      this.open(target.dataset.modal).catch((err) => {
+        if (err?.message !== "MAX_WINDOWS_REACHED") {
+          console.error("Modal trigger failed:", err);
+        }
+      });
     });
 
     this._delegator.on("click", "[data-maximize]", (e, target) => {
       e.preventDefault();
       const winElement = target.closest(".window");
-      if (winElement) this.toggleMaximize(winElement);
+      if (winElement) {
+        this.toggleMaximize(winElement);
+      }
     });
 
     this._delegator.on("click", "[data-close]", (e, target) => {
       e.preventDefault();
       const winElement = target.closest(".window");
-      if (winElement) this.close(winElement);
+      if (winElement) {
+        this.close(winElement);
+      }
     });
 
     this._delegator.on("mousedown", ".window", (e, target) => {
-      if (e.target.closest("[data-close]") || e.target.closest("[data-modal]")) return;
+      if (
+        e.target.closest("[data-close]") ||
+        e.target.closest("[data-modal]")
+      ) {
+        return;
+      }
       const winElement = target.closest(".window");
-      if (winElement) this.focus(winElement);
+      if (winElement) {
+        this.focus(winElement);
+      }
     });
 
     this._delegator.on("mousedown", "[data-bar]", (e, target) => {
-      if (e.target.closest("[data-close]") || e.target.closest("[data-maximize]")) return;
+      if (
+        e.target.closest("[data-close]") ||
+        e.target.closest("[data-maximize]")
+      ) {
+        return;
+      }
       e.preventDefault();
       const winElement = target.closest(".window");
       if (winElement) {
@@ -149,16 +147,13 @@ export default class WindowManager extends BaseManager {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
         WindowTiling.handleResize(this._windows, this._config, {
-          repositionFromRatios: (win, vw, vh) => WindowState.repositionWindowFromRatios(win, vw, vh)
+          repositionFromRatios: (win, vw, vh) =>
+            WindowState.repositionWindowFromRatios(win, vw, vh),
         });
       }, this._config.resizeDebounceMs);
     });
   }
 
-  /**
-   * Builds the shared context object for Lifecycle operations.
-   * @private
-   */
   _getLifecycleContext() {
     return {
       root: this._root,
@@ -167,23 +162,24 @@ export default class WindowManager extends BaseManager {
       zIndexCounter: this._zIndexCounter,
       pendingRequests: this._pendingRequests,
       lastOpenTimestamps: this._lastOpenTimestamps,
-      notify: this._notify,
       fetchWindowContent: this._fetchWindowContent,
       callbacks: {
         initializeContent: (root) => this._initializeModalContent(root),
         saveWindowState: (el, key, opts) => WindowState.save(el, key, opts),
         readWindowState: (el, key) => WindowState.read(el, key),
-        applyWindowState: (el, state, opts) => WindowState.apply(el, state, opts)
-      }
+        applyWindowState: (el, state, opts) =>
+          WindowState.apply(el, state, opts),
+      },
     };
   }
 
-  /**
-   * Public API to open a window.
-   */
   async open(endpoint, force = false, focusSelector = null, activate = true) {
     const isAlreadyOpen = this._windows.has(endpoint);
-    const win = await WindowLifecycle.open(endpoint, { force, focusSelector, activate }, this._getLifecycleContext());
+    const win = await WindowLifecycle.open(
+      endpoint,
+      { force, focusSelector, activate },
+      this._getLifecycleContext(),
+    );
 
     if (!isAlreadyOpen) {
       this._root.dispatchEvent(
@@ -204,9 +200,6 @@ export default class WindowManager extends BaseManager {
     return win;
   }
 
-  /**
-   * Public API to close a window.
-   */
   close(winElement) {
     const endpoint = winElement.dataset.endpoint;
     const result = WindowLifecycle.close(winElement, this._windows);
@@ -221,41 +214,35 @@ export default class WindowManager extends BaseManager {
     return result;
   }
 
-  /**
-   * Public API to close the topmost/focused window.
-   */
   closeTopmost() {
     let topWin = null;
     let maxZ = -1;
     this._windows.forEach((winElement) => {
-      if (winElement.classList.contains("animate-disappearance")) return;
+      if (winElement.classList.contains("animate-disappearance")) {
+        return;
+      }
       const z = parseInt(winElement.style.zIndex || 0, 10);
       if (z > maxZ) {
         maxZ = z;
         topWin = winElement;
       }
     });
-    if (topWin) return this.close(topWin);
+    if (topWin) {
+      return this.close(topWin);
+    }
     return null;
   }
 
-  /**
-   * Returns a list of current open windows.
-   * @returns {Array<[string, HTMLElement]>}
-   */
   getWindows() {
     return Array.from(this._windows.entries());
   }
 
-  /**
-   * Brings a window to the front.
-   */
   focus(winElement) {
     const ctx = this._getLifecycleContext();
     const endpoint = winElement.dataset.endpoint;
     WindowLifecycle.focusWindow(winElement, ctx);
     this._zIndexCounter = ctx.zIndexCounter;
-    
+
     this._root.dispatchEvent(
       new CustomEvent("window:focused", {
         detail: { endpoint },
@@ -263,70 +250,73 @@ export default class WindowManager extends BaseManager {
       }),
     );
   }
-  
-  /**
-   * Starts a drag operation.
-   */
+
   drag(e, winElement) {
     const callbacks = {
-      onRestore: (win, ratio, isMaximized) => WindowTiling.restoreWindowInternal(win, ratio, this._config, {
-        onUpdateMaximizeIcon: (w, isMax) => WindowLifecycle.updateMaximizeIcon(w, isMax),
-        onSavePositionRatios: (w) => WindowState.savePositionRatios(w)
-      }),
-      onUpdateMaximizeIcon: (win, isMax) => WindowLifecycle.updateMaximizeIcon(win, isMax),
-      detectSnapZone: (x, y, view) => WindowTiling.detectSnapZone(this._config, x, y, view),
-      updateSnapIndicator: (snap, view) => this._updateSnapIndicator(snap, view),
+      onRestore: (win, ratio) =>
+        WindowTiling.restoreWindowInternal(win, ratio, this._config, {
+          onUpdateMaximizeIcon: (w, isMax) =>
+            WindowLifecycle.updateMaximizeIcon(w, isMax),
+          onSavePositionRatios: (w) => WindowState.savePositionRatios(w),
+        }),
+      onUpdateMaximizeIcon: (win, isMax) =>
+        WindowLifecycle.updateMaximizeIcon(win, isMax),
+      detectSnapZone: (x, y, view) =>
+        WindowTiling.detectSnapZone(this._config, x, y, view),
+      updateSnapIndicator: (snap, view) =>
+        this._updateSnapIndicator(snap, view),
       onMaximize: (win) => this.toggleMaximize(win),
-      onSnap: (win, snap, view) => WindowTiling.snapWindow(win, snap, this._config, view),
-      onSaveState: (win) => WindowState.savePositionRatios(win)
+      onSnap: (win, snap, view) =>
+        WindowTiling.snapWindow(win, snap, this._config, view),
+      onSaveState: (win) => WindowState.savePositionRatios(win),
     };
 
-    return WindowDrag.drag(e, winElement, this._config, this._dragState, callbacks);
+    return WindowDrag.drag(
+      e,
+      winElement,
+      this._config,
+      this._dragState,
+      callbacks,
+    );
   }
 
-  /**
-   * Visual update for the snap indicator element.
-   * @private
-   */
   _updateSnapIndicator(type, view) {
-    if (!this._snapIndicator) return;
+    if (!this._snapIndicator) {
+      return;
+    }
     if (!type) {
       this._snapIndicator.classList.remove("visible");
       return;
     }
+
     let layout;
     if (type === "maximize") {
-      layout = { top: "0px", left: "0px", width: `${view.w}px`, height: `${view.h}px` };
+      layout = {
+        top: "0px",
+        left: "0px",
+        width: `${view.w}px`,
+        height: `${view.h}px`,
+      };
     } else {
       layout = WindowTiling.getSnapLayout(type, this._config, view.w, view.h);
     }
+
     Object.assign(this._snapIndicator.style, layout);
     this._snapIndicator.classList.add("visible");
   }
 
-  /**
-   * Public API to maximize or restore a window.
-   */
   toggleMaximize(winElement) {
-    return WindowLifecycle.toggleMaximize(winElement, this._getLifecycleContext());
+    return WindowLifecycle.toggleMaximize(
+      winElement,
+      this._getLifecycleContext(),
+    );
   }
 
-  /**
-   * Default notification handler.
-   */
-  _defaultNotify(level, message) {
-    const logger = level === "error" ? console.error : console.log;
-    logger(`[nidamjs:${level}]`, message);
-  }
-
-  /**
-   * Initializes content within a window using modules and custom logic.
-   */
   _initializeModalContent(root) {
     const modules = this._getModules ? this._getModules() : null;
     this._initializeContent(root, {
       delegator: this._delegator,
-      modules: modules,
+      modules,
       manager: this,
     });
   }

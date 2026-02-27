@@ -1,5 +1,5 @@
 export function renderHomePage() {
-    return `<!doctype html>
+  return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -7,10 +7,16 @@ export function renderHomePage() {
     <title>NidamJS Demo</title>
     <link rel="stylesheet" href="/dist/nidam.css" />
     <link rel="stylesheet" href="/examples/shared/demo.css" />
-    <script type="module" src="/dist/nidam.es.js"></script>
+    <script type="module" data-nd-init>
+      import initNidamApp from "/dist/nidam.es.js";
+      import config from "/examples/shared/example.config.json" with { type: "json" };
+
+      initNidamApp(config);
+    </script>
   </head>
 
   <body>
+    <div nd-toast-stack data-position="bottom-right"></div>
     <div nd-desktop class="demo-root">
       <div class="demo-bg"></div>
 

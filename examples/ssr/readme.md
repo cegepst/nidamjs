@@ -19,6 +19,7 @@ Open `http://localhost:8080`.
 ## Notes
 
 - Uses the built ES bundle `/dist/nidam.es.js` in the browser.
+- Initializes from shared JSON config in `examples/shared/example.config.json`.
 - Uses the built library stylesheet `/dist/nidam.css`.
 - Uses shared demo styles from `examples/shared/demo.css`.
 - Window pages are rendered by SSR templates in `examples/ssr/server/templates/`.

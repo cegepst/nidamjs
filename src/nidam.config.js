@@ -26,40 +26,33 @@
  * @property {Array<any>} [registry] - Content registry array (default: [])
  * @property {Record<string, string[]>|null} [refreshMap] - Map of refreshing rules (default: null)
  * @property {number} [refreshTimeout] - Timeout in ms for refreshing windows (default: 200)
- * @property {Function} [notify] - Custom notification logger (default: defaultNotify)
  * @property {WindowManagerConfig} [windowManager] - Configuration for WindowManager (default: {})
  */
 
-export const defaultNotify = (level, message) => {
-    const logger = level === "error" ? console.error : console.log;
-    logger(`[nidamjs:${level}]`, message);
-};
-
 /** @type {NidamConfig} */
 export default {
-    root: typeof document !== "undefined" ? document : null,
-    modalContainer: "#target",
-    pendingModalDatasetKey: "pendingModal",
-    registry: [],
-    refreshMap: null,
-    refreshTimeout: 200,
-    notify: defaultNotify,
-    windowManager: {
-        zIndexBase: 40,
-        layoutStabilizationMs: 450,
-        cascadeOffset: 30,
-        cooldownMs: 500,
-        maxWindows: 1,
-        snapGap: 6,
-        taskbarHeight: 64,
-        snapThreshold: 30,
-        dragThreshold: 10,
-        resizeDebounceMs: 6,
-        animationDurationMs: 400,
-        defaultWidth: 800,
-        defaultHeight: 600,
-        minMargin: 10,
-        edgeDetectionRatio: 0.4,
-        scrollRestoreTimeoutMs: 2000,
-    }
+  root: typeof document !== "undefined" ? document : null,
+  modalContainer: "#target",
+  pendingModalDatasetKey: "pendingModal",
+  registry: [],
+  refreshMap: null,
+  refreshTimeout: 200,
+  windowManager: {
+    zIndexBase: 40,
+    layoutStabilizationMs: 450,
+    cascadeOffset: 30,
+    cooldownMs: 500,
+    maxWindows: 10,
+    snapGap: 6,
+    taskbarHeight: 64,
+    snapThreshold: 30,
+    dragThreshold: 10,
+    resizeDebounceMs: 6,
+    animationDurationMs: 400,
+    defaultWidth: 800,
+    defaultHeight: 600,
+    minMargin: 10,
+    edgeDetectionRatio: 0.4,
+    scrollRestoreTimeoutMs: 2000,
+  },
 };

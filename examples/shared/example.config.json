@@ -2,7 +2,6 @@
   "modalContainer": "#target",
   "refreshTimeout": 300,
   "windowManager": {
-    "theme": "custom",
-    "debug": true
+    "maxWindows": 1
   }
 }

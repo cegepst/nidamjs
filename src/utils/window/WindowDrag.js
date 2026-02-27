@@ -6,7 +6,7 @@ export default class WindowDrag {
   /**
    * Initializes the drag process for a window.
    * Attaches mousemove and mouseup listeners to the document.
-   * 
+   *
    * @param {MouseEvent} e - The initial mousedown event.
    * @param {HTMLElement} winElement - The window element to drag.
    * @param {Object} config - Configuration object (dragThreshold, taskbarHeight).
@@ -45,7 +45,8 @@ export default class WindowDrag {
       state.currentY = ev.clientY;
     };
 
-    const stopHandler = () => WindowDrag._handleDragStop(config, state, callbacks);
+    const stopHandler = () =>
+      WindowDrag._handleDragStop(config, state, callbacks);
 
     state._moveHandler = moveHandler;
 
@@ -68,7 +69,7 @@ export default class WindowDrag {
   /**
    * Core logic for calculating the new window position during a drag.
    * Handles automatic restoration from maximized/tiled states and snap zone detection.
-   * 
+   *
    * @private
    */
   static _updateDragPosition(config, state, callbacks) {
@@ -78,20 +79,28 @@ export default class WindowDrag {
     const deltaY = currentY - startY;
 
     // Movement threshold detection
-    if (!state.isDragging && (Math.abs(deltaX) > config.dragThreshold || Math.abs(deltaY) > config.dragThreshold)) {
+    if (
+      !state.isDragging &&
+      (Math.abs(deltaX) > config.dragThreshold ||
+        Math.abs(deltaY) > config.dragThreshold)
+    ) {
       state.isDragging = true;
     }
 
     if (!state.isDragging) return;
 
     // Handle restoration from maximized/tiled states on drag start
-    if ((state.initialState.tiled || state.initialState.maximized) && !state.isRestored) {
+    if (
+      (state.initialState.tiled || state.initialState.maximized) &&
+      !state.isRestored
+    ) {
       if (state.initialState.maximized) {
         state.restoreXRatio = startX / window.innerWidth;
         callbacks.onRestore(winElement, state.restoreXRatio, true);
         state.startWinTop = 0;
       } else {
-        state.restoreXRatio = (startX - winElement.offsetLeft) / winElement.offsetWidth;
+        state.restoreXRatio =
+          (startX - winElement.offsetLeft) / winElement.offsetWidth;
         callbacks.onRestore(winElement, null, false);
         state.startWinTop = winElement.offsetTop;
       }
@@ -107,15 +116,22 @@ export default class WindowDrag {
       newLeft = currentX - state.restoreXRatio * winElement.offsetWidth;
       newTop = Math.max(0, state.startWinTop + (currentY - startY));
     } else {
-      newLeft = state.startWinLeft + (state.isRestored ? currentX - startX : deltaX);
-      newTop = Math.max(0, state.startWinTop + (state.isRestored ? currentY - startY : deltaY));
+      newLeft =
+        state.startWinLeft + (state.isRestored ? currentX - startX : deltaX);
+      newTop = Math.max(
+        0,
+        state.startWinTop + (state.isRestored ? currentY - startY : deltaY),
+      );
     }
 
     winElement.style.left = `${newLeft}px`;
     winElement.style.top = `${newTop}px`;
 
     // Immediate visual cleanup of state classes
-    if (state.isRestored || (!state.initialState.tiled && !state.initialState.maximized)) {
+    if (
+      state.isRestored ||
+      (!state.initialState.tiled && !state.initialState.maximized)
+    ) {
       winElement.classList.remove("tiled", "maximized");
       callbacks.onUpdateMaximizeIcon(winElement, false);
     }
