@@ -23,8 +23,8 @@
    ========================================= */
 [nd-window] {
     transform-origin: center;
-    min-width: 768px;
-    min-height: 480px;
+    width: 768px;
+    height: 480px;
     display: flex;
     flex-direction: column;
     border-radius: 1rem;
@@ -40,23 +40,23 @@
 }
 
 [nd-window="sm"] {
-    min-width: 480px;
-    min-height: 320px;
+    width: 480px;
+    height: 320px;
 }
 
 [nd-window="lg"] {
-    min-width: 1024px;
-    min-height: 640px;
+    width: 1024px;
+    height: 640px;
 }
 
 [nd-window="xl"] {
-    min-width: 1280px;
-    min-height: 800px;
+    width: 1280px;
+    height: 800px;
 }
 
 [nd-window="2xl"] {
-    min-width: 1440px;
-    min-height: 900px;
+    width: 1440px;
+    height: 900px;
 }
 
 [nd-window].animate-appearance {
