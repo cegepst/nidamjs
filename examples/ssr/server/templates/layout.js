@@ -9,14 +9,9 @@ export function renderHomePage() {
     <link rel="stylesheet" href="/examples/shared/demo.css" />
     <script type="module" data-nd-init>
       import initNidamApp from "/dist/nidam.es.js";
+      import config from "/examples/shared/example.config.json" with { type: "json" };
 
-      initNidamApp({
-        notify: {
-          position: "bottom-right",
-          duration: 3500,
-          closable: true,
-        },
-      });
+      initNidamApp(config);
     </script>
   </head>
 
