@@ -123,6 +123,10 @@ export default class WindowManager extends BaseManager {
   // Event Handlers
 
   _handleModalTrigger(e, target) {
+    if (target.hasAttribute("nd-taskbar-icon")) {
+      return;
+    }
+
     e.preventDefault();
     this.open(target.dataset.modal).catch((err) => {
       console.debug("Modal trigger failed:", err);
