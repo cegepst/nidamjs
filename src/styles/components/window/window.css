@@ -2,6 +2,22 @@
 @import "./header.css";
 @import "./button.css";
 
+:root {
+  --nd-window-bg: #ffffff;
+  --nd-window-border: rgba(0, 0, 0, 0.08);
+  --nd-window-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  --nd-window-bg-glass: rgba(255, 255, 255, 0.7);
+  --nd-window-backdrop-blur: 16px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --nd-window-bg: #1f2937;
+    --nd-window-border: rgba(255, 255, 255, 0.08);
+    --nd-window-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  }
+}
+
 /* =========================================
    Window Base
    ========================================= */
@@ -12,10 +28,15 @@
     display: flex;
     flex-direction: column;
     border-radius: 1rem;
-    border: 1px solid rgba(71, 85, 105, 0.7);
-    background: rgb(15 23 42);
-    box-shadow: 0 26px 42px rgba(2, 6, 23, 0.48);
+    border: 1px solid var(--nd-window-border);
+    background: var(--nd-window-bg);
+    box-shadow: var(--nd-window-shadow);
     overflow: hidden;
+}
+
+[nd-window][nd-variant="glass"] {
+    background: var(--nd-window-bg-glass);
+    backdrop-filter: blur(var(--nd-window-backdrop-blur));
 }
 
 [nd-window="sm"] {
