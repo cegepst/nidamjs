@@ -63,6 +63,33 @@ export default class WindowManager extends BaseManager {
     this._zIndexCounter = this._config.zIndexBase;
 
     this._initSnapIndicator();
+    this._hydrateExistingWindows();
+  }
+
+  /**
+   * Scans the DOM for existing windows (SSR support) and populates internal state.
+   * @private
+   */
+  _hydrateExistingWindows() {
+    const existingWins = this._root.querySelectorAll(".window");
+    existingWins.forEach((win) => {
+      const endpoint = win.dataset.endpoint || win.dataset.modal;
+      if (endpoint && !this._windows.has(endpoint)) {
+        // Ensure endpoint is set on dataset for future reference (close, focus, etc.)
+        if (!win.dataset.endpoint) win.dataset.endpoint = endpoint;
+        
+        this._windows.set(endpoint, win);
+        
+        // Ensure the content is initialized (attach listeners, etc.)
+        this._initializeModalContent(win);
+
+        // Synchronize zIndexCounter to avoid overlap with new windows
+        const z = parseInt(win.style.zIndex || 0, 10);
+        if (z > this._zIndexCounter) {
+          this._zIndexCounter = z;
+        }
+      }
+    });
   }
 
   /**
@@ -154,14 +181,27 @@ export default class WindowManager extends BaseManager {
   /**
    * Public API to open a window.
    */
-  open(endpoint, force = false, focusSelector = null, activate = true) {
-    WindowLifecycle.open(endpoint, { force, focusSelector, activate }, this._getLifecycleContext());
-    this._root.dispatchEvent(
-      new CustomEvent("window:opened", {
-        detail: { endpoint },
-        bubbles: true,
-      }),
-    );
+  async open(endpoint, force = false, focusSelector = null, activate = true) {
+    const isAlreadyOpen = this._windows.has(endpoint);
+    const win = await WindowLifecycle.open(endpoint, { force, focusSelector, activate }, this._getLifecycleContext());
+
+    if (!isAlreadyOpen) {
+      this._root.dispatchEvent(
+        new CustomEvent("window:opened", {
+          detail: { endpoint },
+          bubbles: true,
+        }),
+      );
+    } else if (activate) {
+      this._root.dispatchEvent(
+        new CustomEvent("window:focused", {
+          detail: { endpoint },
+          bubbles: true,
+        }),
+      );
+    }
+
+    return win;
   }
 
   /**
@@ -212,8 +252,16 @@ export default class WindowManager extends BaseManager {
    */
   focus(winElement) {
     const ctx = this._getLifecycleContext();
+    const endpoint = winElement.dataset.endpoint;
     WindowLifecycle.focusWindow(winElement, ctx);
     this._zIndexCounter = ctx.zIndexCounter;
+    
+    this._root.dispatchEvent(
+      new CustomEvent("window:focused", {
+        detail: { endpoint },
+        bubbles: true,
+      }),
+    );
   }
   
   /**
