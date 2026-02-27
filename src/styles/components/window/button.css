@@ -1,18 +1,59 @@
+:root {
+  --nd-btn-bg: transparent;
+  --nd-btn-border: rgba(0, 0, 0, 0.08);
+  --nd-btn-text: inherit;
+  --nd-btn-hover-bg: rgba(0, 0, 0, 0.05);
+  --nd-btn-hover-border: rgba(0, 0, 0, 0.15);
+
+  --nd-btn-close-hover-bg: rgba(220, 38, 38, 0.12);
+  --nd-btn-close-hover-text: #b91c1c;
+
+  --nd-btn-max-hover-bg: rgba(0, 0, 0, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --nd-btn-border: rgba(255, 255, 255, 0.08);
+    --nd-btn-hover-bg: rgba(255, 255, 255, 0.08);
+    --nd-btn-hover-border: rgba(255, 255, 255, 0.15);
+    --nd-btn-close-hover-bg: rgba(248, 113, 113, 0.18);
+    --nd-btn-close-hover-text: #fca5a5;
+    --nd-btn-max-hover-bg: rgba(255, 255, 255, 0.12);
+  }
+}
+
 /* =========================================
    Window Buttons
    ========================================= */
 [nd-window] [nd-window-button] {
-    border: 1px solid rgba(148, 163, 184, 0.7);
-    border-radius: 0.45rem;
-    background: rgba(15, 23, 42, 0.78);
-    color: rgb(241 245 249);
-    padding: 0.05rem 0.45rem;
-    font-size: 0.72rem;
+    border: 1px solid var(--nd-btn-border);
+    border-radius: 0.5rem;
+    background: var(--nd-btn-bg);
+    color: var(--nd-btn-text);
+    padding: 0;
+    font-size: 0.8rem;
     cursor: pointer;
     height: 2rem;
     width: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 120ms ease,
+                border-color 120ms ease,
+                color 120ms ease;
 }
 
 [nd-window] [nd-window-button]:hover {
-    border-color: rgb(125 211 252);
+    background: var(--nd-btn-hover-bg);
+    border-color: var(--nd-btn-hover-border);
+}
+
+[nd-window] [nd-window-button="maximize"]:hover {
+    background: var(--nd-btn-max-hover-bg);
+}
+
+[nd-window] [nd-window-button="close"]:hover {
+    background: var(--nd-btn-close-hover-bg);
+    color: var(--nd-btn-close-hover-text);
+    border-color: transparent;
 }

@@ -8,6 +8,16 @@ body {
   min-height: 100%;
 }
 
+body {
+  font-family:
+    "Segoe UI",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+}
+
 .demo-root {
   position: relative;
   min-height: 100vh;
