@@ -204,6 +204,10 @@ export default class WindowLifecycle {
     const { windows, config, lastOpenTimestamps } = context;
 
     if (windows.size >= config.maxWindows && !windows.has(endpoint)) {
+      const msg =
+        document.body.dataset.errorMaxWindows ||
+        `Maximum of ${config.maxWindows} windows allowed.`;
+      toastNotify("error", msg.replace("%s", String(config.maxWindows)));
       return "MAX_WINDOWS_REACHED";
     }
 

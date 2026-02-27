@@ -42,7 +42,9 @@ export default class TaskbarManager extends BaseManager {
 
     if (this._windowManager) {
       this._windowManager.open(endpoint).catch((err) => {
-        console.debug("Taskbar icon trigger failed:", err);
+        if (err?.message !== "MAX_WINDOWS_REACHED") {
+          console.error("Taskbar icon trigger failed:", err);
+        }
       });
     }
   }

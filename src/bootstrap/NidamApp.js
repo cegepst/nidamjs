@@ -87,7 +87,12 @@ export default class NidamApp {
   }
 
   #initializeIconManager() {
-    const iconManager = new IconManager("[nd-icons]", this.#delegator);
+    const iconRoot = this.#config.root.querySelector("[nd-icons]");
+    if (!iconRoot) {
+      return;
+    }
+
+    const iconManager = new IconManager(iconRoot, this.#delegator);
     this.#modules.set("icon", iconManager);
   }
 

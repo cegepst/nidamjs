@@ -86,7 +86,9 @@ export default class WindowManager extends BaseManager {
       }
       e.preventDefault();
       this.open(target.dataset.modal).catch((err) => {
-        console.debug("Modal trigger failed:", err);
+        if (err?.message !== "MAX_WINDOWS_REACHED") {
+          console.error("Modal trigger failed:", err);
+        }
       });
     });
 
