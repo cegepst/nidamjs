@@ -56,7 +56,6 @@ export function renderHomePage() {
       <div nd-taskbar>
         <button nd-taskbar-icon class="toolbar-btn" data-modal="examples/shared/page-one.html">Page One</button>
         <button nd-taskbar-icon class="toolbar-btn" data-modal="examples/shared/page-two.html">Page Two</button>
-        <button nd-taskbar-icon class="toolbar-btn">Nothing</button>
       </div>
     </div>
   </body>
