@@ -5,6 +5,7 @@ import WindowLifecycle from "../../utils/window/WindowLifecycle.js";
 import WindowDrag from "../../utils/window/WindowDrag.js";
 import WindowTiling from "../../utils/window/WindowTiling.js";
 import WindowLoader from "../../utils/window/WindowLoader.js";
+import EventDelegator from "../../core/EventDelegator.js";
 
 /**
  * WindowManager is the main orchestrator for the window system.
@@ -110,9 +111,9 @@ export default class WindowManager extends BaseManager {
       }
     });
 
-    document.addEventListener("keydown", (e) => {
+    this._delegator.on("keydown", null, (e) => {
       if (e.key === "Escape" && !e.repeat) {
-        WindowLifecycle.closeTopmostWindow(this._windows);
+        this.closeTopmost();
       }
     });
 
@@ -178,6 +179,24 @@ export default class WindowManager extends BaseManager {
     );
 
     return result;
+  }
+
+  /**
+   * Public API to close the topmost/focused window.
+   */
+  closeTopmost() {
+    let topWin = null;
+    let maxZ = -1;
+    this._windows.forEach((winElement) => {
+      if (winElement.classList.contains("animate-disappearance")) return;
+      const z = parseInt(winElement.style.zIndex || 0, 10);
+      if (z > maxZ) {
+        maxZ = z;
+        topWin = winElement;
+      }
+    });
+    if (topWin) return this.close(topWin);
+    return null;
   }
 
   /**
