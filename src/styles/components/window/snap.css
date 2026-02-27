@@ -1,8 +1,22 @@
+:root {
+  --nd-snap-border: rgba(0, 0, 0, 0.25);
+  --nd-snap-bg: rgba(0, 0, 0, 0.08);
+  --nd-snap-border-width: 2px;
+  --nd-snap-radius: 0.85rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --nd-snap-border: rgba(255, 255, 255, 0.35);
+    --nd-snap-bg: rgba(255, 255, 255, 0.08);
+  }
+}
+
 .snap-indicator {
   position: fixed;
-  border: 2px dashed rgba(56, 189, 248, 0.9);
-  border-radius: 0.85rem;
-  background: rgba(14, 165, 233, 0.18);
+  border: var(--nd-snap-border-width) dashed var(--nd-snap-border);
+  border-radius: var(--nd-snap-radius);
+  background: var(--nd-snap-bg);
   opacity: 0;
   pointer-events: none;
   transition: opacity 110ms ease;
