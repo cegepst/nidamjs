@@ -5,7 +5,7 @@ import WindowManager from "../features/window/WindowManager.js";
 import WindowRefresher from "../features/window/WindowRefresher.js";
 import defaultConfig from "../nidam.config.js";
 import TaskbarManager from "../features/taskbar/TaskbarManager.js";
-import { createToastNotify, toastNotify } from "../utils/toast.js";
+import { toastNotify } from "../utils/toast.js";
 
 export default class NidamApp {
   #config;
@@ -20,6 +20,7 @@ export default class NidamApp {
     this.#config = {
       ...defaultConfig,
       ...parsedConfig,
+      notify: toastNotify,
     };
   }
 
@@ -61,7 +62,7 @@ export default class NidamApp {
           ctx.modules,
           this.#config.registry,
         ),
-      notify: this.#config.notify,
+      notify: toastNotify,
       ...(this.#config.windowManager || {}),
     });
 
@@ -113,41 +114,20 @@ export default class NidamApp {
   }
 
   _parseConfig(config) {
-    const normalizeNotify = (notifyConfig) => {
-      if (typeof notifyConfig === "function") {
-        return notifyConfig;
-      }
-      if (notifyConfig && typeof notifyConfig === "object") {
-        return createToastNotify(
-          /** @type {import("../utils/toast.js").NotifyOptions} */ (notifyConfig),
-        );
-      }
-      return toastNotify;
-    };
-
     if (typeof config === "string") {
       try {
-        const parsed = JSON.parse(config);
-        return {
-          ...parsed,
-          notify: normalizeNotify(parsed?.notify),
-        };
+        return JSON.parse(config);
       } catch (e) {
         toastNotify(
           "error",
           "Parsing error, falling back to default settings.",
         );
-        return { notify: toastNotify };
+        return {};
       }
     }
 
-    const parsed = config || {};
-    return {
-      ...parsed,
-      notify: normalizeNotify(parsed.notify),
-    };
+    return config || {};
   }
-
 }
 
 export const createNidamApp = (config = {}) => new NidamApp(config);

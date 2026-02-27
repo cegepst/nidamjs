@@ -9,7 +9,8 @@ const createDelegatorStub = () => ({
 
 describe("Notification Integration", () => {
   beforeEach(() => {
-    document.body.innerHTML = '<section nd-icons="2:2"></section><div id="target"></div>';
+    document.body.innerHTML =
+      '<section nd-icons="2:2"></section><div id="target"></div>';
     Object.defineProperty(globalThis, "localStorage", {
       value: {
         getItem: vi.fn(() => null),
@@ -86,14 +87,9 @@ describe("Notification Integration", () => {
     expect(closeButton).toBeNull();
   });
 
-  test("NidamApp accepts toast options directly in config notify", async () => {
+  test("NidamApp uses default toast notifier", async () => {
     const app = createNidamApp({
       root: document,
-      notify: {
-        position: "bottom-right",
-        duration: 0,
-        closable: false,
-      },
       windowManager: {
         config: { maxWindows: 0 },
       },
@@ -104,7 +100,7 @@ describe("Notification Integration", () => {
 
     const stack = document.querySelector("[nd-toast-stack]");
     const closeButton = document.querySelector(".nd-toast-close");
-    expect(stack?.getAttribute("data-position")).toBe("bottom-right");
-    expect(closeButton).toBeNull();
+    expect(stack?.getAttribute("data-position")).toBe("top-right");
+    expect(closeButton).toBeTruthy();
   });
 });
