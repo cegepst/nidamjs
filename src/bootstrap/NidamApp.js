@@ -61,7 +61,7 @@ export default class NidamApp {
           this.#config.registry,
         ),
       notify: this.#config.notify,
-      ...(this.#config.windowManager || {}),
+      config: this.#config.windowManager || {},
     });
 
     this.#modules.set("window", windowManager);

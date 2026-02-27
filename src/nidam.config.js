@@ -49,7 +49,7 @@ export default {
         layoutStabilizationMs: 450,
         cascadeOffset: 30,
         cooldownMs: 500,
-        maxWindows: 2,
+        maxWindows: 1,
         snapGap: 6,
         taskbarHeight: 64,
         snapThreshold: 30,
