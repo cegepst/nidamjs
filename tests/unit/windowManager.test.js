@@ -238,7 +238,11 @@ describe("WindowManager", () => {
 
     manager.toggleMaximize(win);
 
-    const expected = manager._getSnapLayout("left", 1400, 900 - 64);
+    const expected = manager._getSnapLayout(
+      "left",
+      1400,
+      900 - manager._config.taskbarHeight,
+    );
     expect(win.classList.contains("tiled")).toBe(true);
     expect(win.style.left).toBe(expected.left);
     expect(win.style.top).toBe(expected.top);
