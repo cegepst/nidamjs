@@ -5,12 +5,12 @@
 export default class WindowRouter {
   /**
    * Checks if a path matches a given pattern.
-   * 
+   *
    * Rules:
    * 1. Exact Match: "team" matches "team".
    * 2. Wildcard (*): "team/*" matches "team/5", "team/12/details".
    * 3. Parameters ({id}): "team/{id}" matches "team/5".
-   * 
+   *
    * @param {string} pattern - The pattern from configuration.
    * @param {string} path - The actual window endpoint path.
    * @param {string|number|null} [entityId=null] - Optional ID to enforce specific parameter matching.
@@ -40,18 +40,20 @@ export default class WindowRouter {
         }
         return true;
       }
-      
+
       return seg === pathSegments[i];
     });
   }
 
   /**
    * Normalizes an endpoint/path by removing leading slashes and trimming.
-   * 
-   * @param {string} path 
+   *
+   * @param {string} path
    * @returns {string}
    */
   static normalize(path) {
-    return String(path || "").trim().replace(/^\/+/, "");
+    return String(path || "")
+      .trim()
+      .replace(/^\/+/, "");
   }
 }

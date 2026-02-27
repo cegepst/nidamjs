@@ -7,7 +7,8 @@ import {
 
 describe("Toast Utility", () => {
   beforeEach(() => {
-    document.body.innerHTML = "";
+    document.body.innerHTML =
+      '<div nd-toast-stack data-position="top-right"></div>';
     vi.useFakeTimers();
   });
 
@@ -16,7 +17,7 @@ describe("Toast Utility", () => {
     vi.useRealTimers();
   });
 
-  test("showToast creates stack and toast", () => {
+  test("showToast appends a toast to the existing stack", () => {
     showToast("success", "Test message");
 
     const container = document.querySelector("[nd-toast-stack]");
@@ -25,6 +26,19 @@ describe("Toast Utility", () => {
     const toast = container.querySelector('.nd-toast[data-type="success"]');
     expect(toast).toBeTruthy();
     expect(toast?.textContent).toContain("Test message");
+  });
+
+  test("warns and does not create a stack when missing", () => {
+    document.body.innerHTML = "";
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const result = showToast("success", "Test message");
+
+    expect(result).toBeUndefined();
+    expect(document.querySelector("[nd-toast-stack]")).toBeNull();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy.mock.calls[0][0]).toContain("Missing [nd-toast-stack]");
+    warnSpy.mockRestore();
   });
 
   test("showToast handles multiple messages", () => {
@@ -50,6 +64,19 @@ describe("Toast Utility", () => {
 
     const container = document.querySelector("[nd-toast-stack]");
     expect(container?.getAttribute("data-position")).toBe("bottom-left");
+  });
+
+  test("reuses a pre-rendered toast stack", () => {
+    document.body.innerHTML =
+      '<div nd-toast-stack data-position="bottom-right"></div>';
+
+    showToast("info", "Reuse existing");
+
+    const containers = document.querySelectorAll("[nd-toast-stack]");
+    const container = document.querySelector("[nd-toast-stack]");
+    expect(containers.length).toBe(1);
+    expect(container?.getAttribute("data-position")).toBe("bottom-right");
+    expect(container?.querySelector(".nd-toast")).toBeTruthy();
   });
 
   test("supports disabling close button", () => {

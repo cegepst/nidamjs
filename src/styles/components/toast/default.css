@@ -2,7 +2,10 @@
 
 [nd-toast-stack] {
   position: fixed;
-  inset: 1rem;
+  top: calc(1rem + var(--nd-toast-top-offset));
+  right: calc(1rem + var(--nd-toast-right-offset));
+  bottom: calc(1rem + var(--nd-toast-bottom-offset));
+  left: calc(1rem + var(--nd-toast-left-offset));
   z-index: var(--nd-toast-z-index);
   display: flex;
   flex-direction: column;

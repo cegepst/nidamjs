@@ -16,6 +16,7 @@ export function renderHomePage() {
   </head>
 
   <body>
+    <div nd-toast-stack data-position="bottom-right"></div>
     <div nd-desktop class="demo-root">
       <div class="demo-bg"></div>
 

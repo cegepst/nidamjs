@@ -6,7 +6,7 @@
 export default class WindowLoader {
   /**
    * Loads window content for a given endpoint.
-   * 
+   *
    * @param {string} endpoint - The route or identifier.
    * @param {Object} options - Additional options for the fetch.
    * @param {Object} context - Context containing flags (isStatic, resolveEndpoint).
@@ -25,7 +25,9 @@ export default class WindowLoader {
     }
 
     // 2. Network Fetch Strategy
-    const url = (resolveEndpoint || WindowLoader._defaultResolveEndpoint)(endpoint);
+    const url = (resolveEndpoint || WindowLoader._defaultResolveEndpoint)(
+      endpoint,
+    );
 
     const response = await fetch(url, {
       headers: { "X-Modal-Request": "1" },
@@ -41,8 +43,8 @@ export default class WindowLoader {
 
   /**
    * Default implementation to resolve an endpoint to a URL.
-   * 
-   * @param {string} endpoint 
+   *
+   * @param {string} endpoint
    * @returns {string} The resolved URL.
    */
   static _defaultResolveEndpoint(endpoint) {
@@ -52,19 +54,21 @@ export default class WindowLoader {
 
   /**
    * Normalizes an endpoint by trimming and removing leading slashes.
-   * 
-   * @param {string} endpoint 
+   *
+   * @param {string} endpoint
    * @returns {string}
    */
   static _normalizeEndpoint(endpoint) {
-    return String(endpoint || "").trim().replace(/^\/+/, "");
+    return String(endpoint || "")
+      .trim()
+      .replace(/^\/+/, "");
   }
 
   /**
    * Builds a list of potential route candidates for static template matching.
    * (e.g., "team/details.html" -> ["team/details.html", "details.html", "team/details", "details"])
-   * 
-   * @param {string} endpoint 
+   *
+   * @param {string} endpoint
    * @returns {string[]}
    */
   static _buildStaticRouteCandidates(endpoint) {
@@ -94,8 +98,8 @@ export default class WindowLoader {
 
   /**
    * Searches for a <template> element with a matching data-route attribute.
-   * 
-   * @param {string} endpoint 
+   *
+   * @param {string} endpoint
    * @returns {string|null} The template content or null if not found.
    */
   static _getStaticTemplateContent(endpoint) {

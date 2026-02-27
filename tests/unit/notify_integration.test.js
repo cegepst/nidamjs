@@ -11,7 +11,7 @@ const createDelegatorStub = () => ({
 describe("Notification Integration", () => {
   beforeEach(() => {
     document.body.innerHTML =
-      '<section nd-icons="2:2"></section><div id="target"></div>';
+      '<div nd-toast-stack data-position="top-right"></div><section nd-icons="2:2"></section><div id="target"></div>';
     Object.defineProperty(globalThis, "localStorage", {
       value: {
         getItem: vi.fn(() => null),
@@ -56,6 +56,7 @@ describe("Notification Integration", () => {
 
   test("taskbar click triggers only one toast", async () => {
     document.body.innerHTML = `
+      <div nd-toast-stack data-position="top-right"></div>
       <section nd-icons="2:2"></section>
       <div id="target"></div>
       <div nd-taskbar>
@@ -84,5 +85,82 @@ describe("Notification Integration", () => {
     );
     expect(toasts.length).toBe(1);
     debugSpy.mockRestore();
+  });
+
+  test("extended taskbar exposes bottom toast offset", () => {
+    document.body.innerHTML = `
+      <div nd-toast-stack data-position="bottom-right"></div>
+      <section nd-icons="2:2"></section>
+      <div id="target"></div>
+      <div nd-taskbar="extend">
+        <button nd-taskbar-icon data-modal="page-one">Page One</button>
+      </div>
+    `;
+
+    const delegator = new EventDelegator(document);
+    const taskbar = document.querySelector("[nd-taskbar]");
+
+    Object.defineProperty(taskbar, "getBoundingClientRect", {
+      value: () => ({
+        height: 52,
+      }),
+      configurable: true,
+    });
+
+    new TaskbarManager(taskbar, delegator, {});
+
+    expect(
+      document.documentElement.style.getPropertyValue(
+        "--nd-toast-bottom-offset",
+      ),
+    ).toBe("52px");
+    expect(
+      document.documentElement.style.getPropertyValue("--nd-toast-left-offset"),
+    ).toBe("0px");
+    expect(
+      document.documentElement.style.getPropertyValue(
+        "--nd-toast-right-offset",
+      ),
+    ).toBe("0px");
+  });
+
+  test("left taskbar exposes left toast offset", () => {
+    document.body.innerHTML = `
+      <div nd-toast-stack data-position="top-left"></div>
+      <section nd-icons="2:2"></section>
+      <div id="target"></div>
+      <div nd-taskbar nd-taskbar-position="left">
+        <button nd-taskbar-icon data-modal="page-one">Page One</button>
+      </div>
+    `;
+
+    const delegator = new EventDelegator(document);
+    const taskbar = document.querySelector("[nd-taskbar]");
+
+    Object.defineProperty(window, "innerWidth", {
+      value: 1280,
+      configurable: true,
+      writable: true,
+    });
+    Object.defineProperty(taskbar, "getBoundingClientRect", {
+      value: () => ({
+        width: 68,
+        height: 320,
+        left: 0,
+        right: 68,
+      }),
+      configurable: true,
+    });
+
+    new TaskbarManager(taskbar, delegator, {});
+
+    expect(
+      document.documentElement.style.getPropertyValue("--nd-toast-left-offset"),
+    ).toBe("68px");
+    expect(
+      document.documentElement.style.getPropertyValue(
+        "--nd-toast-bottom-offset",
+      ),
+    ).toBe("0px");
   });
 });

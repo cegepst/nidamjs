@@ -1,4 +1,9 @@
-export function renderWindowShell({ title, content, endpoint, defaultSnap = true }) {
+export function renderWindowShell({
+  title,
+  content,
+  endpoint,
+  defaultSnap = true,
+}) {
   const snapAttr = defaultSnap ? "data-default-snap" : "";
 
   return `

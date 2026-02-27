@@ -10,8 +10,6 @@ const DEFAULT_DISMISS_MS = 220;
 const DEFAULT_OPTIONS = {
   duration: 3000,
   closable: true,
-  /** @type {"top-right"|"top-left"|"bottom-right"|"bottom-left"} */
-  position: "top-right",
 };
 
 /**
@@ -39,7 +37,7 @@ const isValidPosition = (value) =>
 
 /**
  * @param {ToastOptions|undefined} options
- * @returns {{ duration: number, closable: boolean, position: ToastPosition }}
+ * @returns {{ duration: number, closable: boolean, position: ToastPosition | null }}
  */
 const normalizeOptions = (options) => {
   const duration = Number.isFinite(options?.duration)
@@ -49,9 +47,7 @@ const normalizeOptions = (options) => {
     typeof options?.closable === "boolean"
       ? options.closable
       : DEFAULT_OPTIONS.closable;
-  const position = isValidPosition(options?.position)
-    ? options.position
-    : DEFAULT_OPTIONS.position;
+  const position = isValidPosition(options?.position) ? options.position : null;
 
   return {
     duration,
@@ -61,22 +57,27 @@ const normalizeOptions = (options) => {
 };
 
 /**
- * @param {ToastPosition} position
+ * @param {ToastPosition|null} requestedPosition
  * @returns {HTMLElement | null}
  */
-const ensureContainer = (position) => {
+const ensureContainer = (requestedPosition) => {
   if (typeof document === "undefined") return null;
 
   let container = /** @type {HTMLElement|null} */ (
     document.querySelector(TOAST_STACK_SELECTOR)
   );
   if (!container) {
-    container = document.createElement("div");
-    container.setAttribute("nd-toast-stack", "");
-    document.body.appendChild(container);
+    console.warn(
+      '[nidamjs:toast] Missing [nd-toast-stack]. Add <div nd-toast-stack data-position="bottom-right"></div> if you want to display toasts.',
+    );
+    return null;
   }
 
-  container.setAttribute("data-position", position);
+  const currentPosition = container.getAttribute("data-position");
+  const resolvedPosition =
+    requestedPosition ||
+    (isValidPosition(currentPosition) ? currentPosition : "top-right");
+  container.setAttribute("data-position", resolvedPosition);
   return container;
 };
 
