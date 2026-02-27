@@ -1,36 +1,19 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>NidamJS Demo</title>
-  </head>
-  <body>
-    <div class="window window-shell animate-appearance" data-default-snap>
-      <div class="window-bar" data-bar>
-        <strong class="window-title">Page Two</strong>
-        <div class="window-actions">
-          <button class="mini-btn" data-maximize title="Maximize">
-            <i class="not-italic">[]</i>
-          </button>
-          <button class="mini-btn" data-close title="Close">
-            <i class="not-italic">x</i>
-          </button>
-        </div>
-      </div>
-      <div class="window-content-scrollable window-content-shell">
-        <div class="window-content">
-          <p>
-            This second route proves the same app can open multiple independent
-            window pages.
-          </p>
-          <button
-            class="toolbar-btn"
-            data-modal="examples/shared/page-one.html"
-          >
-            Back To Page One
-          </button>
-        </div>
-      </div>
-    </div>
-  </body>
-</html>
+<div nd-window class="window">
+  <div nd-window-header data-bar>
+    <span>Page Two</span>
+    <button nd-window-button data-maximize title="Maximize">[ ]</button>
+    <button nd-window-button data-close title="Close">X</button>
+  </div>
+  <div nd-window-content>
+      <p>
+        This second route proves the same app can open multiple independent
+        window pages.
+      </p>
+      <button
+        class="toolbar-btn"
+        data-modal="examples/shared/page-one.html"
+      >
+        Back To Page One
+      </button>
+  </div>
+</div>

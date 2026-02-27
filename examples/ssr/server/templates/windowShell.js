@@ -1,8 +1,6 @@
 export function renderWindowShell({ title, content, defaultSnap = true }) {
-    const snapAttr = defaultSnap ? "data-default-snap" : "";
-
     return `
-  <div nd-window class="window" ${snapAttr}>
+  <div nd-window class="window">
     <div nd-window-header data-bar>
       <span>${title}</span>
       <button nd-window-button data-maximize title="Maximize">[ ]</button>
