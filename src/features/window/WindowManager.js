@@ -37,7 +37,6 @@ export default class WindowManager extends BaseManager {
   _windows = new Map();
   _zIndexCounter = this._config.zIndexBase;
   _getModules = null;
-  _notify = null;
   _fetchWindowContent = null;
   _initializeContent = null;
   _resolveEndpoint = null;
@@ -52,14 +51,12 @@ export default class WindowManager extends BaseManager {
     const {
       getModules = null,
       config = null,
-      notify = null,
       fetchWindowContent = null,
       initializeContent = null,
       resolveEndpoint = null,
     } = options || {};
 
     this._getModules = getModules;
-    this._notify = notify || toastNotify;
     this._fetchWindowContent =
       fetchWindowContent || this._defaultFetchWindowContent.bind(this);
     this._initializeContent = initializeContent || (() => {});
@@ -239,7 +236,7 @@ export default class WindowManager extends BaseManager {
       const msg =
         document.body.dataset.errorMaxWindows ||
         `Maximum of ${this._config.maxWindows} windows allowed.`;
-      this._notify("error", msg.replace("%s", String(this._config.maxWindows)));
+      toastNotify("error", msg.replace("%s", String(this._config.maxWindows)));
       return Promise.reject(new Error("Max windows reached"));
     }
 
@@ -313,7 +310,7 @@ export default class WindowManager extends BaseManager {
         console.error("Error opening window:", error);
         const msg =
           document.body.dataset.errorOpenFailed || "Failed to open window.";
-        this._notify("error", msg);
+        toastNotify("error", msg);
         throw error;
       } finally {
         this._pendingRequests.delete(endpoint);

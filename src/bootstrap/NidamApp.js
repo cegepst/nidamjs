@@ -20,7 +20,6 @@ export default class NidamApp {
     this.#config = {
       ...defaultConfig,
       ...parsedConfig,
-      notify: toastNotify,
     };
   }
 
@@ -62,7 +61,6 @@ export default class NidamApp {
           ctx.modules,
           this.#config.registry,
         ),
-      notify: toastNotify,
       ...(this.#config.windowManager || {}),
     });
 

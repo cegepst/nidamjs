@@ -5,14 +5,12 @@ const createDelegatorStub = () => ({
 });
 
 describe("WindowManager", () => {
-  test("calls notify and rejects when max windows limit is reached", async () => {
+  test("shows toast and rejects when max windows limit is reached", async () => {
     document.body.innerHTML = `<div id="target"></div>`;
     const container = document.querySelector("#target");
     const delegator = createDelegatorStub();
-    const notify = vi.fn();
 
     const manager = new WindowManager(container, delegator, {
-      notify,
       config: { maxWindows: 1 },
       initializeContent: vi.fn(),
       fetchWindowContent: vi.fn(),
@@ -21,8 +19,10 @@ describe("WindowManager", () => {
     manager._windows.set("a", document.createElement("div"));
 
     await expect(manager.open("b")).rejects.toThrow("Max windows reached");
-    expect(notify).toHaveBeenCalledTimes(1);
-    expect(notify.mock.calls[0][0]).toBe("error");
+    const toast = document.querySelector(
+      '[nd-toast-stack] .nd-toast[data-type="error"]',
+    );
+    expect(toast).toBeTruthy();
   });
 
   test("opens a new window and initializes modal content", async () => {
