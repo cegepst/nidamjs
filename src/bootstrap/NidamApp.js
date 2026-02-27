@@ -16,22 +16,10 @@ export default class NidamApp {
    */
   constructor(config = {}) {
     const parsedConfig = this._parseConfig(config);
-    const notifyConfig = parsedConfig.notify;
-    const normalizedNotify =
-      typeof notifyConfig === "function"
-        ? notifyConfig
-        : notifyConfig && typeof notifyConfig === "object"
-          ? createToastNotify(
-              /** @type {import("../utils/toast.js").NotifyOptions} */ (
-                notifyConfig
-              ),
-            )
-          : toastNotify;
 
     this.#config = {
       ...defaultConfig,
       ...parsedConfig,
-      notify: normalizedNotify,
     };
   }
 
@@ -125,18 +113,39 @@ export default class NidamApp {
   }
 
   _parseConfig(config) {
+    const normalizeNotify = (notifyConfig) => {
+      if (typeof notifyConfig === "function") {
+        return notifyConfig;
+      }
+      if (notifyConfig && typeof notifyConfig === "object") {
+        return createToastNotify(
+          /** @type {import("../utils/toast.js").NotifyOptions} */ (notifyConfig),
+        );
+      }
+      return toastNotify;
+    };
+
     if (typeof config === "string") {
       try {
-        return JSON.parse(config);
+        const parsed = JSON.parse(config);
+        return {
+          ...parsed,
+          notify: normalizeNotify(parsed?.notify),
+        };
       } catch (e) {
         toastNotify(
           "error",
           "Parsing error, falling back to default settings.",
         );
-        return {};
+        return { notify: toastNotify };
       }
     }
-    return config || {};
+
+    const parsed = config || {};
+    return {
+      ...parsed,
+      notify: normalizeNotify(parsed.notify),
+    };
   }
 
 }
