@@ -71,7 +71,7 @@ export default class WindowManager extends BaseManager {
    * @private
    */
   _hydrateExistingWindows() {
-    const existingWins = this._root.querySelectorAll(".window");
+    const existingWins = this._root.querySelectorAll("[nd-window]");
     existingWins.forEach((win) => {
       const endpoint = win.dataset.endpoint || win.dataset.modal;
       if (endpoint && !this._windows.has(endpoint)) {
@@ -110,28 +110,28 @@ export default class WindowManager extends BaseManager {
       this.open(target.dataset.modal);
     });
 
-    this._delegator.on("click", "[data-maximize]", (e, target) => {
+    this._delegator.on("click", '[nd-window-button="maximize"]', (e, target) => {
       e.preventDefault();
-      const winElement = target.closest(".window");
+      const winElement = target.closest("[nd-window]");
       if (winElement) this.toggleMaximize(winElement);
     });
 
-    this._delegator.on("click", "[data-close]", (e, target) => {
+    this._delegator.on("click", '[nd-window-button="close"]', (e, target) => {
       e.preventDefault();
-      const winElement = target.closest(".window");
+      const winElement = target.closest("[nd-window]");
       if (winElement) this.close(winElement);
     });
 
-    this._delegator.on("mousedown", ".window", (e, target) => {
-      if (e.target.closest("[data-close]") || e.target.closest("[data-modal]")) return;
-      const winElement = target.closest(".window");
+    this._delegator.on("mousedown", "[nd-window]", (e, target) => {
+      if (e.target.closest('[nd-window-button="close"]') || e.target.closest("[data-modal]")) return;
+      const winElement = target.closest("[nd-window]");
       if (winElement) this.focus(winElement);
     });
 
     this._delegator.on("mousedown", "[nd-window-header]", (e, target) => {
-      if (e.target.closest("[data-close]") || e.target.closest("[data-maximize]")) return;
+      if (e.target.closest('[nd-window-button="close"]') || e.target.closest('[nd-window-button="maximize"]')) return;
       e.preventDefault();
-      const winElement = target.closest(".window");
+      const winElement = target.closest("[nd-window]");
       if (winElement) {
         this.focus(winElement);
         this.drag(e, winElement);
