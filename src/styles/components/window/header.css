@@ -1,8 +1,8 @@
 :root {
-  --nd-header-bg: #f9fafb;
+  --nd-header-bg: #ffffff;
   --nd-header-border: rgba(0, 0, 0, 0.06);
   --nd-header-text: #111827;
-  --nd-header-bg-focused: #ffffff;
+  --nd-header-bg-focused: #f9fafb;
   --nd-header-focus-ring: 0 0 0 1px rgba(0, 0, 0, 0.06);
 }
 

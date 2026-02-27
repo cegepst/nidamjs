@@ -19,77 +19,10 @@ body {
 }
 
 .demo-root {
-  position: relative;
   min-height: 100vh;
   padding: 1rem;
   display: flex;
   flex-direction: column;
-}
-
-@media (min-width: 768px) {
-  .demo-root {
-    padding: 1.5rem;
-  }
-}
-
-.demo-bg {
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background:
-    radial-gradient(
-      circle at 10% 10%,
-      rgba(59, 130, 246, 0.25),
-      transparent 35%
-    ),
-    radial-gradient(
-      circle at 80% 20%,
-      rgba(16, 185, 129, 0.2),
-      transparent 40%
-    ),
-    radial-gradient(circle at 70% 80%, rgba(14, 116, 144, 0.2), transparent 50%);
-}
-
-.demo-header {
-  margin-bottom: 1rem;
-  border: 1px solid rgba(100, 116, 139, 0.45);
-  border-radius: 0.8rem;
-  background: rgba(15, 23, 42, 0.56);
-  padding: 1rem;
-}
-
-.demo-title {
-  margin: 0;
-  font-size: clamp(1.25rem, 2.8vw, 1.7rem);
-  font-weight: 600;
-  letter-spacing: 0.01em;
-}
-
-.demo-subtitle {
-  margin: 0.35rem 0 0;
-  font-size: 0.92rem;
-  color: rgb(203 213 225);
-}
-
-.demo-actions {
-  margin-bottom: 1rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.demo-footer {
-  margin-top: 0.75rem;
-  color: rgb(203 213 225);
-  font-size: 0.9rem;
-}
-
-.demo-target {
-  position: absolute;
-  inset: 0;
-  z-index: 40;
-  pointer-events: none;
 }
 
 .toolbar-btn {
