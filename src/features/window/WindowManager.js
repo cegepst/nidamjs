@@ -1,6 +1,6 @@
 import BaseManager from "../../core/BaseManager.js";
 import WindowState from "../../utils/window/WindowState.js";
-import { config as defaultConfig } from "../../utils/window/WindowConfig.js";
+import nidamConfig from "../../nidam.config.js";
 import WindowLifecycle from "../../utils/window/WindowLifecycle.js";
 import WindowDrag from "../../utils/window/WindowDrag.js";
 import WindowTiling from "../../utils/window/WindowTiling.js";
@@ -12,7 +12,7 @@ import EventDelegator from "../../core/EventDelegator.js";
  * It manages the lifecycle, dragging, and tiling services.
  */
 export default class WindowManager extends BaseManager {
-  _config = { ...defaultConfig };
+  _config = { ...nidamConfig.windowManager };
   _windows = new Map();
   _zIndexCounter = this._config.zIndexBase;
   _getModules = null;
