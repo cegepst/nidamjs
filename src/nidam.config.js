@@ -1,3 +1,12 @@
+import { toastNotify } from "./utils/toast.js";
+
+/**
+ * @typedef {Object} NidamNotifyConfig
+ * @property {number} [duration] - Auto-dismiss timeout in ms. Use <= 0 to disable.
+ * @property {boolean} [closable] - Whether to render the close button.
+ * @property {"top-right"|"top-left"|"bottom-right"|"bottom-left"} [position] - Toast stack position.
+ */
+
 /**
  * @typedef {Object} NidamConfig
  * @property {Document|HTMLElement} [root] - The root element to attach event delegation (default: document)
@@ -6,14 +15,9 @@
  * @property {Array<any>} [registry] - Content registry array (default: [])
  * @property {Record<string, string[]>|null} [refreshMap] - Map of refreshing rules (default: null)
  * @property {number} [refreshTimeout] - Timeout in ms for refreshing windows (default: 200)
- * @property {Function} [notify] - Custom notification logger (default: defaultNotify)
+ * @property {((level: string, message: unknown) => void) | NidamNotifyConfig} [notify] - Notification callback or toast options object (default: toastNotify)
  * @property {Object} [windowManager] - Configuration for WindowManager (default: {})
  */
-
-export const defaultNotify = (level, message) => {
-  const logger = level === "error" ? console.error : console.log;
-  logger(`[nidamjs:${level}]`, message);
-};
 
 /** @type {NidamConfig} */
 export default {
@@ -23,6 +27,6 @@ export default {
   registry: [],
   refreshMap: null,
   refreshTimeout: 200,
-  notify: defaultNotify,
-  windowManager: {}
+  notify: toastNotify,
+  windowManager: {},
 };

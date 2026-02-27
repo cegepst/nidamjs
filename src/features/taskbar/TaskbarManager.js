@@ -26,11 +26,13 @@ export default class TaskbarManager extends BaseManager {
 
     // Listen for window events to update icon states
     document.addEventListener("window:opened", (e) => {
-      this._updateIconState(e.detail.endpoint, true);
+      const customEvent = /** @type {CustomEvent<{ endpoint: string }>} */ (e);
+      this._updateIconState(customEvent.detail.endpoint, true);
     });
 
     document.addEventListener("window:closed", (e) => {
-      this._updateIconState(e.detail.endpoint, false);
+      const customEvent = /** @type {CustomEvent<{ endpoint: string }>} */ (e);
+      this._updateIconState(customEvent.detail.endpoint, false);
     });
   }
 

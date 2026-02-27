@@ -4,6 +4,7 @@ import {
   readWindowState,
   saveWindowState,
 } from "../../utils/windowState.js";
+import { toastNotify } from "../../utils/toast.js";
 
 /**
  * WindowManager handles multi-window interface including:
@@ -58,10 +59,10 @@ export default class WindowManager extends BaseManager {
     } = options || {};
 
     this._getModules = getModules;
-    this._notify = notify || this._defaultNotify.bind(this);
+    this._notify = notify || toastNotify;
     this._fetchWindowContent =
       fetchWindowContent || this._defaultFetchWindowContent.bind(this);
-    this._initializeContent = initializeContent || (() => { });
+    this._initializeContent = initializeContent || (() => {});
     this._resolveEndpoint = resolveEndpoint || this._defaultResolveEndpoint;
 
     if (config && typeof config === "object") {
@@ -259,7 +260,7 @@ export default class WindowManager extends BaseManager {
     if (
       !force &&
       now - (this._lastOpenTimestamps.get(endpoint) || 0) <
-      this._config.cooldownMs
+        this._config.cooldownMs
     ) {
       return Promise.resolve();
     }
@@ -518,7 +519,7 @@ export default class WindowManager extends BaseManager {
 
     const settleMs =
       Number.isFinite(this._config.layoutStabilizationMs) &&
-        this._config.layoutStabilizationMs > 0
+      this._config.layoutStabilizationMs > 0
         ? this._config.layoutStabilizationMs
         : 450;
     const now =
@@ -766,7 +767,7 @@ export default class WindowManager extends BaseManager {
       newTop = Math.max(
         0,
         state.startWinTop +
-        (state.isRestored ? currentY - state.startY : deltaY),
+          (state.isRestored ? currentY - state.startY : deltaY),
       );
     }
 
@@ -1071,11 +1072,6 @@ export default class WindowManager extends BaseManager {
   _defaultResolveEndpoint(endpoint) {
     const normalized = String(endpoint || "").replace(/^\/+/, "");
     return `/${normalized}`;
-  }
-
-  _defaultNotify(level, message) {
-    const logger = level === "error" ? console.error : console.log;
-    logger(`[nidamjs:${level}]`, message);
   }
 
   _initializeModalContent(root) {

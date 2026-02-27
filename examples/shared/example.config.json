@@ -1,8 +1,16 @@
 {
   "modalContainer": "#target",
   "refreshTimeout": 300,
+  "notify": {
+    "position": "top-right",
+    "duration": 3500,
+    "closable": true
+  },
   "windowManager": {
     "theme": "custom",
-    "debug": true
+    "debug": true,
+    "config": {
+      "maxWindows": 1
+    }
   }
 }

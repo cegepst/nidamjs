@@ -1,0 +1,24 @@
+:root {
+  --nd-toast-z-index: 2000;
+  --nd-toast-gap: 0.6rem;
+  --nd-toast-width: min(92vw, 360px);
+  --nd-toast-padding: 0.75rem 0.9rem;
+  --nd-toast-radius: 0.75rem;
+  --nd-toast-border: 1px solid rgba(148, 163, 184, 0.35);
+  --nd-toast-shadow: 0 14px 30px rgba(2, 6, 23, 0.32);
+  --nd-toast-backdrop-filter: blur(8px);
+  --nd-toast-font-size: 0.9rem;
+  --nd-toast-line-height: 1.35;
+  --nd-toast-enter-duration: 180ms;
+  --nd-toast-close-duration: 220ms;
+
+  --nd-toast-bg-info: rgba(15, 23, 42, 0.92);
+  --nd-toast-bg-success: rgba(6, 78, 59, 0.9);
+  --nd-toast-bg-warning: rgba(133, 77, 14, 0.92);
+  --nd-toast-bg-error: rgba(127, 29, 29, 0.92);
+  --nd-toast-color: #f8fafc;
+
+  --nd-toast-close-size: 1.35rem;
+  --nd-toast-close-opacity: 0.75;
+  --nd-toast-close-opacity-hover: 1;
+}

@@ -3,8 +3,9 @@ import EventDelegator from "../core/EventDelegator.js";
 import IconManager from "../features/desktop/IconManager.js";
 import WindowManager from "../features/window/WindowManager.js";
 import WindowRefresher from "../features/window/WindowRefresher.js";
-import defaultConfig, { defaultNotify } from "../nidam.config.js";
+import defaultConfig from "../nidam.config.js";
 import TaskbarManager from "../features/taskbar/TaskbarManager.js";
+import { createToastNotify, toastNotify } from "../utils/toast.js";
 
 export default class NidamApp {
   #config;
@@ -14,11 +15,13 @@ export default class NidamApp {
    * @param {import('../nidam.config.js').NidamConfig | string} config - The app configuration object or JSON string.
    */
   constructor(config = {}) {
-    let parsedConfig = this._parseConfig(config);
+    const parsedConfig = this._parseConfig(config);
+    const normalizedNotify = this._resolveNotifyConfig(parsedConfig.notify);
 
     this.#config = {
       ...defaultConfig,
       ...parsedConfig,
+      notify: normalizedNotify,
     };
   }
 
@@ -116,11 +119,34 @@ export default class NidamApp {
       try {
         return JSON.parse(config);
       } catch (e) {
-        defaultNotify("error", "Parsing error, falling back to default settings.");
+        toastNotify(
+          "error",
+          "Parsing error, falling back to default settings.",
+        );
         return {};
       }
     }
     return config || {};
+  }
+
+  /**
+   * @param {unknown} notifyConfig
+   * @returns {(level: string, message: unknown) => void}
+   */
+  _resolveNotifyConfig(notifyConfig) {
+    if (typeof notifyConfig === "function") {
+      return /** @type {(level: string, message: unknown) => void} */ (
+        notifyConfig
+      );
+    }
+
+    if (notifyConfig && typeof notifyConfig === "object") {
+      return createToastNotify(
+        /** @type {import("../utils/toast.js").NotifyOptions} */ (notifyConfig),
+      );
+    }
+
+    return toastNotify;
   }
 }
 

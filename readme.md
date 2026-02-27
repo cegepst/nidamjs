@@ -31,11 +31,15 @@ import { createNidamApp } from "nidamjs";
 const app = createNidamApp({
   modalContainer: "#target",
   registry: [],
+  notify: {
+    position: "bottom-right",
+    duration: 4000,
+    closable: true,
+  },
   windowManager: {
     config: {
       layoutStabilizationMs: 450,
     },
-    notify: (level, message) => console.log(level, message),
   },
 });
 
@@ -44,6 +48,14 @@ app.initialize();
 
 `layoutStabilizationMs` controls how long the first window can auto-recenter if late CSS changes its rendered size after
 open.
+
+## Toast Notifications
+
+- `notify` uses toast notifications by default (`toastNotify`).
+- To configure behavior globally, set `notify` to an object: `{ duration, closable, position }`.
+- If you need full custom behavior, `notify` can still be a callback function.
+- Supported positions: `top-right`, `top-left`, `bottom-right`, `bottom-left`.
+- Styling is CSS-variable driven on `[nd-toast-stack]` and `.nd-toast`.
 
 ## Documentation
 

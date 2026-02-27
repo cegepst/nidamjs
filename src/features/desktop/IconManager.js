@@ -30,10 +30,11 @@ export default class IconManager extends BaseManager {
         if (!dimensions) return;
 
         const [cols, rows] = dimensions.split(":").map(Number);
+        const root = /** @type {HTMLElement} */ (this._root);
 
         if (cols && rows) {
-            this._root.style.setProperty("--nd-cols", cols);
-            this._root.style.setProperty("--nd-rows", rows);
+            root.style.setProperty("--nd-cols", String(cols));
+            root.style.setProperty("--nd-rows", String(rows));
         }
     }
 

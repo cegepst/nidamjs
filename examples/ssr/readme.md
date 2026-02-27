@@ -19,6 +19,7 @@ Open `http://localhost:8080`.
 ## Notes
 
 - Uses the built ES bundle `/dist/nidam.es.js` in the browser.
+- Initializes with direct `notify` toast options in `examples/ssr/server/templates/layout.js`.
 - Uses the built library stylesheet `/dist/nidam.css`.
 - Uses shared demo styles from `examples/shared/demo.css`.
 - Window pages are rendered by SSR templates in `examples/ssr/server/templates/`.
