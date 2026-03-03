@@ -1,4 +1,4 @@
-import WindowState from './WindowState.js';
+import WindowState from "./WindowState.js";
 
 /**
  * WindowTiling utility for window snapping and layout management.
@@ -7,7 +7,7 @@ import WindowState from './WindowState.js';
 export default class WindowTiling {
   /**
    * Detects the snap zone based on current mouse coordinates.
-   * 
+   *
    * @param {Object} config - Configuration object (snapThreshold, edgeDetectionRatio).
    * @param {number} x - Mouse X coordinate.
    * @param {number} y - Mouse Y coordinate.
@@ -41,7 +41,7 @@ export default class WindowTiling {
 
   /**
    * Snaps a window to a specific zone and saves the previous state for restoration.
-   * 
+   *
    * @param {HTMLElement} winElement - The window element.
    * @param {string} type - The snap zone type.
    * @param {Object} config - Configuration object.
@@ -55,12 +55,15 @@ export default class WindowTiling {
     winElement.dataset.snapType = type;
     const layout = WindowTiling.getSnapLayout(type, config, view.w, view.h);
     Object.assign(winElement.style, layout);
-    setTimeout(() => winElement.classList.remove("window-toggling"), config.animationDurationMs);
+    setTimeout(
+      () => winElement.classList.remove("window-toggling"),
+      config.animationDurationMs,
+    );
   }
 
   /**
    * Calculates the CSS layout properties for a specific snap zone.
-   * 
+   *
    * @param {string} type - Snap zone type.
    * @param {Object} config - Configuration object.
    * @param {number} vw - Viewport width.
@@ -85,7 +88,7 @@ export default class WindowTiling {
       left: { top: topY, left: leftX, width: halfW, height: fullH },
       right: { top: topY, left: rightX, width: halfW, height: fullH },
     };
-    
+
     const layout = layouts[type];
     if (!layout) return {};
 
@@ -100,7 +103,7 @@ export default class WindowTiling {
   /**
    * Adjusts all tiled windows to the new viewport size.
    * Called during window resize events.
-   * 
+   *
    * @param {Map} windows - Map of all windows.
    * @param {Object} config - Configuration object.
    * @param {Object} callbacks - Hooks (repositionFromRatios).
@@ -111,7 +114,10 @@ export default class WindowTiling {
     const vhTiled = vhFull - config.taskbarHeight;
 
     windows.forEach((winElement) => {
-      if (winElement.classList.contains("tiled") && winElement.dataset.snapType) {
+      if (
+        winElement.classList.contains("tiled") &&
+        winElement.dataset.snapType
+      ) {
         const type = winElement.dataset.snapType;
         const layout = WindowTiling.getSnapLayout(type, config, vw, vhTiled);
         Object.assign(winElement.style, layout);
@@ -123,7 +129,7 @@ export default class WindowTiling {
 
   /**
    * Restores a window to its free-floating state with original dimensions.
-   * 
+   *
    * @param {HTMLElement} winElement - The window element.
    * @param {number|null} xRatio - Optional X ratio for centered restoration during drag.
    * @param {Object} config - Configuration object.
@@ -132,7 +138,7 @@ export default class WindowTiling {
   static restoreWindowInternal(winElement, xRatio, config, callbacks) {
     let width, height;
     const savedState = WindowState.read(winElement);
-    
+
     if (xRatio === null) {
       if (savedState) {
         width = savedState.width;
@@ -149,7 +155,7 @@ export default class WindowTiling {
     winElement.classList.remove("maximized", "tiled");
     callbacks.onUpdateMaximizeIcon(winElement, false);
     winElement.classList.add("window-toggling", "dragging-restore");
-    
+
     WindowState.apply(winElement, { width, height });
 
     setTimeout(() => {

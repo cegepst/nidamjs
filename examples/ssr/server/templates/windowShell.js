@@ -1,5 +1,5 @@
 export function renderWindowShell({ title, content, endpoint }) {
-    return `
+  return `
   <div nd-window nd-window-endpoint="${endpoint}">
     <div nd-window-header>
       <span>${title}</span>

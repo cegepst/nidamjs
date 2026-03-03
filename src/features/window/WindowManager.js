@@ -1,5 +1,4 @@
 import BaseManager from "../../core/BaseManager.js";
-import EventDelegator from "../../core/EventDelegator.js";
 import nidamConfig from "../../nidam.config.js";
 import WindowDrag from "../../utils/window/WindowDrag.js";
 import WindowLifecycle from "../../utils/window/WindowLifecycle.js";
@@ -7,55 +6,43 @@ import WindowLoader from "../../utils/window/WindowLoader.js";
 import WindowState from "../../utils/window/WindowState.js";
 import WindowTiling from "../../utils/window/WindowTiling.js";
 
-/**
- * WindowManager is the main orchestrator for the window system.
- * It manages the lifecycle, dragging, and tiling services.
- */
 export default class WindowManager extends BaseManager {
-    _config = { ...nidamConfig.windowManager };
-    _windows = new Map();
-    _zIndexCounter = this._config.zIndexBase;
-    _getModules = null;
-    _notify = null;
-    _fetchWindowContent = null;
-    _initializeContent = null;
-    _resolveEndpoint = null;
-    _static = false;
-    _lastOpenTimestamps = new Map();
-    _pendingRequests = new Map();
-    _snapIndicator = null;
-    _dragState = { active: false };
+  _config = { ...nidamConfig.windowManager };
+  _windows = new Map();
+  _zIndexCounter = this._config.zIndexBase;
+  _getModules = null;
+  _fetchWindowContent = null;
+  _initializeContent = null;
+  _resolveEndpoint = null;
+  _static = false;
+  _lastOpenTimestamps = new Map();
+  _pendingRequests = new Map();
+  _snapIndicator = null;
+  _dragState = { active: false };
 
-    /**
-     * @param {HTMLElement|string} container - Root element or selector.
-     * @param {EventDelegator} delegator - Global event delegator.
-     * @param {Object} options - Custom configuration and overrides.
-     */
-    constructor(container, delegator, options = {}) {
-        super(container, delegator);
-        const {
-            getModules = null,
-            config = null,
-            notify = null,
-            fetchWindowContent = null,
-            initializeContent = null,
-            resolveEndpoint = null,
-            static: staticRendering = false,
-        } = options || {};
+  constructor(container, delegator, options = {}) {
+    super(container, delegator);
+    const {
+      getModules = null,
+      config = null,
+      fetchWindowContent = null,
+      initializeContent = null,
+      resolveEndpoint = null,
+      static: staticRendering = false,
+    } = options || {};
 
-        this._getModules = getModules;
-        this._notify = notify || this._defaultNotify.bind(this);
-        this._initializeContent = initializeContent || (() => { });
-        this._resolveEndpoint = resolveEndpoint;
-        this._static = Boolean(staticRendering);
-
-        // If a custom fetcher is provided, use it; otherwise, wrap the WindowLoader.
-        this._fetchWindowContent = fetchWindowContent || ((endpoint, opts) => {
-            return WindowLoader.load(endpoint, opts, {
-                isStatic: this._static,
-                resolveEndpoint: this._resolveEndpoint
-            });
+    this._getModules = getModules;
+    this._initializeContent = initializeContent || (() => {});
+    this._resolveEndpoint = resolveEndpoint;
+    this._static = Boolean(staticRendering);
+    this._fetchWindowContent =
+      fetchWindowContent ||
+      ((endpoint, opts) => {
+        return WindowLoader.load(endpoint, opts, {
+          isStatic: this._static,
+          resolveEndpoint: this._resolveEndpoint,
         });
+      });
 
         if (config && typeof config === "object") {
             this._config = { ...this._config, ...config };
@@ -94,14 +81,11 @@ export default class WindowManager extends BaseManager {
         });
     }
 
-    /**
-     * Initializes the visual indicator for window snapping.
-     */
-    _initSnapIndicator() {
-        this._snapIndicator = document.createElement("div");
-        this._snapIndicator.className = "snap-indicator";
-        document.body.appendChild(this._snapIndicator);
-    }
+  _initSnapIndicator() {
+    this._snapIndicator = document.createElement("div");
+    this._snapIndicator.className = "snap-indicator";
+    document.body.appendChild(this._snapIndicator);
+  }
 
     /**
      * Binds global and scoped events using the delegator.
@@ -169,7 +153,6 @@ export default class WindowManager extends BaseManager {
             zIndexCounter: this._zIndexCounter,
             pendingRequests: this._pendingRequests,
             lastOpenTimestamps: this._lastOpenTimestamps,
-            notify: this._notify,
             fetchWindowContent: this._fetchWindowContent,
             callbacks: {
                 initializeContent: (root) => this._initializeModalContent(root),
@@ -241,13 +224,9 @@ export default class WindowManager extends BaseManager {
         return null;
     }
 
-    /**
-     * Returns a list of current open windows.
-     * @returns {Array<[string, HTMLElement]>}
-     */
-    getWindows() {
-        return Array.from(this._windows.entries());
-    }
+  getWindows() {
+    return Array.from(this._windows.entries());
+  }
 
     /**
      * Brings a window to the front.
@@ -283,53 +262,53 @@ export default class WindowManager extends BaseManager {
             onSaveState: (win) => WindowState.savePositionRatios(win)
         };
 
-        return WindowDrag.drag(e, winElement, this._config, this._dragState, callbacks);
+    return WindowDrag.drag(
+      e,
+      winElement,
+      this._config,
+      this._dragState,
+      callbacks,
+    );
+  }
+
+  _updateSnapIndicator(type, view) {
+    if (!this._snapIndicator) {
+      return;
+    }
+    if (!type) {
+      this._snapIndicator.classList.remove("visible");
+      return;
     }
 
-    /**
-     * Visual update for the snap indicator element.
-     * @private
-     */
-    _updateSnapIndicator(type, view) {
-        if (!this._snapIndicator) return;
-        if (!type) {
-            this._snapIndicator.classList.remove("visible");
-            return;
-        }
-        let layout;
-        if (type === "maximize") {
-            layout = { top: "0px", left: "0px", width: `${view.w}px`, height: `${view.h}px` };
-        } else {
-            layout = WindowTiling.getSnapLayout(type, this._config, view.w, view.h);
-        }
-        Object.assign(this._snapIndicator.style, layout);
-        this._snapIndicator.classList.add("visible");
+    let layout;
+    if (type === "maximize") {
+      layout = {
+        top: "0px",
+        left: "0px",
+        width: `${view.w}px`,
+        height: `${view.h}px`,
+      };
+    } else {
+      layout = WindowTiling.getSnapLayout(type, this._config, view.w, view.h);
     }
 
-    /**
-     * Public API to maximize or restore a window.
-     */
-    toggleMaximize(winElement) {
-        return WindowLifecycle.toggleMaximize(winElement, this._getLifecycleContext());
-    }
+    Object.assign(this._snapIndicator.style, layout);
+    this._snapIndicator.classList.add("visible");
+  }
 
-    /**
-     * Default notification handler.
-     */
-    _defaultNotify(level, message) {
-        const logger = level === "error" ? console.error : console.log;
-        logger(`[nidamjs:${level}]`, message);
-    }
+  toggleMaximize(winElement) {
+    return WindowLifecycle.toggleMaximize(
+      winElement,
+      this._getLifecycleContext(),
+    );
+  }
 
-    /**
-     * Initializes content within a window using modules and custom logic.
-     */
-    _initializeModalContent(root) {
-        const modules = this._getModules ? this._getModules() : null;
-        this._initializeContent(root, {
-            delegator: this._delegator,
-            modules: modules,
-            manager: this,
-        });
-    }
+  _initializeModalContent(root) {
+    const modules = this._getModules ? this._getModules() : null;
+    this._initializeContent(root, {
+      delegator: this._delegator,
+      modules,
+      manager: this,
+    });
+  }
 }

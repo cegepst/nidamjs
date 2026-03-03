@@ -1,19 +1,19 @@
 <!doctype html>
 <html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>NidamJS Demo</title>
+    <link href="/dist/nidam.css" rel="stylesheet" />
+    <link href="/examples/shared/demo.css" rel="stylesheet" />
+    <!-- NidamJS basic setup-->
+    <!-- <script type="module" src="/dist/nidam.es.js"></script> -->
 
-<head>
-  <meta charset="UTF-8" />
-  <title>NidamJS Demo</title>
-  <link href="/dist/nidam.css" rel="stylesheet" />
-  <link href="/examples/shared/demo.css" rel="stylesheet" />
-  <!-- NidamJS basic setup-->
-  <!-- <script type="module" src="/dist/nidam.es.js"></script> -->
-
-  <!-- NidamJS setup with a custom config (Only works if the script is loaded with data-manual)-->
-  <script type="module" src="example.js" data-nd-init></script>
-</head>
+    <!-- NidamJS setup with a custom config (Only works if the script is loaded with data-manual)-->
+    <script type="module" src="example.js" data-nd-init></script>
+  </head>
 
 <body>
+  <div nd-toast-stack data-position="bottom-right"></div>
   <div nd-desktop>
     <section nd-icons="5:3">
       <div nd-icon="1:1" nd-id="page-one" data-modal="examples/shared/page-one.html">
@@ -32,7 +32,7 @@
       </div>
     </section>
 
-    <div class="demo-target" data-pending-modal="" id="target"></div>
+      <div class="demo-target" data-pending-modal="" id="target"></div>
 
     <div nd-taskbar>
       <button nd-taskbar-icon class="toolbar-btn" data-modal="examples/shared/page-one.html">Page One</button>

@@ -14,7 +14,7 @@ export default class WindowState {
 
   /**
    * Captures the current geometry of a window element.
-   * 
+   *
    * @param {HTMLElement} winElement - The window element to measure.
    * @param {Object} [options={}] - Options like { includePosition: boolean }.
    * @returns {Object} Geometry object { width, height, left, top }.
@@ -22,30 +22,38 @@ export default class WindowState {
   static capture(winElement, options = {}) {
     const includePosition = options.includePosition === true;
     let computed = null;
-    
+
     const getComputed = () => {
       if (!computed) computed = window.getComputedStyle(winElement);
       return computed;
     };
 
-    const width = (winElement.offsetWidth > 0 ? WindowState.#toPx(winElement.offsetWidth) : "") ||
-                 WindowState.#normalizeCss(winElement.style.width) ||
-                 WindowState.#normalizeCss(getComputed().width);
+    const width =
+      (winElement.offsetWidth > 0
+        ? WindowState.#toPx(winElement.offsetWidth)
+        : "") ||
+      WindowState.#normalizeCss(winElement.style.width) ||
+      WindowState.#normalizeCss(getComputed().width);
 
-    const height = (winElement.offsetHeight > 0 ? WindowState.#toPx(winElement.offsetHeight) : "") ||
-                  WindowState.#normalizeCss(winElement.style.height) ||
-                  WindowState.#normalizeCss(getComputed().height);
+    const height =
+      (winElement.offsetHeight > 0
+        ? WindowState.#toPx(winElement.offsetHeight)
+        : "") ||
+      WindowState.#normalizeCss(winElement.style.height) ||
+      WindowState.#normalizeCss(getComputed().height);
 
     let left = "";
     let top = "";
-    
+
     if (includePosition) {
-      left = WindowState.#toPx(winElement.offsetLeft) ||
-             WindowState.#normalizeCss(winElement.style.left) ||
-             WindowState.#normalizeCss(getComputed().left);
-      top = WindowState.#toPx(winElement.offsetTop) ||
-            WindowState.#normalizeCss(winElement.style.top) ||
-            WindowState.#normalizeCss(getComputed().top);
+      left =
+        WindowState.#toPx(winElement.offsetLeft) ||
+        WindowState.#normalizeCss(winElement.style.left) ||
+        WindowState.#normalizeCss(getComputed().left);
+      top =
+        WindowState.#toPx(winElement.offsetTop) ||
+        WindowState.#normalizeCss(winElement.style.top) ||
+        WindowState.#normalizeCss(getComputed().top);
     }
 
     return { width: width || "", height: height || "", left, top };
@@ -53,7 +61,7 @@ export default class WindowState {
 
   /**
    * Saves the current window geometry to a dataset attribute.
-   * 
+   *
    * @param {HTMLElement} winElement - The window element.
    * @param {string} [key="prevState"] - The dataset key to use.
    * @param {Object} [options={}] - Capture options.
@@ -62,16 +70,16 @@ export default class WindowState {
   static save(winElement, key = "prevState", options = {}) {
     const state = WindowState.capture(winElement, options);
     const raw = JSON.stringify(state);
-    
+
     winElement.dataset[key] = raw;
     WindowState.#getCache(winElement).set(key, { raw, parsed: state });
-    
+
     return state;
   }
 
   /**
    * Reads a saved window geometry from a dataset attribute.
-   * 
+   *
    * @param {HTMLElement} winElement - The window element.
    * @param {string} [key="prevState"] - The dataset key to read.
    * @returns {Object|null} The parsed geometry or null.
@@ -105,7 +113,7 @@ export default class WindowState {
 
   /**
    * Applies a geometry state back to a window element's styles.
-   * 
+   *
    * @param {HTMLElement} winElement - The window element.
    * @param {Object} state - The geometry state to apply.
    * @param {Object} [options={}] - Options like { includePosition: boolean }.
@@ -139,7 +147,9 @@ export default class WindowState {
   static ensureRestoreState(winElement) {
     const savedState = WindowState.read(winElement);
     if (savedState?.width && savedState?.height) return savedState;
-    return WindowState.save(winElement, "prevState", { includePosition: false });
+    return WindowState.save(winElement, "prevState", {
+      includePosition: false,
+    });
   }
 
   // --- GEOMETRY (Layout & Ratios) ---
@@ -148,25 +158,31 @@ export default class WindowState {
    * Positions a window using a cascade effect relative to the number of existing windows.
    */
   static positionWindow(winElement, windowsCount, config) {
-    const width = winElement.offsetWidth || parseInt(winElement.style.width) || config.defaultWidth;
-    const height = winElement.offsetHeight || parseInt(winElement.style.height) || config.defaultHeight;
+    const width =
+      winElement.offsetWidth ||
+      parseInt(winElement.style.width) ||
+      config.defaultWidth;
+    const height =
+      winElement.offsetHeight ||
+      parseInt(winElement.style.height) ||
+      config.defaultHeight;
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    
+
     const cascadeIndex = windowsCount;
     const cascadeX = cascadeIndex * config.cascadeOffset;
     const cascadeY = cascadeIndex * config.cascadeOffset;
-    
+
     let left = (vw - width) / 2 + cascadeX;
     let top = (vh - height) / 2 + cascadeY;
     const margin = config.minMargin;
-    
+
     if (left + width > vw) left = Math.max(margin, vw - width - margin);
     if (top + height > vh) top = Math.max(margin, vh - height - margin);
-    
+
     winElement.style.left = `${Math.round(left)}px`;
     winElement.style.top = `${Math.round(top)}px`;
-    
+
     WindowState.savePositionRatios(winElement);
   }
 
@@ -175,12 +191,17 @@ export default class WindowState {
    */
   static stabilizeInitialPlacement(winElement, windowsCount, config) {
     if (!winElement?.isConnected) return;
-    
-    const settleMs = Number.isFinite(config.layoutStabilizationMs) && config.layoutStabilizationMs > 0 
-      ? config.layoutStabilizationMs 
-      : 450;
-    
-    const now = typeof performance !== "undefined" ? () => performance.now() : () => Date.now();
+
+    const settleMs =
+      Number.isFinite(config.layoutStabilizationMs) &&
+      config.layoutStabilizationMs > 0
+        ? config.layoutStabilizationMs
+        : 450;
+
+    const now =
+      typeof performance !== "undefined"
+        ? () => performance.now()
+        : () => Date.now();
     const startedAt = now();
     let active = true;
     let resizeObserver = null;
@@ -201,7 +222,10 @@ export default class WindowState {
         cleanup();
         return;
       }
-      if (winElement.classList.contains("tiled") || winElement.classList.contains("maximized")) {
+      if (
+        winElement.classList.contains("tiled") ||
+        winElement.classList.contains("maximized")
+      ) {
         return;
       }
       const w = winElement.offsetWidth;
@@ -224,12 +248,12 @@ export default class WindowState {
     };
 
     requestAnimationFrame(loop);
-    
+
     if (typeof ResizeObserver === "function") {
       resizeObserver = new ResizeObserver(() => maybeRecenter());
       resizeObserver.observe(winElement);
     }
-    
+
     setTimeout(() => cleanup(), settleMs);
   }
 
@@ -237,7 +261,11 @@ export default class WindowState {
    * Calculates and saves the window's center position as ratios relative to the viewport.
    */
   static savePositionRatios(winElement) {
-    if (winElement.classList.contains("tiled") || winElement.classList.contains("maximized")) return;
+    if (
+      winElement.classList.contains("tiled") ||
+      winElement.classList.contains("maximized")
+    )
+      return;
     const centerX = winElement.offsetLeft + winElement.offsetWidth / 2;
     const centerY = winElement.offsetTop + winElement.offsetHeight / 2;
     winElement.dataset.xRatio = String(centerX / window.innerWidth);
@@ -252,8 +280,12 @@ export default class WindowState {
     const yRatio = parseFloat(winElement.dataset.yRatio);
     if (isNaN(xRatio) || isNaN(yRatio)) return false;
 
-    const width = (size && size.widthPx > 0 ? size.widthPx : null) || winElement.offsetWidth;
-    const height = (size && size.heightPx > 0 ? size.heightPx : null) || winElement.offsetHeight;
+    const width =
+      (size && size.widthPx > 0 ? size.widthPx : null) ||
+      winElement.offsetWidth;
+    const height =
+      (size && size.heightPx > 0 ? size.heightPx : null) ||
+      winElement.offsetHeight;
     const centerX = xRatio * vw;
     const centerY = yRatio * vh;
 
@@ -270,11 +302,17 @@ export default class WindowState {
   static captureScrollState(winElement) {
     const state = new Map();
     if (winElement.scrollTop > 0 || winElement.scrollLeft > 0) {
-      state.set("root", { top: winElement.scrollTop, left: winElement.scrollLeft });
+      state.set("root", {
+        top: winElement.scrollTop,
+        left: winElement.scrollLeft,
+      });
     }
     winElement.querySelectorAll("*").forEach((el) => {
       if (el.scrollTop > 0 || el.scrollLeft > 0) {
-        state.set(WindowState.getElementPath(winElement, el), { top: el.scrollTop, left: el.scrollLeft });
+        state.set(WindowState.getElementPath(winElement, el), {
+          top: el.scrollTop,
+          left: el.scrollLeft,
+        });
       }
     });
     return state;
@@ -304,11 +342,13 @@ export default class WindowState {
     };
 
     apply();
-    
-    const content = winElement.querySelector(".window-content-scrollable > div") || winElement;
+
+    const content =
+      winElement.querySelector(".window-content-scrollable > div") ||
+      winElement;
     const observer = new ResizeObserver(() => apply());
     observer.observe(content);
-    
+
     setTimeout(() => observer.disconnect(), config.scrollRestoreTimeoutMs);
   }
 
@@ -330,7 +370,10 @@ export default class WindowState {
     let path = [];
     let current = element;
     while (current && current !== winElement) {
-      let index = Array.prototype.indexOf.call(current.parentNode.children, current);
+      let index = Array.prototype.indexOf.call(
+        current.parentNode.children,
+        current,
+      );
       path.unshift(`${current.tagName}:nth-child(${index + 1})`);
       current = current.parentNode;
     }

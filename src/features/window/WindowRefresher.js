@@ -7,7 +7,7 @@ import WindowRouter from "../../utils/window/WindowRouter.js";
 export default class WindowRefresher {
   /** @type {Object} Map of event names to path patterns */
   #refreshMap;
-  
+
   /** @type {number} Delay in ms before triggering a refresh/close */
   #refreshTimeout;
 
@@ -15,7 +15,10 @@ export default class WindowRefresher {
    * @param {Object} windowProvider - An object providing window management methods (getWindows, open, close).
    * @param {Object} options - Configuration options.
    */
-  constructor(windowProvider, { refreshMap = null, refreshTimeout = 200 } = {}) {
+  constructor(
+    windowProvider,
+    { refreshMap = null, refreshTimeout = 200 } = {},
+  ) {
     this._provider = windowProvider;
     this.#refreshMap = refreshMap || window.window_refresh_map || {};
     this.#refreshTimeout = refreshTimeout;
@@ -30,7 +33,7 @@ export default class WindowRefresher {
 
   /**
    * Processes an incoming event and triggers window actions.
-   * 
+   *
    * @param {string} eventName - The event identifier (e.g., "user:updated").
    * @param {Object} payload - Data associated with the event (must contain id for param matching).
    */
@@ -47,15 +50,28 @@ export default class WindowRefresher {
 
       // 1. Dependency-based Closure
       if (isDestructive && entityId && winElement.dataset.dependsOn) {
-        if (this._shouldCloseByDependency(winElement.dataset.dependsOn, category, entityId)) {
-          setTimeout(() => this._provider.close(winElement), this.#refreshTimeout);
+        if (
+          this._shouldCloseByDependency(
+            winElement.dataset.dependsOn,
+            category,
+            entityId,
+          )
+        ) {
+          setTimeout(
+            () => this._provider.close(winElement),
+            this.#refreshTimeout,
+          );
           return; // Skip further processing for this window
         }
       }
 
       // 2. Standard Refresh Mapping
-      const shouldRefresh = patterns.some(pattern => 
-        WindowRouter.match(pattern, currentPath, isDestructive ? null : entityId)
+      const shouldRefresh = patterns.some((pattern) =>
+        WindowRouter.match(
+          pattern,
+          currentPath,
+          isDestructive ? null : entityId,
+        ),
       );
 
       if (shouldRefresh) {
@@ -70,7 +86,7 @@ export default class WindowRefresher {
   /**
    * Checks if a window should be closed based on its data-depends-on attribute.
    * Format: "category:id|category:id"
-   * 
+   *
    * @private
    */
   _shouldCloseByDependency(dependsOn, category, entityId) {

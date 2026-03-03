@@ -12,7 +12,7 @@
   --nd-icon-size: clamp(48px, 50%, 96px);
   --nd-icon-hover-scale: 1.15;
   --nd-icon-transition: transform 0.18s ease, opacity 0.2s ease;
-  
+
   /* Label Styling */
   --nd-label-font-size: 0.875rem;
   --nd-label-bg: rgba(0, 0, 0, 0.12);
@@ -20,7 +20,7 @@
   --nd-label-text: inherit;
   --nd-label-radius: 4px;
   --nd-label-blur: 12px;
-  
+
   /* States */
   --nd-ghost-opacity: 0.6;
   --nd-dragging-opacity: 0.3;
