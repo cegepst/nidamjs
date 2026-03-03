@@ -143,27 +143,22 @@ const buildContent = (messageList) => {
 };
 
 /**
- * @param {HTMLElement} container
  * @param {HTMLElement} toast
  * @returns {void}
  */
-const removeToast = (container, toast) => {
+const removeToast = (toast) => {
   toast.setAttribute("data-state", "closing");
   window.setTimeout(() => {
     toast.remove();
-    if (!container.childElementCount) {
-      container.remove();
-    }
   }, DEFAULT_DISMISS_MS);
 };
 
 /**
- * @param {HTMLElement} container
  * @param {HTMLElement} toast
  * @param {number} timeoutId
  * @returns {HTMLButtonElement}
  */
-const createCloseButton = (container, toast, timeoutId) => {
+const createCloseButton = (toast, timeoutId) => {
   const button = document.createElement("button");
   button.type = "button";
   button.className = "nd-toast-close";
@@ -173,21 +168,20 @@ const createCloseButton = (container, toast, timeoutId) => {
     if (timeoutId) {
       window.clearTimeout(timeoutId);
     }
-    removeToast(container, toast);
+    removeToast(toast);
   });
   return button;
 };
 
 /**
- * @param {HTMLElement} container
  * @param {HTMLElement} toast
  * @param {number} duration
  * @returns {number}
  */
-const scheduleRemoval = (container, toast, duration) => {
+const scheduleRemoval = (toast, duration) => {
   if (duration <= 0) return 0;
   return window.setTimeout(() => {
-    removeToast(container, toast);
+    removeToast(toast);
   }, duration);
 };
 
@@ -216,9 +210,9 @@ export const showToast = (type, messages, options = undefined) => {
   toast.setAttribute("data-state", "open");
   toast.appendChild(buildContent(messageList));
 
-  const timeoutId = scheduleRemoval(container, toast, resolvedOptions.duration);
+  const timeoutId = scheduleRemoval(toast, resolvedOptions.duration);
   if (resolvedOptions.closable) {
-    toast.appendChild(createCloseButton(container, toast, timeoutId));
+    toast.appendChild(createCloseButton(toast, timeoutId));
   }
 
   container.appendChild(toast);
