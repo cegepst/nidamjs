@@ -170,7 +170,7 @@ export default class WindowLifecycle {
    * Toggles the maximize/compress icon.
    */
   static updateMaximizeIcon(winElement, isMaximized) {
-    const icon = winElement.querySelector("[data-maximize] i");
+    const icon = winElement.querySelector('[nd-window-button="maximize"] i');
     if (icon) {
       icon.classList.toggle("fa-expand", !isMaximized);
       icon.classList.toggle("fa-compress", isMaximized);
@@ -273,7 +273,7 @@ export default class WindowLifecycle {
   static _parseHTML(html) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
-    return doc.querySelector(".window");
+    return doc.querySelector("[nd-window]");
   }
 
   /**

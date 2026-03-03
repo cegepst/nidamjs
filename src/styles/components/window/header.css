@@ -1,0 +1,45 @@
+:root {
+  --nd-header-bg: #ffffff;
+  --nd-header-border: rgba(0, 0, 0, 0.06);
+  --nd-header-text: #111827;
+  --nd-header-bg-focused: #f9fafb;
+  --nd-header-focus-ring: 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --nd-header-bg: #1f2937;
+    --nd-header-border: rgba(255, 255, 255, 0.08);
+    --nd-header-text: #f3f4f6;
+    --nd-header-bg-focused: #111827;
+    --nd-header-focus-ring: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* =========================================
+   Window Header
+   ========================================= */
+[nd-window] [nd-window-header] {
+    cursor: move;
+    height: 44px;
+    padding: 0 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--nd-header-border);
+    background: var(--nd-header-bg);
+    color: var(--nd-header-text);
+    user-select: none;
+}
+
+[nd-window] [nd-window-header] span {
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    margin-right: auto;
+    font-size: 0.95rem;
+}
+
+[nd-window].focused [nd-window-header] {
+    background: var(--nd-header-bg-focused);
+    box-shadow: var(--nd-header-focus-ring);
+}

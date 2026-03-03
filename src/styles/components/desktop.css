@@ -1,8 +1,8 @@
 [nd-desktop] {
   display: flex;
   flex-direction: column;
-  max-width: 100%;
-  max-height: max-content;
+  min-width: 100vw;
+  min-height: 100vh;
   overflow: hidden;
   position: relative;
 }
