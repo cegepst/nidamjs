@@ -49,7 +49,9 @@ export default class TaskbarManager extends BaseManager {
   _handleIconClick(e, target) {
     const endpoint = target.dataset.modal;
     if (!endpoint) return;
-
+    if (target.hasAttribute("nd-taskbar-icon")) {
+      return;
+    }
     if (this._windowManager) {
       this._windowManager.open(endpoint).catch((err) => {
         if (err?.message !== "MAX_WINDOWS_REACHED") {
