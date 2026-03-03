@@ -1,30 +1,25 @@
 import ContentInitializer from "../core/ContentInitializer.js";
 import EventDelegator from "../core/EventDelegator.js";
+import IconManager from "../features/desktop/IconManager.js";
 import WindowManager from "../features/window/WindowManager.js";
 import WindowRefresher from "../features/window/WindowRefresher.js";
+import defaultConfig from "../nidam.config.js";
 import TaskbarManager from "../features/taskbar/TaskbarManager.js";
-
-const defaultNotify = (level, message) => {
-  const logger = level === "error" ? console.error : console.log;
-  logger(`[nidamjs:${level}]`, message);
-};
+import { toastNotify } from "../utils/toast.js";
 
 export default class NidamApp {
   #config;
   #modules = new Map();
   #delegator = null;
-
+  /**
+   * @param {import('../nidam.config.js').NidamConfig | string} config - The app configuration object or JSON string.
+   */
   constructor(config = {}) {
+    const parsedConfig = this._parseConfig(config);
+
     this.#config = {
-      root: document,
-      modalContainer: "#target",
-      pendingModalDatasetKey: "pendingModal",
-      registry: [],
-      refreshMap: null,
-      refreshTimeout: 200,
-      notify: defaultNotify,
-      windowManager: {},
-      ...config,
+      ...defaultConfig,
+      ...parsedConfig,
     };
   }
 
@@ -32,6 +27,7 @@ export default class NidamApp {
     this.#initializeEventDelegation();
     this.#initializeWindowManagement();
     this.#initializeStaticContent();
+    this.#initializeIconManager();
     return this;
   }
 
@@ -65,8 +61,7 @@ export default class NidamApp {
           ctx.modules,
           this.#config.registry,
         ),
-      notify: this.#config.notify,
-      ...(this.#config.windowManager || {}),
+      config: this.#config.windowManager || {},
     });
 
     this.#modules.set("window", windowManager);
@@ -91,6 +86,16 @@ export default class NidamApp {
     this.#modules.set("refresher", refresher);
   }
 
+  #initializeIconManager() {
+    const iconRoot = this.#config.root.querySelector("[nd-icons]");
+    if (!iconRoot) {
+      return;
+    }
+
+    const iconManager = new IconManager(iconRoot, this.#delegator);
+    this.#modules.set("icon", iconManager);
+  }
+
   #openPendingWindow(container, windowManager) {
     const key = this.#config.pendingModalDatasetKey;
     const pending = (container?.dataset?.[key] || "").trim();
@@ -109,6 +114,22 @@ export default class NidamApp {
       this.#modules,
       this.#config.registry,
     );
+  }
+
+  _parseConfig(config) {
+    if (typeof config === "string") {
+      try {
+        return JSON.parse(config);
+      } catch (e) {
+        toastNotify(
+          "error",
+          "Parsing error, falling back to default settings.",
+        );
+        return {};
+      }
+    }
+
+    return config || {};
   }
 }
 

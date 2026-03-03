@@ -7,28 +7,40 @@ export function renderHomePage() {
     <title>NidamJS Demo</title>
     <link rel="stylesheet" href="/dist/nidam.css" />
     <link rel="stylesheet" href="/examples/shared/demo.css" />
-    <script type="module" src="/dist/nidam.es.js"></script>
+    <script type="module" data-nd-init>
+      import initNidamApp from "/dist/nidam.es.js";
+      import config from "/examples/shared/example.config.json" with { type: "json" };
+
+      initNidamApp(config);
+    </script>
   </head>
 
   <body>
-    <div class="demo-root">
-      <div class="demo-bg"></div>
+    <div nd-toast-stack data-position="bottom-right"></div>
+    <div nd-desktop>
+      <section nd-icons="5:3">
+        <div nd-icon="1:1" nd-id="page-one" data-modal="page-one">
+          <img src="examples/shared/images/icons/algo-icon.png">
+          <span>Page One</span>
+        </div>
 
-      <header class="demo-header">
-        <h1 class="demo-title">NidamJS Minimal Demo</h1>
-        <p class="demo-subtitle">Two live routes opened as windows from one page.</p>
-      </header>
+        <div nd-icon="6:2" nd-id="page-two" data-modal="page-two">
+          <img src="examples/shared/images/icons/arena-icon.png">
+          <span>Page Two</span>
+        </div>
 
-      <section class="demo-actions">
-        <button data-modal="page-one" class="toolbar-btn">Open Page One</button>
-        <button data-modal="page-two" class="toolbar-btn">Open Page Two</button>
+        <div nd-icon="2:3" nd-id="mail" data-modal="page-two">
+          <img src="examples/shared/images/icons/group-icon.png">
+          <span>Mail</span>
+        </div>
       </section>
 
-      <footer class="demo-footer">
-        Tip: drag windows by the title bar and use close/maximize buttons.
-      </footer>
+      <div class="demo-target" data-pending-modal="" id="target"></div>
 
-      <div id="target" data-pending-modal="" class="demo-target"></div>
+      <div nd-taskbar>
+        <button nd-taskbar-icon class="toolbar-btn" data-modal="examples/shared/page-one.html">Page One</button>
+        <button nd-taskbar-icon class="toolbar-btn" data-modal="examples/shared/page-two.html">Page Two</button>
+      </div>
     </div>
   </body>
 </html>`;
