@@ -11,7 +11,7 @@ export function renderHomePage() {
   </head>
 
   <body>
-    <div nd-desktop class="demo-root">
+    <div nd-desktop>
       <section nd-icons="5:3">
         <div nd-icon="1:1" nd-id="page-one" data-modal="page-one">
           <img src="examples/shared/images/icons/algo-icon.png">
