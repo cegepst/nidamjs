@@ -1,178 +1,163 @@
 # NidamJS
 
+![NPM Version](https://img.shields.io/npm/v/@moonitoring/nidamjs)
+![License](https://img.shields.io/github/license/cegepst/nidamjs)
+![NPM Downloads](https://img.shields.io/npm/dm/@moonitoring/nidamjs)
+
 NidamJS is a framework-agnostic JavaScript library for desktop-like window components in web applications.
 
-## Official API
+## About The Project
 
-Use the package root export for manual initialization:
+NidamJS aims to provide a simple yet powerful way to integrate desktop-like windowing capabilities into your web applications, offering a fluid and intuitive user experience. It's designed to be lightweight and compatible with various JavaScript frameworks.
 
-```js
-import { createNidamApp, WindowManager, WindowRefresher } from "nidamjs";
+### Tech Stack
+
+*   [Javascript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+*   [Vite](https://vitejs.dev/) (Build Tool)
+*   [Vitest](https://vitest.dev/) (Testing Framework)
+*   [Express](https://expressjs.com/) (Potentially for SSR examples or development server)
+*   [JSDOM](https://github.com/jsdom/jsdom) (DOM implementation for Node.js, likely for testing)
+*   [Prettier](https://prettier.io/) (Code Formatter)
+
+## Getting Started
+
+To integrate NidamJS into your project, follow the installation steps below.
+
+### Prerequisites
+
+Ensure you have Node.js (which includes npm) installed on your system.
+
+npm
+```sh
+npm install npm@latest -g
 ```
 
-Internal paths (`src/*`) are implementation details and not public API.
+### Installation
 
-## Bundle Strategy
+Install NidamJS via npm:
+```sh
+npm install @moonitoring/nidamjs
+```
 
-- `nidamjs` (`dist/nidam.es.js`, `dist/nidam.umd.js`): core bundle.
-- Initialization is explicit: call `createNidamApp(...).initialize()`.
+## Quick Start Example
 
-## Installation
+Here's a basic example to get you started with NidamJS, demonstrating how to create and manage a simple window component:
 
-```bash
+```html
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>NidamJS App</title>
+
+    <!-- Include the NidamJS CSS -->
+    <link href="/node_modules/nidamjs/dist/nidam.css" rel="stylesheet" />
+
+    <!-- Include the NidamJS ES Module -->
+    <script type="module" src="/node_modules/nidamjs/dist/nidam.es.js"></script>
+  </head>
+  <body>
+    <div nd-desktop>
+
+      <!-- Desktop Icons Grid -->
+      <section nd-icons="8:4">
+        <div nd-icon="1:1" nd-id="hello" data-modal="hello">
+          <img src="/icons/hello.png" alt="Hello" />
+          <span>Hello</span>
+        </div>
+      </section>
+
+      <!-- Taskbar -->
+      <div nd-taskbar>
+        <div nd-taskbar-icon data-modal="hello">
+          <img src="/icons/hello.png" alt="Hello" />
+        </div>
+      </div>
+
+      <!-- Toasts notification -->
+      <div nd-toast-stack data-position="bottom-right"></div>
+    </div>
+  </body>
+</html>
+```
+
+And here's an example window file:
+
+```html
+<div nd-window nd-window-endpoint="hello">
+  <div nd-window-header>
+    <span>Hello</span>
+    <button nd-window-button="maximize" title="Maximize">[ ]</button>
+    <button nd-window-button="close" title="Close">X</button>
+  </div>
+
+  <div nd-window-content>
+    <span>Hello World!</span>
+  </div>
+</div>
+```
+
+For more detailed examples and API reference, please refer to the [project's documentation](https://cegepst.github.io/nidamjs-docs).
+
+## Contributing
+
+Contributions are highly welcome! Whether it's reporting bugs, suggesting features, or submitting pull requests, your help makes NidamJS better for everyone.
+
+To contribute:
+
+1.  **Fork the Project:** Go to [https://github.com/cegepst/nidamjs](https://github.com/cegepst/nidamjs) and click the "Fork" button.
+2.  **Clone your Fork:**
+```sh
+git clone https://github.com/YOUR_USERNAME/nidamjs.git
+cd nidamjs
+```
+3.  **Install Dependencies:**
+```sh
+npm install
+```
+or if using Bun:
+```sh
 bun install
 ```
-
-## Quick Start
-
-```js
-import { createNidamApp } from "nidamjs";
-
-const app = createNidamApp({
-  modalContainer: "#target",
-  registry: [],
-  windowManager: {
-    layoutStabilizationMs: 450,
-  },
-});
-
-app.initialize();
+4.  **Create your Feature Branch:**
+```sh
+git checkout -b feature/AmazingFeature
 ```
-
-`layoutStabilizationMs` controls how long the first window can auto-recenter if late CSS changes its rendered size after
-open.
-
-## Toast Notifications
-
-- App-level notifications use `toastNotify` by default.
-- Supported positions: `top-right`, `top-left`, `bottom-right`, `bottom-left`.
-- Styling is CSS-variable driven on `[nd-toast-stack]` and `.nd-toast`.
-
-## Documentation
-
-- Porting plan and Code Arena differences: [porting_plan.md](porting_plan.md)
-- Additional docs index: [docs/readme.md](docs/readme.md)
-- CSR example: [examples/csr/readme.md](examples/csr/readme.md)
-- SSR example: [examples/ssr/readme.md](examples/ssr/readme.md)
-
-## Naming Convention
-
-- All documentation filenames use lowercase.
-- Standard file name: `readme.md` (not `README.md`).
-
-## Files
-
-- Porting plan: [porting_plan.md](porting_plan.md)
-- Project root documentation: [readme.md](readme.md)
-
-## Scripts (Bun)
-
-- `bun run imports`: verifies the public entrypoint can be imported.
-- `bun run test`: runs Vitest with coverage enabled.
-- `bun run test:watch`: watch mode with coverage enabled.
-- `bun run lint`: type-lints JS with TypeScript (`checkJs`).
-- `bun run format`: rewrites formatting with Prettier.
-- `bun run quality`: aggregate quality command.
-- `bun run csr`: builds bundles then opens the CSR demo.
-- `bun run ssr`: builds bundles then starts the SSR demo server.
-
-## Quality Stack
-
-- Test framework: `Vitest` + `jsdom`
-- Coverage: `@vitest/coverage-v8` (V8 provider)
-- Type linter: `TypeScript` in `checkJs` mode
-- Formatter: `Prettier`
-
-## Coverage Report
-
-- Run `bun run test`.
-- Terminal summary is printed after tests.
-- HTML report: `coverage/index.html`.
-- LCOV report: `coverage/lcov.info`.
-
-## Runtime DOM Contract
-
-The window engine expects these selectors/attributes in your modal HTML:
-
-- `.window`
-- `[data-modal]`
-- `[data-close]`
-- `[data-maximize]`
-- `[data-bar]`
-- `.window-content-scrollable` (optional but recommended)
-
-## Project Tree
-
-```text
-.
-├── .gitignore
-├── porting_plan.md
-├── readme.md
-├── bun.lock
-├── docs
-│   └── readme.md
-├── examples
-│   ├── csr
-│   │   ├── index.html
-│   │   ├── main.js
-│   │   └── readme.md
-│   ├── ssr
-│   │   ├── main.js
-│   │   ├── public
-│   │   │   └── client.js
-│   │   ├── readme.md
-│   │   └── server
-│   │       ├── routes.js
-│   │       └── templates
-│   │           └── layout.js
-│   ├── shared
-│       ├── demo.css
-│       ├── page-one.html
-│       └── page-two.html
-├── package.json
-├── src
-│   ├── bootstrap
-│   │   └── NidamApp.js
-│   ├── core
-│   │   ├── BaseManager.js
-│   │   ├── ContentInitializer.js
-│   │   └── EventDelegator.js
-│   ├── features
-│   │   ├── desktop
-│   │   │   └── DesktopIconManager.js
-│   │   └── window
-│   │       ├── WindowManager.js
-│   │       └── WindowRefresher.js
-│   ├── index.js
-│   └── utils
-│       ├── dom.js
-│       └── eventUtils.js
-├── tests
-│   ├── readme.md
-│   └── unit
-│       ├── contentInitializer.test.js
-│       ├── windowManager.test.js
-│       └── windowRefresher.test.js
-├── tsconfig.json
-└── vitest.config.js
+5.  **Make Changes and Test:** Implement your features or bug fixes. Ensure existing tests pass and add new ones if necessary.
+6.  **Run Tests:**
+```sh
+npm test
 ```
+or
+```sh
+bun test
+```
+7.  **Format Code:**
+```sh
+npm run format
+```
+or
+```sh
+bun run format
+```
+8.  **Commit your Changes:**
+```sh
+git commit -m 'feat: Add some AmazingFeature'
+```
+9.  **Push to the Branch:**
+```sh
+git push origin feature/AmazingFeature
+```
+10. **Open a Pull Request:** Go to your forked repository on GitHub and open a pull request to the `cegepst/nidamjs` `dev` branch.
 
-## Tree Explanation
+Please ensure your pull requests are well-described and pass all CI checks.
 
-- `src/index.js`: side-effect-free public API entrypoint.
-- `src/bootstrap/`: app bootstrap composition (`NidamApp`).
-- `src/core/`: generic infrastructure primitives (base manager, event delegation, dynamic init).
-- `src/features/window/`: core window system (open/close/focus/drag/snap/refresh).
-- `src/features/desktop/`: desktop icon drag-and-drop behavior.
-- `src/utils/`: shared utility helpers.
-- `examples/csr/`: ES module client-side example.
-- `examples/ssr/`: Express-based server-side rendering example.
-- `examples/shared/`: shared pages and demo styling reused by CSR/SSR.
-- `tests/unit/`: focused unit tests for core and window features.
-- `docs/porting_plan.md`: migration decisions and boundaries.
-- `tsconfig.json`: type-lint config for JS (`checkJs`).
-- `vitest.config.js`: test runner config.
+## License
 
-## Notes
+Distributed under the MIT License. See the `LICENSE` file in the repository for more information.
 
-Detailed migration strategy and design rationale are documented in [docs/porting_plan.md](porting_plan.md).
+## Contact
+
+Project Link: [https://github.com/cegepst/nidamjs](https://github.com/cegepst/nidamjs)
+
+For questions or suggestions, please open an issue on the GitHub repository.
