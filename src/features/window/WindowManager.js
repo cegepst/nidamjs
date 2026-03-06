@@ -50,35 +50,6 @@ export default class WindowManager extends BaseManager {
         this._zIndexCounter = this._config.zIndexBase;
 
         this._initSnapIndicator();
-        this._hydrateExistingWindows();
-    }
-
-    /**
-     * Scans the DOM for existing windows (SSR support) and populates internal state.
-     * @private
-     */
-    _hydrateExistingWindows() {
-        const existingWins = this._root.querySelectorAll("[nd-window]");
-        existingWins.forEach((win) => {
-            const endpoint = win.getAttribute("nd-window-endpoint") || win.dataset.modal;
-            if (endpoint && !this._windows.has(endpoint)) {
-                // Ensure endpoint is set on dataset for future reference (close, focus, etc.)
-                if (!win.getAttribute("nd-window-endpoint")) {
-                    win.setAttribute("nd-window-endpoint", endpoint);
-                }
-
-                this._windows.set(endpoint, win);
-
-                // Ensure the content is initialized (attach listeners, etc.)
-                this._initializeModalContent(win);
-
-                // Synchronize zIndexCounter to avoid overlap with new windows
-                const z = parseInt(win.style.zIndex || 0, 10);
-                if (z > this._zIndexCounter) {
-                    this._zIndexCounter = z;
-                }
-            }
-        });
     }
 
   _initSnapIndicator() {
@@ -168,6 +139,7 @@ export default class WindowManager extends BaseManager {
      */
     async open(endpoint, force = false, focusSelector = null, activate = true) {
         const isAlreadyOpen = this._windows.has(endpoint);
+        
         const win = await WindowLifecycle.open(endpoint, { force, focusSelector, activate }, this._getLifecycleContext());
 
         if (!isAlreadyOpen) {
