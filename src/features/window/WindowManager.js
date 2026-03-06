@@ -59,6 +59,7 @@ export default class WindowManager extends BaseManager {
      */
     _hydrateExistingWindows() {
         const existingWins = this._root.querySelectorAll("[nd-window]");
+        
         existingWins.forEach((win) => {
             const endpoint = win.getAttribute("nd-window-endpoint") || win.dataset.modal;
             if (endpoint && !this._windows.has(endpoint)) {
@@ -165,6 +166,7 @@ export default class WindowManager extends BaseManager {
      */
     async open(endpoint, force = false, focusSelector = null, activate = true) {
         const isAlreadyOpen = this._windows.has(endpoint);
+        
         const win = await WindowLifecycle.open(endpoint, { force, focusSelector, activate }, this._getLifecycleContext());
 
         if (!isAlreadyOpen) {
