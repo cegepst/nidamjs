@@ -6,6 +6,7 @@ import WindowRefresher from "../features/window/WindowRefresher.js";
 import defaultConfig from "../nidam.config.js";
 import TaskbarManager from "../features/taskbar/TaskbarManager.js";
 import { toastNotify } from "../utils/toast.js";
+import WindowContainer from "../utils/window/WindowContainer.js";
 
 export default class NidamApp {
   #config;
@@ -45,9 +46,11 @@ export default class NidamApp {
   }
 
   #initializeWindowManagement() {
-    const container = this.#config.root.querySelector(
+    const container = WindowContainer.ensure(
+      this.#config.root,
       this.#config.modalContainer,
     );
+    
     if (!container) {
       return;
     }
