@@ -62,17 +62,14 @@ export default class WindowManager extends BaseManager {
         existingWins.forEach((win) => {
             const endpoint = win.getAttribute("nd-window-endpoint") || win.dataset.modal;
             if (endpoint && !this._windows.has(endpoint)) {
-                // Ensure endpoint is set on dataset for future reference (close, focus, etc.)
                 if (!win.getAttribute("nd-window-endpoint")) {
                     win.setAttribute("nd-window-endpoint", endpoint);
                 }
 
                 this._windows.set(endpoint, win);
 
-                // Ensure the content is initialized (attach listeners, etc.)
                 this._initializeModalContent(win);
 
-                // Synchronize zIndexCounter to avoid overlap with new windows
                 const z = parseInt(win.style.zIndex || 0, 10);
                 if (z > this._zIndexCounter) {
                     this._zIndexCounter = z;

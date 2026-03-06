@@ -2,6 +2,6 @@
   "modalContainer": "#target",
   "refreshTimeout": 300,
   "windowManager": {
-    "maxWindows": 1
+    "maxWindows": 3
   }
 }
