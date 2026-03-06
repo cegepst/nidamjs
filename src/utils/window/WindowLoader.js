@@ -48,8 +48,11 @@ export default class WindowLoader {
    * @returns {string} The resolved URL.
    */
   static _defaultResolveEndpoint(endpoint) {
-    const normalized = String(endpoint || "").replace(/^\/+/, "");
-    return `/${normalized}`;
+    const normalized = String(endpoint || "")
+      .trim()
+      .replace(/^(\.\/|\/)+/, "");
+
+    return new URL(normalized, document.baseURI).toString();
   }
 
   /**
