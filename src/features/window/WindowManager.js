@@ -50,33 +50,6 @@ export default class WindowManager extends BaseManager {
         this._zIndexCounter = this._config.zIndexBase;
 
         this._initSnapIndicator();
-        this._hydrateExistingWindows();
-    }
-
-    /**
-     * Scans the DOM for existing windows (SSR support) and populates internal state.
-     * @private
-     */
-    _hydrateExistingWindows() {
-        const existingWins = this._root.querySelectorAll("[nd-window]");
-        
-        existingWins.forEach((win) => {
-            const endpoint = win.getAttribute("nd-window-endpoint") || win.dataset.modal;
-            if (endpoint && !this._windows.has(endpoint)) {
-                if (!win.getAttribute("nd-window-endpoint")) {
-                    win.setAttribute("nd-window-endpoint", endpoint);
-                }
-
-                this._windows.set(endpoint, win);
-
-                this._initializeModalContent(win);
-
-                const z = parseInt(win.style.zIndex || 0, 10);
-                if (z > this._zIndexCounter) {
-                    this._zIndexCounter = z;
-                }
-            }
-        });
     }
 
   _initSnapIndicator() {
